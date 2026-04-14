@@ -1,0 +1,519 @@
+{
+  "version": "1.0",
+  "description": "Default configuration profiles for vLLM CLI",
+  "profiles": {
+    "standard": {
+      "name": "Standard",
+      "description": "Minimal configuration with auto-detected settings",
+      "icon": "",
+      "config": {},
+      "environment": {}
+    },
+    "moe_optimized": {
+      "name": "MoE Optimized",
+      "description": "Optimized for Mixture of Experts (MoE) models",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true
+      },
+      "environment": {
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
+    },
+    "high_throughput": {
+      "name": "High Throughput",
+      "description": "Optimized for maximum request throughput",
+      "icon": "",
+      "config": {
+        "max_model_len": 8192,
+        "gpu_memory_utilization": 0.95,
+        "enable_chunked_prefill": true,
+        "max_num_batched_tokens": 8192,
+        "trust_remote_code": true,
+        "enable_prefix_caching": true
+      },
+      "environment": {
+        "VLLM_USE_TRITON_FLASH_ATTN": "1"
+      }
+    },
+    "low_memory": {
+      "name": "Low Memory",
+      "description": "Minimizes memory usage for constrained environments",
+      "icon": "",
+      "config": {
+        "max_model_len": 4096,
+        "gpu_memory_utilization": 0.70,
+        "enable_chunked_prefill": false,
+        "trust_remote_code": true,
+        "quantization": "fp8"
+      },
+      "environment": {
+        "VLLM_CPU_KVCACHE_SPACE": "4"
+      }
+    },
+    "gpt_oss_ampere": {
+      "name": "GPT-OSS Ampere (A100)",
+      "description": "Optimized for GPT-OSS models on NVIDIA A100 GPUs",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.90,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": true,
+        "async_scheduling": true
+      },
+      "environment": {
+        "VLLM_ATTENTION_BACKEND": "TRITON_ATTN_VLLM_V1",
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
+    },
+    "gpt_oss_hopper": {
+      "name": "GPT-OSS Hopper (H100/H200)",
+      "description": "Optimized for GPT-OSS models on NVIDIA H100/H200 GPUs",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.90,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": true,
+        "async_scheduling": true
+      },
+      "environment": {
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
+    },
+    "gpt_oss_blackwell": {
+      "name": "GPT-OSS Blackwell (B100/B200)",
+      "description": "Optimized for GPT-OSS models on NVIDIA Blackwell GPUs",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.90,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": true,
+        "async_scheduling": true
+      },
+      "environment": {
+        "VLLM_USE_TRTLLM_ATTENTION": "1",
+        "VLLM_USE_TRTLLM_DECODE_ATTENTION": "1",
+        "VLLM_USE_TRTLLM_CONTEXT_ATTENTION": "1",
+        "VLLM_USE_FLASHINFER_MXFP4_BF16_MOE": "1",
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
+    },
+    "gpt_oss_20b": {
+      "name": "GPT-OSS-20B",
+      "description": "Optimized for OpenAI GPT-OSS-20B model with tool calling support",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.90,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": true,
+        "tool_call_parser": "openai",
+        "enable_auto_tool_choice": true,
+        "chat_template_content_format": "openai"
+      },
+      "environment": {
+        "VLLM_USE_FLASHINFER_MXFP4_MOE": "1"
+      }
+    },
+    "gpt_oss_20b_low_memory": {
+      "name": "GPT-OSS-20B (Low Memory)",
+      "description": "Memory-optimized configuration for GPT-OSS-20B (~13GB VRAM)",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.70,
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": false,
+        "kv_cache_dtype": "fp8",
+        "tool_call_parser": "openai",
+        "enable_auto_tool_choice": true,
+        "chat_template_content_format": "openai"
+      },
+      "environment": {
+        "VLLM_USE_FLASHINFER_MXFP4_MOE": "1",
+        "VLLM_CPU_KVCACHE_SPACE": "4"
+      }
+    },
+    "deepseek_v31": {
+      "name": "DeepSeek-V3.1",
+      "description": "Optimized for DeepSeek-V3.1 with thinking mode support",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "tool_call_parser": "deepseek_v31",
+        "enable_auto_tool_choice": true,
+        "chat_template": "examples/tool_chat_template_deepseekv31.jinja"
+      },
+      "environment": {}
+    },
+    "qwen3_next": {
+      "name": "Qwen3-Next",
+      "description": "Optimized for Qwen3-Next with MTP support",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "gpu_memory_utilization": 0.80,
+        "trust_remote_code": true,
+        "tool_call_parser": "hermes",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {}
+    },
+    "qwen3_next_mtp": {
+      "name": "Qwen3-Next (MTP)",
+      "description": "Qwen3-Next with Multi-Token Prediction enabled",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "gpu_memory_utilization": 0.80,
+        "trust_remote_code": true,
+        "tool_call_parser": "hermes",
+        "enable_auto_tool_choice": true,
+        "speculative_config": "{\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}"
+      },
+      "environment": {}
+    },
+    "qwen3_next_fp8": {
+      "name": "Qwen3-Next (FP8)",
+      "description": "Qwen3-Next with FP8 optimization for SM90/SM100",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "trust_remote_code": true,
+        "tool_call_parser": "hermes",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {
+        "VLLM_USE_FLASHINFER_MOE_FP8": "1",
+        "VLLM_FLASHINFER_MOE_BACKEND": "latency",
+        "VLLM_USE_DEEP_GEMM": "0",
+        "VLLM_USE_TRTLLM_ATTENTION": "0",
+        "VLLM_ATTENTION_BACKEND": "FLASH_ATTN"
+      }
+    },
+    "glm_45": {
+      "name": "GLM-4.5",
+      "description": "Optimized for GLM-4.5 with tool calling and reasoning",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "tool_call_parser": "glm45",
+        "reasoning_parser": "glm45",
+        "enable_auto_tool_choice": true,
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 32768,
+        "gpu_memory_utilization": 0.95
+      },
+      "environment": {}
+    },
+    "glm_45_air_fp8": {
+      "name": "GLM-4.5-Air (FP8)",
+      "description": "GLM-4.5-Air with FP8 for lower cost",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "tool_call_parser": "glm45",
+        "reasoning_parser": "glm45",
+        "enable_auto_tool_choice": true,
+        "max_model_len": 65536,
+        "max_num_batched_tokens": 32768,
+        "gpu_memory_utilization": 0.95
+      },
+      "environment": {}
+    },
+    "amd_mi300": {
+      "name": "AMD MI300x/MI325",
+      "description": "Optimized for AMD MI300x/MI325 GPUs",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "compilation_config": "{\"full_cuda_graph\": true}"
+      },
+      "environment": {
+        "VLLM_ROCM_USE_AITER": "1",
+        "VLLM_USE_AITER_UNIFIED_ATTENTION": "1",
+        "VLLM_ROCM_USE_AITER_MHA": "0"
+      }
+    },
+    "amd_mi355": {
+      "name": "AMD MI355x",
+      "description": "Optimized for AMD MI355x GPUs with advanced features",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "compilation_config": "{\"compile_sizes\": [1, 2, 4, 8, 16, 24, 32, 64, 128, 256, 4096, 8192], \"full_cuda_graph\": true}",
+        "block_size": 64
+      },
+      "environment": {
+        "VLLM_USE_AITER_TRITON_FUSED_SPLIT_QKV_ROPE": "1",
+        "VLLM_USE_AITER_TRITON_FUSED_ADD_RMSNORM_PAD": "1",
+        "VLLM_USE_AITER_TRITON_GEMM": "1",
+        "VLLM_ROCM_USE_AITER": "1",
+        "VLLM_USE_AITER_UNIFIED_ATTENTION": "1",
+        "VLLM_ROCM_USE_AITER_MHA": "0",
+        "TRITON_HIP_PRESHUFFLE_SCALES": "1"
+      }
+    },
+    "minimax_m2": {
+      "name": "MiniMax-M2",
+      "description": "MiniMax-M2 with tool calling and reasoning support",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "trust_remote_code": true,
+        "tool_call_parser": "minimax_m2",
+        "reasoning_parser": "minimax_m2_append_think",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {
+        "VLLM_MOE_USE_DEEP_GEMM": "0"
+      }
+    },
+    "minimax_m2_dp": {
+      "name": "MiniMax-M2 (DP+EP)",
+      "description": "MiniMax-M2 with Data Parallel + Expert Parallel for >4 GPUs",
+      "icon": "",
+      "config": {
+        "data_parallel_size": 8,
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "tool_call_parser": "minimax_m2",
+        "reasoning_parser": "minimax_m2_append_think",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {
+        "VLLM_MOE_USE_DEEP_GEMM": "0"
+      }
+    },
+    "kimi_k2": {
+      "name": "Kimi-K2",
+      "description": "Kimi-K2 with tool calling support (16xH800)",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "pipeline_parallel_size": 2,
+        "trust_remote_code": true,
+        "dtype": "bfloat16",
+        "quantization": "fp8",
+        "max_model_len": 2048,
+        "max_num_seqs": 1,
+        "max_num_batched_tokens": 1024,
+        "enable_chunked_prefill": true,
+        "kv_cache_dtype": "fp8",
+        "tool_call_parser": "kimi_k2",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {}
+    },
+    "kimi_k2_dp": {
+      "name": "Kimi-K2 (DP+EP)",
+      "description": "Kimi-K2 with Data Parallel + Expert Parallel",
+      "icon": "",
+      "config": {
+        "data_parallel_size": 16,
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "max_num_batched_tokens": 8192,
+        "max_num_seqs": 256,
+        "gpu_memory_utilization": 0.85,
+        "tool_call_parser": "kimi_k2",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {}
+    },
+    "kimi_k2_thinking": {
+      "name": "Kimi-K2-Thinking",
+      "description": "Kimi-K2-Thinking with deep reasoning (8xH200)",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "deepseek_v32": {
+      "name": "DeepSeek-V3.2-Exp",
+      "description": "DeepSeek-V3.2 with sparse attention (8xH200/B200)",
+      "icon": "",
+      "config": {
+        "data_parallel_size": 8,
+        "enable_expert_parallel": true,
+        "trust_remote_code": true
+      },
+      "environment": {
+        "VLLM_USE_DEEP_GEMM": "0"
+      }
+    },
+    "qwen3_coder": {
+      "name": "Qwen3-Coder",
+      "description": "Qwen3-Coder with tool calling (8xH200)",
+      "icon": "",
+      "config": {
+        "max_model_len": 32000,
+        "enable_expert_parallel": true,
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "tool_call_parser": "qwen3_coder",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {}
+    },
+    "qwen3_coder_fp8": {
+      "name": "Qwen3-Coder (FP8)",
+      "description": "Qwen3-Coder FP8 with DP+EP",
+      "icon": "",
+      "config": {
+        "max_model_len": 131072,
+        "enable_expert_parallel": true,
+        "data_parallel_size": 8,
+        "trust_remote_code": true,
+        "tool_call_parser": "qwen3_coder",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {
+        "VLLM_USE_DEEP_GEMM": "1"
+      }
+    },
+    "deepseek_r1_fp8": {
+      "name": "DeepSeek-R1 (FP8)",
+      "description": "DeepSeek-R1 with FP8 on 8xH200",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "tensor_parallel_size": 8,
+        "enable_expert_parallel": true
+      },
+      "environment": {
+        "VLLM_ATTENTION_BACKEND": "CUTLASS_MLA",
+        "VLLM_USE_FLASHINFER_MOE_FP8": "1"
+      }
+    },
+    "deepseek_r1_fp4": {
+      "name": "DeepSeek-R1 (FP4)",
+      "description": "DeepSeek-R1 with FP4 on 4xB200",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "tensor_parallel_size": 4,
+        "enable_expert_parallel": true
+      },
+      "environment": {
+        "VLLM_ATTENTION_BACKEND": "CUTLASS_MLA",
+        "VLLM_USE_FLASHINFER_MOE_FP4": "1"
+      }
+    },
+    "ernie45_21b": {
+      "name": "ERNIE-4.5-21B",
+      "description": "ERNIE-4.5-21B on single 80G GPU",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "ernie45_300b": {
+      "name": "ERNIE-4.5-300B",
+      "description": "ERNIE-4.5-300B with FP8 on 8xH200",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "gpu_memory_utilization": 0.95,
+        "quantization": "fp8",
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "glm_45v_fp8": {
+      "name": "GLM-4.5V (FP8)",
+      "description": "GLM-4.5V multimodal with FP8 on 4xH100",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "trust_remote_code": true,
+        "tool_call_parser": "glm45",
+        "reasoning_parser": "glm45",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {}
+    },
+    "qwen25_vl_72b": {
+      "name": "Qwen2.5-VL-72B",
+      "description": "Qwen2.5-VL-72B multimodal on 4xA100",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "qwen3_vl_235b": {
+      "name": "Qwen3-VL-235B",
+      "description": "Qwen3-VL flagship MoE on 8xH100/H200",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "enable_expert_parallel": true
+      },
+      "environment": {}
+    },
+    "internvl_35": {
+      "name": "InternVL3.5-8B",
+      "description": "InternVL3.5 vision-language model",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "nemotron_nano_vl": {
+      "name": "Nemotron-Nano-12B-VL",
+      "description": "NVIDIA Nemotron-Nano multimodal on single GPU",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "max_model_len": 131072
+      },
+      "environment": {
+        "VLLM_VIDEO_LOADER_BACKEND": "opencv"
+      }
+    },
+    "kimi_linear": {
+      "name": "Kimi-Linear-48B",
+      "description": "Kimi-Linear with 1M context on 4-8 GPUs",
+      "icon": "",
+      "config": {
+        "tensor_parallel_size": 4,
+        "max_model_len": 1048576,
+        "trust_remote_code": true
+      },
+      "environment": {}
+    },
+    "ring_1t_fp8": {
+      "name": "Ring-1T (FP8)",
+      "description": "Ring-1T with FP8 KV cache on 8xH200",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "tensor_parallel_size": 8,
+        "gpu_memory_utilization": 0.97,
+        "max_num_seqs": 32,
+        "kv_cache_dtype": "fp8",
+        "compilation_config": "{\"use_inductor\": false}"
+      },
+      "environment": {}
+    }
+  }
+}

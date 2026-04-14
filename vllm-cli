@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+import sys
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(script_dir, 'src'))
+from vllm_cli.__main__ import main
+if __name__ == '__main__':
+    main()

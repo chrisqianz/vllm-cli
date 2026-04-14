@@ -1,0 +1,944 @@
+{
+  "version": "1.0.1",
+  "description": "vLLM server argument definitions and metadata",
+  "arguments": {
+    "model": {
+      "type": "string",
+      "category": "essential",
+      "description": "Model name or path to serve",
+      "cli_flag": null,
+      "required": true,
+      "importance": "critical"
+    },
+    "dtype": {
+      "type": "choice",
+      "category": "essential",
+      "description": "Data type for model weights",
+      "default": "auto",
+      "cli_flag": "--dtype",
+      "choices": [
+        "auto",
+        "float16",
+        "bfloat16",
+        "float32",
+        "float8"
+      ],
+      "importance": "high",
+      "hint": "Use bfloat16 for better numerical stability, float16 for memory savings"
+    },
+    "port": {
+      "type": "integer",
+      "category": "api",
+      "description": "Port to serve the API on",
+      "default": 8000,
+      "cli_flag": "--port",
+      "validation": {
+        "min": 1000,
+        "max": 65535
+      },
+      "importance": "high"
+    },
+    "host": {
+      "type": "string",
+      "category": "api",
+      "description": "Host address to bind the server",
+      "default": "0.0.0.0",
+      "cli_flag": "--host",
+      "importance": "medium"
+    },
+    "quantization": {
+      "type": "choice",
+      "category": "essential",
+      "description": "Quantization method for model compression",
+      "default": null,
+      "cli_flag": "--quantization",
+      "choices": [
+        null,
+        "awq",
+        "awq_marlin",
+        "auto-round",
+        "bitsandbytes",
+        "bitblas",
+        "gguf",
+        "gptq",
+        "gptq_marlin",
+        "fp8",
+        "fbgemm_fp8",
+        "compressed-tensors",
+        "experts_int8",
+        "modelopt_fp4",
+        "modelopt_mxfp8"
+      ],
+      "importance": "high",
+      "hint": "Reduces memory usage but may impact quality"
+    },
+    "max_model_len": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Maximum sequence length (context window)",
+      "default": null,
+      "cli_flag": "--max-model-len",
+      "validation": {
+        "min": 1
+      },
+      "importance": "high",
+      "hint": "Set None/empty to let vLLM auto-detect, or specify value (supports 1M, 100K format)"
+    },
+    "gpu_memory_utilization": {
+      "type": "float",
+      "category": "performance",
+      "description": "Fraction of GPU memory to use",
+      "default": 0.9,
+      "cli_flag": "--gpu-memory-utilization",
+      "validation": {
+        "min": 0.1,
+        "max": 1.0
+      },
+      "importance": "high",
+      "hint": "Lower values leave room for other processes"
+    },
+    "max_num_seqs": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Maximum number of sequences to process concurrently",
+      "default": null,
+      "cli_flag": "--max-num-seqs",
+      "validation": {
+        "min": 1,
+        "max": 10000
+      },
+      "importance": "high",
+      "hint": "Higher values increase throughput but use more memory"
+    },
+    "max_num_batched_tokens": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Maximum number of tokens in a single batch",
+      "default": null,
+      "cli_flag": "--max-num-batched-tokens",
+      "validation": {
+        "min": 1,
+        "max": 100000
+      },
+      "importance": "medium"
+    },
+    "swap_space": {
+      "type": "integer",
+      "category": "performance",
+      "description": "CPU swap space in GiB for handling overflow",
+      "default": null,
+      "cli_flag": "--swap-space",
+      "validation": {
+        "min": 0,
+        "max": 1000
+      },
+      "importance": "medium",
+      "hint": "Allows handling more requests at the cost of speed"
+    },
+    "cpu_offload_gb": {
+      "type": "float",
+      "category": "performance",
+      "description": "Offload model weights to CPU (in GB)",
+      "default": null,
+      "cli_flag": "--cpu-offload-gb",
+      "validation": {
+        "min": 0,
+        "max": 1000
+      },
+      "importance": "medium",
+      "hint": "Reduces GPU memory usage but slows inference"
+    },
+    "tensor_parallel_size": {
+      "type": "integer",
+      "category": "essential",
+      "description": "Number of GPUs for tensor parallelism",
+      "default": 1,
+      "cli_flag": "--tensor-parallel-size",
+      "validation": {
+        "min": 1,
+        "max": 8
+      },
+      "importance": "high",
+      "hint": "Split model across multiple GPUs for large models"
+    },
+    "pipeline_parallel_size": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Number of pipeline parallel stages",
+      "default": 1,
+      "cli_flag": "--pipeline-parallel-size",
+      "validation": {
+        "min": 1,
+        "max": 8
+      },
+      "importance": "medium"
+    },
+    "data_parallel_size": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Number of data parallel replicas",
+      "default": null,
+      "cli_flag": "--data-parallel-size",
+      "validation": {
+        "min": 1,
+        "max": 64
+      },
+      "importance": "medium",
+      "hint": "For multi-node deployments"
+    },
+    "data_parallel_size_local": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Number of data parallel replicas per node",
+      "default": null,
+      "cli_flag": "--data-parallel-size-local",
+      "validation": {
+        "min": 1,
+        "max": 64
+      },
+      "importance": "low",
+      "hint": "For multi-node DP+EP deployments"
+    },
+    "data_parallel_address": {
+      "type": "string",
+      "category": "parallelism",
+      "description": "Master node address for data parallelism",
+      "default": null,
+      "cli_flag": "--data-parallel-address",
+      "importance": "low",
+      "hint": "Required for multi-node data parallelism"
+    },
+    "data_parallel_rpc_port": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "RPC port for data parallelism communication",
+      "default": null,
+      "cli_flag": "--data-parallel-rpc-port",
+      "validation": {
+        "min": 1000,
+        "max": 65535
+      },
+      "importance": "low",
+      "hint": "For multi-node data parallelism"
+    },
+    "data_parallel_start_rank": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Starting rank for data parallel workers",
+      "default": null,
+      "cli_flag": "--data-parallel-start-rank",
+      "validation": {
+        "min": 0,
+        "max": 1000
+      },
+      "importance": "low",
+      "hint": "For multi-node deployments (non-master nodes)"
+    },
+    "headless": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Run as headless worker node (no API server)",
+      "default": false,
+      "cli_flag": "--headless",
+      "importance": "low",
+      "hint": "For multi-node deployments (worker nodes)"
+    },
+    "enable_expert_parallel": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable expert parallelism for MoE models",
+      "default": false,
+      "cli_flag": "--enable-expert-parallel",
+      "importance": "low",
+      "hint": "Only for Mixture of Experts models"
+    },
+    "language_model_only": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Only load language model, skip vision encoder (for text-only workloads)",
+      "default": false,
+      "cli_flag": "--language-model-only",
+      "importance": "medium",
+      "hint": "Frees up memory for KV cache, use for text-only serving"
+    },
+    "mm_encoder_tp_mode": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Multimodal encoder tensor parallelism mode",
+      "default": null,
+      "cli_flag": "--mm-encoder-tp-mode",
+      "choices": [
+        "data",
+        "tensor",
+        null
+      ],
+      "importance": "low",
+      "hint": "data for data-parallel vision encoding"
+    },
+    "mm_processor_cache_type": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Multimodal processor cache type",
+      "default": null,
+      "cli_flag": "--mm-processor-cache-type",
+      "choices": [
+        "shm",
+        "disk",
+        null
+      ],
+      "importance": "low",
+      "hint": "shm for shared memory caching"
+    },
+    "mm_processor_kwargs": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Multimodal processor kwargs (JSON string)",
+      "default": null,
+      "cli_flag": "--mm-processor-kwargs",
+      "importance": "low",
+      "hint": "Example: '{\"video_kwargs\": {\"size\": {\"longest_edge\": 234881024}}}'"
+    },
+    "hf_overrides": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Override HuggingFace config parameters (JSON string)",
+      "default": null,
+      "cli_flag": "--hf-overrides",
+      "importance": "low",
+      "hint": "Example: '{\"text_config\": {\"rope_parameters\": {...}}}'"
+    },
+    "enable_chunked_prefill": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Enable chunked prefill to reduce memory peaks",
+      "default": false,
+      "cli_flag": "--enable-chunked-prefill",
+      "importance": "high",
+      "hint": "Recommended for long contexts"
+    },
+    "enable_prefix_caching": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Cache common prompt prefixes",
+      "default": false,
+      "cli_flag": "--enable-prefix-caching",
+      "importance": "high",
+      "hint": "Speeds up requests with shared prefixes"
+    },
+    "kv_cache_dtype": {
+      "type": "choice",
+      "category": "optimization",
+      "description": "Data type for KV cache storage",
+      "default": "auto",
+      "cli_flag": "--kv-cache-dtype",
+      "choices": [
+        "auto",
+        "fp8",
+        "fp8_e4m3",
+        "fp8_e5m2",
+        "fp8_inc"
+      ],
+      "importance": "medium",
+      "hint": "FP8 reduces memory with minimal quality impact"
+    },
+    "num_lookahead_slots": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Lookahead slots for speculative decoding",
+      "default": null,
+      "cli_flag": "--num-lookahead-slots",
+      "validation": {
+        "min": 0,
+        "max": 100
+      },
+      "importance": "low"
+    },
+    "block_size": {
+      "type": "choice",
+      "category": "optimization",
+      "description": "Token block size for paged attention",
+      "default": null,
+      "cli_flag": "--block-size",
+      "choices": [
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "importance": "low"
+    },
+    "enable_lora": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Enable LoRA adapter support",
+      "default": false,
+      "cli_flag": "--enable-lora",
+      "importance": "medium"
+    },
+    "max_loras": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Maximum number of LoRA adapters",
+      "default": null,
+      "cli_flag": "--max-loras",
+      "validation": {
+        "min": 1,
+        "max": 100
+      },
+      "importance": "low",
+      "depends_on": "enable_lora"
+    },
+    "lora_modules": {
+      "type": "string",
+      "category": "optimization",
+      "description": "LoRA modules to load (JSON format or name=path pairs)",
+      "default": null,
+      "cli_flag": "--lora-modules",
+      "importance": "high",
+      "depends_on": "enable_lora"
+    },
+    "max_lora_rank": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Maximum rank for LoRA adapters",
+      "default": null,
+      "cli_flag": "--max-lora-rank",
+      "validation": {
+        "min": 1,
+        "max": 256
+      },
+      "importance": "low",
+      "depends_on": "enable_lora"
+    },
+    "max_cpu_loras": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Maximum number of LoRA adapters that can be loaded on CPU",
+      "default": null,
+      "cli_flag": "--max-cpu-loras",
+      "validation": {
+        "min": 0,
+        "max": 100
+      },
+      "importance": "low",
+      "depends_on": "enable_lora"
+    },
+    "api_key": {
+      "type": "string",
+      "category": "api",
+      "description": "API key for authentication",
+      "default": null,
+      "cli_flag": "--api-key",
+      "importance": "high",
+      "sensitive": true
+    },
+    "served_model_name": {
+      "type": "string",
+      "category": "api",
+      "description": "Model name to report in API responses",
+      "default": null,
+      "cli_flag": "--served-model-name",
+      "importance": "medium"
+    },
+    "chat_template": {
+      "type": "string",
+      "category": "api",
+      "description": "Path to custom chat template file (.jinja)",
+      "default": null,
+      "cli_flag": "--chat-template",
+      "importance": "medium",
+      "hint": "Required for some models (e.g., Qwen3, Llama3.1) to enable proper tool calling. Example: examples/tool_chat_template_llama3.1_json.jinja"
+    },
+    "chat_template_content_format": {
+      "type": "choice",
+      "category": "api",
+      "description": "Format of content in chat templates",
+      "default": "auto",
+      "cli_flag": "--chat-template-content-format",
+      "choices": [
+        "auto",
+        "openai",
+        "string"
+      ],
+      "importance": "low",
+      "hint": "Use 'openai' for models with tool/function calling support"
+    },
+    "response_role": {
+      "type": "string",
+      "category": "api",
+      "description": "Role name for model responses",
+      "default": "assistant",
+      "cli_flag": "--response-role",
+      "importance": "low"
+    },
+    "ssl_keyfile": {
+      "type": "string",
+      "category": "api",
+      "description": "Path to SSL key file",
+      "default": null,
+      "cli_flag": "--ssl-keyfile",
+      "importance": "low"
+    },
+    "ssl_certfile": {
+      "type": "string",
+      "category": "api",
+      "description": "Path to SSL certificate file",
+      "default": null,
+      "cli_flag": "--ssl-certfile",
+      "importance": "low"
+    },
+    "seed": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Random seed for reproducibility",
+      "default": null,
+      "cli_flag": "--seed",
+      "validation": {
+        "min": 0,
+        "max": 2147483647
+      },
+      "importance": "low"
+    },
+    "tokenizer": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Custom tokenizer name or path",
+      "default": null,
+      "cli_flag": "--tokenizer",
+      "importance": "low"
+    },
+    "tokenizer_mode": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Tokenizer mode",
+      "default": "auto",
+      "cli_flag": "--tokenizer-mode",
+      "choices": [
+        "auto",
+        "custom",
+        "mistral",
+        "slow"
+      ],
+      "importance": "low"
+    },
+    "trust_remote_code": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Trust and execute remote code from model repo",
+      "default": false,
+      "cli_flag": "--trust-remote-code",
+      "importance": "high",
+      "hint": "Required for some models but has security implications"
+    },
+    "rope_scaling": {
+      "type": "string",
+      "category": "advanced",
+      "description": "RoPE scaling configuration (JSON)",
+      "default": null,
+      "cli_flag": "--rope-scaling",
+      "importance": "low"
+    },
+    "rope_theta": {
+      "type": "float",
+      "category": "advanced",
+      "description": "RoPE theta value",
+      "default": null,
+      "cli_flag": "--rope-theta",
+      "importance": "low"
+    },
+    "max_logprobs": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Maximum logprobs to return",
+      "default": null,
+      "cli_flag": "--max-logprobs",
+      "validation": {
+        "min": 0,
+        "max": 100
+      },
+      "importance": "low"
+    },
+    "disable_sliding_window": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Disable sliding window attention",
+      "default": false,
+      "cli_flag": "--disable-sliding-window",
+      "importance": "low"
+    },
+    "revision": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Model revision (branch/tag/commit)",
+      "default": null,
+      "cli_flag": "--revision",
+      "importance": "low"
+    },
+    "enforce_eager": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Force eager execution (disable CUDA graphs)",
+      "default": false,
+      "cli_flag": "--enforce-eager",
+      "importance": "low",
+      "hint": "May help with debugging or compatibility"
+    },
+    "disable_log_stats": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Disable periodic stats logging",
+      "default": false,
+      "cli_flag": "--disable-log-stats",
+      "importance": "medium"
+    },
+    "enable_log_requests": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Log all API requests",
+      "default": false,
+      "cli_flag": "--enable-log-requests",
+      "importance": "medium"
+    },
+    "max_log_len": {
+      "type": "integer",
+      "category": "monitoring",
+      "description": "Maximum length of logged prompts",
+      "default": null,
+      "cli_flag": "--max-log-len",
+      "validation": {
+        "min": 0,
+        "max": 100000
+      },
+      "importance": "low"
+    },
+    "otlp_traces_endpoint": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "OpenTelemetry traces endpoint",
+      "default": null,
+      "cli_flag": "--otlp-traces-endpoint",
+      "importance": "low"
+    },
+    "enable_prompt_tokens_details": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Include token details in API responses",
+      "default": false,
+      "cli_flag": "--enable-prompt-tokens-details",
+      "importance": "low"
+    },
+    "guided_decoding_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Backend for guided/constrained generation",
+      "default": "auto",
+      "cli_flag": "--guided-decoding-backend",
+      "choices": [
+        "auto",
+        "guidance",
+        "outlines",
+        "xgrammar"
+      ],
+      "importance": "low"
+    },
+    "speculative_model": {
+      "type": "string",
+      "category": "optimization",
+      "description": "Draft model for speculative decoding",
+      "default": null,
+      "cli_flag": "--speculative-model",
+      "importance": "low",
+      "hint": "Can speed up generation with a smaller draft model"
+    },
+    "num_speculative_tokens": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Tokens to generate speculatively",
+      "default": null,
+      "cli_flag": "--num-speculative-tokens",
+      "validation": {
+        "min": 1,
+        "max": 100
+      },
+      "importance": "low",
+      "depends_on": "speculative_model"
+    },
+    "reasoning_parser": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Parser for reasoning models",
+      "default": null,
+      "cli_flag": "--reasoning-parser",
+      "choices": [
+        "deepseek_r1",
+        "deepseek_v3",
+        "ernie45",
+        "gemma4",
+        "GptOss",
+        "granite",
+        "hunyuan_a13b",
+        "identity",
+        "kimi_k2",
+        "minimax_m2",
+        "mistral",
+        "nemotron_v3",
+        "olmo3",
+        "qwen3",
+        "step3"
+      ],
+      "importance": "low"
+    },
+    "reasoning_parser_plugin": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Path to custom reasoning parser plugin file (e.g., nano_v3_reasoning_parser.py)",
+      "default": null,
+      "cli_flag": "--reasoning-parser-plugin",
+      "importance": "low",
+      "hint": "Use with --reasoning-parser to specify custom parser"
+    },
+    "distributed_executor_backend": {
+      "type": "choice",
+      "category": "parallelism",
+      "description": "Backend for distributed execution",
+      "default": null,
+      "cli_flag": "--distributed-executor-backend",
+      "choices": [
+        "external_launcher",
+        "mp",
+        "ray",
+        "uni",
+        null
+      ],
+      "importance": "low"
+    },
+    "disable_custom_all_reduce": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Disable custom all-reduce kernel",
+      "default": false,
+      "cli_flag": "--disable-custom-all-reduce",
+      "importance": "low"
+    },
+    "max_parallel_loading_workers": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Load model in parallel batches to avoid RAM OOM",
+      "default": null,
+      "cli_flag": "--max-parallel-loading-workers",
+      "validation": {
+        "min": 1,
+        "max": 64
+      },
+      "importance": "medium",
+      "hint": "Useful for large models with tensor parallelism"
+    },
+    "cpu_offload_space": {
+      "type": "float",
+      "category": "performance",
+      "description": "CPU offload space in GiB (newer than cpu-offload-gb)",
+      "default": null,
+      "cli_flag": "--cpu-offload-space",
+      "validation": {
+        "min": 0,
+        "max": 1000
+      },
+      "importance": "medium",
+      "hint": "Virtual GPU memory extension using CPU RAM"
+    },
+    "enable_sleep_mode": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Enable sleep mode for CUDA power saving",
+      "default": false,
+      "cli_flag": "--enable-sleep-mode",
+      "importance": "low",
+      "hint": "Only supported for CUDA platform"
+    },
+    "disable_async_output_proc": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Disable async output processing",
+      "default": false,
+      "cli_flag": "--disable-async-output-proc",
+      "importance": "low"
+    },
+    "calculate_kv_scales": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Calculate k_scale and v_scale for FP8 KV cache",
+      "default": false,
+      "cli_flag": "--calculate-kv-scales",
+      "importance": "low",
+      "depends_on": "kv_cache_dtype"
+    },
+    "long_prefill_token_threshold": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Token threshold for long prefill requests",
+      "default": null,
+      "cli_flag": "--long-prefill-token-threshold",
+      "validation": {
+        "min": 1,
+        "max": 100000
+      },
+      "importance": "low",
+      "hint": "For chunked prefill optimization"
+    },
+    "max_num_partial_prefills": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Max concurrent partial prefills for chunked prefill",
+      "default": null,
+      "cli_flag": "--max-num-partial-prefills",
+      "validation": {
+        "min": 1,
+        "max": 100
+      },
+      "importance": "low",
+      "depends_on": "enable_chunked_prefill"
+    },
+    "generation_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Path to generation config or 'auto'/'vllm'",
+      "default": "auto",
+      "cli_flag": "--generation-config",
+      "importance": "medium"
+    },
+    "generation_config_override": {
+      "type": "string",
+      "category": "advanced",
+      "description": "JSON string to override generation config",
+      "default": null,
+      "cli_flag": "--generation-config-override",
+      "importance": "low",
+      "hint": "Example: {\"temperature\": 0.5}"
+    },
+    "allowed_origins": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed origins (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-origins",
+      "importance": "medium"
+    },
+    "allowed_headers": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed headers (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-headers",
+      "importance": "low"
+    },
+    "allowed_methods": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed methods (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-methods",
+      "importance": "low"
+    },
+    "disable_frontend_multiprocessing": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Run frontend in same process as engine",
+      "default": false,
+      "cli_flag": "--disable-frontend-multiprocessing",
+      "importance": "low"
+    },
+    "tool_call_parser": {
+      "type": "choice",
+      "category": "api",
+      "description": "Tool call parser for function calling support",
+      "default": null,
+      "cli_flag": "--tool-call-parser",
+      "choices": [
+        "deepseek_v3",
+        "deepseek_v31",
+        "deepseek_v32",
+        "ernie45",
+        "functiongemma",
+        "gemma4",
+        "gigachat3",
+        "glm45",
+        "granite",
+        "granite4",
+        "granite-20b-fc",
+        "hermes",
+        "hunyuan_a13b",
+        "jamba",
+        "kimi_k2",
+        "llama3_json",
+        "minimax_m2",
+        "mistral",
+        "olmo3",
+        "openai",
+        "phi4mini",
+        "pythonic",
+        "qwen3coder",
+        "qwen3xml",
+        "seed_oss",
+        "step3",
+        "step3p5",
+        "xlam"
+      ],
+      "importance": "medium",
+      "hint": "Required when using --enable-auto-tool-choice. Use 'openai' for GPT-OSS models"
+    },
+    "tool_parser_plugin": {
+      "type": "string",
+      "category": "api",
+      "description": "Path to custom tool parser plugin file",
+      "default": null,
+      "cli_flag": "--tool-parser-plugin",
+      "importance": "low",
+      "hint": "Use with --tool-call-parser to specify custom parser"
+    },
+    "enable_auto_tool_choice": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Enable automatic tool choice",
+      "default": false,
+      "cli_flag": "--enable-auto-tool-choice",
+      "importance": "low",
+      "depends_on": "tool_call_parser"
+    },
+    "log_config_file": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Path to logging config JSON file",
+      "default": null,
+      "cli_flag": "--log-config-file",
+      "importance": "medium"
+    },
+    "async_scheduling": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "EXPERIMENTAL: Perform async scheduling to reduce CPU overhead",
+      "default": false,
+      "cli_flag": "--async-scheduling",
+      "importance": "medium",
+      "hint": "May help reduce CPU overheads but not supported with all features"
+    },
+    "compilation_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Compilation configuration (JSON format)",
+      "default": null,
+      "cli_flag": "--compilation-config",
+      "importance": "low",
+      "hint": "Example: {\"full_cuda_graph\": true} for AMD GPUs"
+    },
+    "speculative_config": {
+      "type": "string",
+      "category": "optimization",
+      "description": "Speculative decoding configuration (JSON format)",
+      "default": null,
+      "cli_flag": "--speculative-config",
+      "importance": "low",
+      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}"
+    }
+  }
+}
