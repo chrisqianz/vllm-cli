@@ -13,6 +13,8 @@ from .base import ValidationError, VLLMCLIError
 class ConfigurationError(VLLMCLIError):
     """Base class for configuration-related errors."""
 
+    _error_code = "CONFIGURATION_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -20,7 +22,10 @@ class ConfigurationError(VLLMCLIError):
         config_section: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(message, error_code="CONFIGURATION_ERROR", **kwargs)
+        # Allow error_code from kwargs (for explicit subclass overrides),
+        # otherwise fall back to class-level _error_code attribute
+        error_code = kwargs.pop('error_code', self.__class__._error_code)
+        super().__init__(message, error_code=error_code, **kwargs)
         if config_file:
             self.add_context("config_file", config_file)
         if config_section:
@@ -30,13 +35,15 @@ class ConfigurationError(VLLMCLIError):
         return "Configuration error. Check your settings and try again."
 
 
-class ConfigValidationError(ConfigurationError, ValidationError):
+class ConfigValidationError(ConfigurationError):
     """Configuration validation failed."""
+
+    _error_code = "CONFIG_VALIDATION_ERROR"
 
     def __init__(
         self, message: str, validation_errors: Optional[List[str]] = None, **kwargs
     ):
-        super().__init__(message, error_code="CONFIG_VALIDATION_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if validation_errors:
             self.add_context("validation_errors", validation_errors)
 
@@ -50,8 +57,10 @@ class ConfigValidationError(ConfigurationError, ValidationError):
 class ConfigFileError(ConfigurationError):
     """Error reading or writing configuration files."""
 
+    _error_code = "CONFIG_FILE_ERROR"
+
     def __init__(self, message: str, operation: Optional[str] = None, **kwargs):
-        super().__init__(message, error_code="CONFIG_FILE_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if operation:
             self.add_context("operation", operation)
 
@@ -63,6 +72,8 @@ class ConfigFileError(ConfigurationError):
 class ConfigParseError(ConfigurationError):
     """Error parsing configuration file format."""
 
+    _error_code = "CONFIG_PARSE_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -70,7 +81,7 @@ class ConfigParseError(ConfigurationError):
         line_number: Optional[int] = None,
         **kwargs,
     ):
-        super().__init__(message, error_code="CONFIG_PARSE_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if file_format:
             self.add_context("file_format", file_format)
         if line_number:
@@ -87,6 +98,8 @@ class ConfigParseError(ConfigurationError):
 class ProfileError(ConfigurationError):
     """Profile-related operation error."""
 
+    _error_code = "PROFILE_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -94,7 +107,7 @@ class ProfileError(ConfigurationError):
         operation: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(message, error_code="PROFILE_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if profile_name:
             self.add_context("profile_name", profile_name)
         if operation:
@@ -109,8 +122,10 @@ class ProfileError(ConfigurationError):
 class ProfileNotFoundError(ProfileError):
     """Profile not found."""
 
+    _error_code = "PROFILE_NOT_FOUND"
+
     def __init__(self, message: str, **kwargs):
-        super().__init__(message, error_code="PROFILE_NOT_FOUND", **kwargs)
+        super().__init__(message, **kwargs)
 
     def _generate_user_message(self) -> str:
         profile_name = self.get_context("profile_name", "Profile")
@@ -120,8 +135,10 @@ class ProfileNotFoundError(ProfileError):
 class ProfileExistsError(ProfileError):
     """Profile already exists."""
 
+    _error_code = "PROFILE_EXISTS"
+
     def __init__(self, message: str, **kwargs):
-        super().__init__(message, error_code="PROFILE_EXISTS", **kwargs)
+        super().__init__(message, **kwargs)
 
     def _generate_user_message(self) -> str:
         profile_name = self.get_context("profile_name", "Profile")
@@ -131,6 +148,8 @@ class ProfileExistsError(ProfileError):
 class SchemaError(ConfigurationError):
     """Schema definition or validation error."""
 
+    _error_code = "SCHEMA_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -138,7 +157,7 @@ class SchemaError(ConfigurationError):
         schema_field: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(message, error_code="SCHEMA_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if schema_type:
             self.add_context("schema_type", schema_type)
         if schema_field:
@@ -151,6 +170,8 @@ class SchemaError(ConfigurationError):
 class ArgumentError(ConfigurationError):
     """Invalid command line argument."""
 
+    _error_code = "ARGUMENT_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -158,7 +179,7 @@ class ArgumentError(ConfigurationError):
         argument_value: Any = None,
         **kwargs,
     ):
-        super().__init__(message, error_code="ARGUMENT_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if argument_name:
             self.add_context("argument_name", argument_name)
         if argument_value is not None:
@@ -174,6 +195,8 @@ class ArgumentError(ConfigurationError):
 class CompatibilityError(ConfigurationError):
     """Configuration compatibility issue."""
 
+    _error_code = "COMPATIBILITY_ERROR"
+
     def __init__(
         self,
         message: str,
@@ -181,7 +204,7 @@ class CompatibilityError(ConfigurationError):
         severity: str = "error",
         **kwargs,
     ):
-        super().__init__(message, error_code="COMPATIBILITY_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if incompatible_options:
             self.add_context("incompatible_options", incompatible_options)
         self.add_context("severity", severity)
@@ -196,8 +219,10 @@ class CompatibilityError(ConfigurationError):
 class DefaultsError(ConfigurationError):
     """Error with default configuration values."""
 
+    _error_code = "DEFAULTS_ERROR"
+
     def __init__(self, message: str, defaults_type: Optional[str] = None, **kwargs):
-        super().__init__(message, error_code="DEFAULTS_ERROR", **kwargs)
+        super().__init__(message, **kwargs)
         if defaults_type:
             self.add_context("defaults_type", defaults_type)
 

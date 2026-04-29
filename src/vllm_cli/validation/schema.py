@@ -7,6 +7,7 @@ for vLLM configuration parameters, building on the validators module
 to create a comprehensive validation system.
 """
 
+import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -27,6 +28,34 @@ from .registry import ValidationRegistry
 
 logger = logging.getLogger(__name__)
 
+# Cached schema to avoid repeated file reads
+_argument_schema_cache: Optional[Dict[str, Any]] = None
+
+
+def _load_argument_schema() -> Dict[str, Any]:
+    """Load argument_schema.json from the schemas package directory."""
+    global _argument_schema_cache
+    if _argument_schema_cache is not None:
+        return _argument_schema_cache
+
+    schema_path = Path(__file__).resolve().parents[1] / "schemas" / "argument_schema.json"
+    try:
+        with open(schema_path, "r") as f:
+            _argument_schema_cache = json.load(f)
+    except Exception as e:
+        logger.warning(f"Failed to load argument_schema.json: {e}")
+        _argument_schema_cache = {}
+    return _argument_schema_cache
+
+
+def _get_choice_values(arg_name: str) -> List[str]:
+    """Get choice values from argument_schema.json, filtering out None."""
+    schema = _load_argument_schema()
+    arg_info = schema.get("arguments", {}).get(arg_name, {})
+    if arg_info.get("type") == "choice":
+        return [c for c in arg_info.get("choices", []) if c is not None]
+    return []
+
 
 def create_vllm_validation_registry() -> ValidationRegistry:
     """
@@ -46,10 +75,13 @@ def create_vllm_validation_registry() -> ValidationRegistry:
 
     registry.register("host", create_string_validator("host", min_length=1))
 
-    # Model parameters
+    # Model parameters (choices loaded from argument_schema.json)
     registry.register(
         "dtype",
-        create_choice_validator("dtype", ["auto", "float16", "bfloat16", "float32"]),
+        create_choice_validator(
+            "dtype",
+            _get_choice_values("dtype") or ["auto", "float16", "bfloat16", "float32", "float8"],
+        ),
     )
 
     registry.register(
@@ -79,12 +111,13 @@ def create_vllm_validation_registry() -> ValidationRegistry:
 
     registry.register("max_paddings", validate_non_negative_integer("max_paddings"))
 
-    # Quantization parameters
+    # Quantization parameters (choices loaded from argument_schema.json)
     registry.register(
         "quantization",
         create_choice_validator(
             "quantization",
-            [
+            _get_choice_values("quantization")
+            or [
                 "awq",
                 "awq_marlin",
                 "auto-round",
@@ -103,14 +136,21 @@ def create_vllm_validation_registry() -> ValidationRegistry:
         ),
     )
 
-    # KV Cache parameters
+    # KV Cache parameters (choices loaded from argument_schema.json)
     registry.register(
         "kv_cache_dtype",
-        create_choice_validator("kv_cache_dtype", ["auto", "fp8", "fp16", "bf16"]),
+        create_choice_validator(
+            "kv_cache_dtype",
+            _get_choice_values("kv_cache_dtype") or ["auto", "fp8", "fp16", "bf16"],
+        ),
     )
 
     registry.register(
-        "block_size", create_integer_validator("block_size", min_value=1, max_value=256)
+        "block_size",
+        create_choice_validator(
+            "block_size",
+            _get_choice_values("block_size") or [8, 16, 32, 64, 128],
+        ),
     )
 
     # Attention parameters
@@ -346,8 +386,6 @@ def load_validation_schema_from_file(schema_file: Path) -> ValidationRegistry:
     Returns:
         ValidationRegistry built from the schema file
     """
-    import json
-
     registry = ValidationRegistry()
 
     try:
