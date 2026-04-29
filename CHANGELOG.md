@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.9.5] - 2026-04-29
+
+### Added
+- **vLLM 0.20.0 Full Support**: Updated minimum vLLM dependency to `>=0.20.0`
+- **TurboQuant 2-bit KV Cache**: Added `turboquant_k8v4`, `turboquant_4bit_nc`, `turboquant_k3v4_nc`, `turboquant_3bit_nc` KV cache options
+- **New KV Cache Types**: `fp8_ds_mla`, `int8_per_token_head`, `fp8_per_token_head`, `nvfp4`
+- **KV Cache Offloading**: `--kv-offloading-size` and `--kv-offloading-backend` (native/lmcache)
+- **KV Cache Memory Control**: `--kv-cache-memory-bytes` for fine-grain memory management
+- **KV Cache Skip Layers**: `--kv-cache-dtype-skip-layers` for layer-level quantization control
+- **Prefix Caching Hash Algorithm**: `--prefix-caching-hash-algo` (sha256, sha256_cbor, xxhash, xxhash_cbor)
+- **Decode/Prefill Context Parallelism**: `--decode-context-parallel-size` and `--prefill-context-parallel-size`
+- **Expert Parallel Load Balancing**: `--enable-eplb` and `--eplb-config`
+- **Dynamic Batch Optimization**: `--enable-dbo`
+- **Elastic Expert Parallelism**: `--enable-elastic-ep`
+- **NUMA Binding**: `--numa-bind` for GPU workers
+- **Attention Backend Selection**: `--attention-backend` with FlashAttention 4, Triton, ROCm backends
+- **TurboQuant CUDA Graph**: `--tq-max-kv-splits-for-cuda-graph`
+- **MoE Backend Selection**: `--moe-backend` (auto, triton, cutlass, trtllm, aiter)
+- **Optimization/Performance Modes**: `--optimization-level` (O0-O3) and `--performance-mode` (latency/throughput)
+- **Mamba Config**: `--mamba-backend`, `--mamba-cache-mode`, `--mamba-cache-dtype`, `--mamba-ssm-cache-dtype`, `--mamba-block-size`
+- **New Reasoning Parsers**: `hyv3` (Hunyuan v3), `mimo`
+- **New Tool Call Parsers**: `hyv3`, `mimo`
+- **Humming Quantization**: Added `humming` to quantization choices
+- **Model Implementation**: `--model-impl` (transformers/vllm)
+- **GDN Prefill Backend**: `--gdn-prefill-backend` (flashinfer/triton)
+- **Enhanced Monitoring**: `--kv-cache-metrics`, `--cudagraph-metrics`, `--enable-mfu-metrics`, `--enable-layerwise-nvtx-tracing`
+- **Scheduling Policy**: `--scheduling-policy` (fcfs/utilization)
+- **Offload Backend**: `--offload-backend` (uva/prefetch) with granular offload controls
+- **vLLM IR**: `--ir-op-priority` for operator priority configuration
+- **FlashInfer Autotune**: `--enable-flashinfer-autotune`
+- **78 New CLI Arguments** total, bringing schema to 161 arguments
+
+### Changed
+- **PyTorch 2.11 + CUDA 13.0**: vLLM now defaults to PyTorch 2.11 with CUDA 13.0
+- **Transformers v5**: Updated to support HuggingFace transformers>=5
+- **Python 3.14**: Added to supported Python versions
+- **CUDAGraph Memory Profiling**: Now enabled by default
+- **Async Scheduling**: Default OFF for pooling models
+
+### Deprecated
+- **Petit NVFP4**: Removed from vLLM 0.20
+- **LLM.reward**: Deprecated, use `LLM.encode` instead
+
 ## [v0.2.9.3] - 2026-03-23
 
 ### Added

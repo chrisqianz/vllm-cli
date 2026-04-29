@@ -161,6 +161,7 @@ def _add_serve_parser(subparsers) -> None:
             "experts_int8",
             "modelopt_fp4",
             "modelopt_mxfp8",
+            "humming",
         ],
         help="Quantization method to use",
     )

@@ -27,6 +27,46 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.2.9.5
+
+### 🚀 vLLM 0.20.0 Full Support
+
+Updated to support vLLM v0.20.0 with 752 commits from 320 contributors. **161 CLI arguments** now supported (up from 83).
+
+**TurboQuant 2-bit KV Cache:**
+- `turboquant_k8v4`: K8V4 compression with 4× KV cache capacity
+- `turboquant_4bit_nc`: 4-bit non-compressed KV cache
+- `turboquant_k3v4_nc` / `turboquant_3bit_nc`: 3-bit KV cache variants
+- New `--kv-cache-dtype-skip-layers` for fine-grained control
+- Auto-skip first/last 2 layers for boundary protection
+
+**New KV Cache Options:**
+- `fp8_ds_mla`, `int8_per_token_head`, `fp8_per_token_head`, `nvfp4`
+- `--kv-cache-memory-bytes` for fine-grain memory control
+- `--kv-offloading-size` / `--kv-offloading-backend` for CPU offloading
+
+**New Parallelism Features:**
+- Decode/Prefill context parallelism (`--decode-context-parallel-size`, `--prefill-context-parallel-size`)
+- Expert parallel load balancing (`--enable-eplb`, `--eplb-config`)
+- Dynamic batch optimization (`--enable-dbo`)
+- Elastic expert parallelism (`--enable-elastic-ep`)
+- NUMA binding for GPU workers (`--numa-bind`)
+
+**New Model Support:**
+- DeepSeek V4, Hunyuan v3 (HYV3), Granite 4.1 Vision, EXAONE-4.5
+- New reasoning parsers: `hyv3`, `mimo`
+- New tool call parsers: `hyv3`, `mimo`
+
+**New Quantization:**
+- `humming` quantization kernel support
+
+**PyTorch 2.11 + CUDA 13.0 Default:**
+- vLLM now ships on PyTorch 2.11 with CUDA 13.0 as default
+- Transformers v5 support
+- Python 3.14 added to supported versions
+
+See [Release Notes](RELEASE_NOTES_v0.2.9.5.md) for details.
+
 ## What's New in v0.2.9
 
 ### 🚀 Official vLLM Recipes Integration

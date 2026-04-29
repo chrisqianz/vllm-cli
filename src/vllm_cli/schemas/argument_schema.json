@@ -67,7 +67,8 @@
         "compressed-tensors",
         "experts_int8",
         "modelopt_fp4",
-        "modelopt_mxfp8"
+        "modelopt_mxfp8",
+        "humming"
       ],
       "importance": "high",
       "hint": "Reduces memory usage but may impact quality"
@@ -328,7 +329,7 @@
     "kv_cache_dtype": {
       "type": "choice",
       "category": "optimization",
-      "description": "Data type for KV cache storage",
+      "description": "Data type for KV cache storage. TurboQuant options enable 2-bit compression with 4x capacity.",
       "default": "auto",
       "cli_flag": "--kv-cache-dtype",
       "choices": [
@@ -336,10 +337,18 @@
         "fp8",
         "fp8_e4m3",
         "fp8_e5m2",
-        "fp8_inc"
+        "fp8_inc",
+        "fp8_ds_mla",
+        "turboquant_k8v4",
+        "turboquant_4bit_nc",
+        "turboquant_k3v4_nc",
+        "turboquant_3bit_nc",
+        "int8_per_token_head",
+        "fp8_per_token_head",
+        "nvfp4"
       ],
       "importance": "medium",
-      "hint": "FP8 reduces memory with minimal quality impact"
+      "hint": "FP8 reduces memory with minimal quality impact. TurboQuant options (turboquant_*) enable 2-bit KV cache compression with 4x capacity (vLLM 0.20+)"
     },
     "num_lookahead_slots": {
       "type": "integer",
@@ -678,9 +687,11 @@
         "GptOss",
         "granite",
         "hunyuan_a13b",
+        "hyv3",
         "identity",
         "kimi_k2",
         "minimax_m2",
+        "mimo",
         "mistral",
         "nemotron_v3",
         "olmo3",
@@ -868,10 +879,952 @@
         "granite-20b-fc",
         "hermes",
         "hunyuan_a13b",
+        "hyv3",
         "jamba",
         "kimi_k2",
         "llama3_json",
         "minimax_m2",
+        "mimo",
+        "mistral",
+        "olmo3",
+        "openai",
+        "phi4mini",
+        "pythonic",
+        "qwen3coder",
+        "qwen3xml",
+        "seed_oss",
+        "step3",
+        "step3p5",
+        "xlam"
+      ],
+      "importance": "medium",
+      "hint": "Required when using --enable-auto-tool-choice. Use 'openai' for GPT-OSS models"
+    },
+    "tool_parser_plugin": {
+      "type": "string",
+      "category": "api",
+      "description": "Path to custom tool parser plugin file",
+      "default": null,
+      "cli_flag": "--tool-parser-plugin",
+      "importance": "low",
+      "hint": "Use with --tool-call-parser to specify custom parser"
+    },
+    "enable_auto_tool_choice": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Enable automatic tool choice",
+      "default": false,
+      "cli_flag": "--enable-auto-tool-choice",
+      "importance": "low",
+      "depends_on": "tool_call_parser"
+    },
+    "log_config_file": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Path to logging config JSON file",
+      "default": null,
+      "cli_flag": "--log-config-file",
+      "importance": "medium"
+    },
+    "async_scheduling": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "EXPERIMENTAL: Perform async scheduling to reduce CPU overhead",
+      "default": false,
+      "cli_flag": "--async-scheduling",
+      "importance": "medium",
+      "hint": "May help reduce CPU overheads but not supported with all features"
+    },
+    "compilation_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Compilation configuration (JSON format)",
+      "default": null,
+      "cli_flag": "--compilation-config",
+      "importance": "low",
+      "hint": "Example: {\"full_cuda_graph\": true} for AMD GPUs"
+    },
+    "speculative_config": {
+      "type": "string",
+      "category": "optimization",
+      "description": "Speculative decoding configuration (JSON format)",
+      "default": null,
+      "cli_flag": "--speculative-config",
+      "importance": "low",
+      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}"
+    },
+    "attention_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Attention backend to use (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--attention-backend",
+      "choices": [
+        "auto",
+        "flash_attn",
+        "flash_attn_diffkv",
+        "triton_attn",
+        "rocm_attn",
+        "rocm_aiter_mla",
+        "rocm_aiter_triton_mla",
+        "rocm_aiter_fa",
+        null
+      ],
+      "importance": "medium",
+      "hint": "Auto-selects the best backend. FlashAttention 4 is default for MLA prefill on Hopper+"
+    },
+    "tq_max_kv_splits_for_cuda_graph": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "TurboQuant max KV splits for CUDA graph decode (vLLM 0.20+)",
+      "default": 32,
+      "cli_flag": "--tq-max-kv-splits-for-cuda-graph",
+      "validation": {
+        "min": 1,
+        "max": 256
+      },
+      "importance": "low",
+      "hint": "Fixes split count for constant grid dimensions across captures. Used with TurboQuant KV cache."
+    },
+    "kv_cache_memory_bytes": {
+      "type": "integer",
+      "category": "performance",
+      "description": "KV cache memory size per GPU in bytes (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kv-cache-memory-bytes",
+      "validation": {
+        "min": 1
+      },
+      "importance": "medium",
+      "hint": "Fine-grain control of KV cache memory. Overrides gpu_memory_utilization when set."
+    },
+    "kv_offloading_size": {
+      "type": "float",
+      "category": "performance",
+      "description": "KV cache offloading buffer size in GiB (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kv-offloading-size",
+      "validation": {
+        "min": 0
+      },
+      "importance": "medium",
+      "hint": "Enables KV cache offloading to CPU. Total buffer summed across all TP ranks when TP > 1."
+    },
+    "kv_offloading_backend": {
+      "type": "choice",
+      "category": "performance",
+      "description": "Backend for KV cache offloading (vLLM 0.20+)",
+      "default": "native",
+      "cli_flag": "--kv-offloading-backend",
+      "choices": [
+        "native",
+        "lmcache"
+      ],
+      "importance": "low",
+      "hint": "Only active when kv_offloading_size is set. 'native' uses vLLM CPU offloading, 'lmcache' uses LMCache."
+    },
+    "kv_cache_dtype_skip_layers": {
+      "type": "string",
+      "category": "optimization",
+      "description": "Layer patterns to skip KV cache quantization (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kv-cache-dtype-skip-layers",
+      "importance": "low",
+      "hint": "Accepts layer indices (e.g., '0,2,4') or attention type names (e.g., 'sliding_window'). Auto-skips first/last 2 layers for TurboQuant."
+    },
+    "prefix_caching_hash_algo": {
+      "type": "choice",
+      "category": "optimization",
+      "description": "Hash algorithm for prefix caching (vLLM 0.20+)",
+      "default": "sha256",
+      "cli_flag": "--prefix-caching-hash-algo",
+      "choices": [
+        "sha256",
+        "sha256_cbor",
+        "xxhash",
+        "xxhash_cbor"
+      ],
+      "importance": "low",
+      "hint": "sha256 is most secure. xxhash variants are faster but non-cryptographic. Requires xxhash package for xxhash options."
+    },
+    "enable_ep_weight_filter": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable expert weight filter for expert parallelism (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-ep-weight-filter",
+      "importance": "low",
+      "hint": "Optimizes expert parallelism weight transfers"
+    },
+    "all2all_backend": {
+      "type": "choice",
+      "category": "parallelism",
+      "description": "All-to-all communication backend (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--all2all-backend",
+      "choices": [
+        "auto",
+        "deepep_low_latency",
+        "deepep_high_throughput",
+        "naive"
+      ],
+      "importance": "low",
+      "hint": "DeepEP backends require the DeepEP package installed"
+    },
+    "enable_dbo": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable dynamic batch optimization (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-dbo",
+      "importance": "low"
+    },
+    "enable_elastic_ep": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable elastic expert parallelism (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-elastic-ep",
+      "importance": "low",
+      "hint": "Allows dynamic adjustment of expert parallelism"
+    },
+    "expert_placement_strategy": {
+      "type": "choice",
+      "category": "parallelism",
+      "description": "Strategy for placing experts across devices (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--expert-placement-strategy",
+      "choices": [
+        "auto",
+        "balanced",
+        "compact",
+        null
+      ],
+      "importance": "low",
+      "hint": "Controls how MoE experts are distributed across GPUs"
+    },
+    "enable_eplb": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable expert parallel load balancing (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-eplb",
+      "importance": "low",
+      "hint": "For MoE models with expert parallelism"
+    },
+    "eplb_config": {
+      "type": "string",
+      "category": "parallelism",
+      "description": "EPLB configuration (JSON format, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--eplb-config",
+      "importance": "low",
+      "hint": "JSON config for expert parallel load balancing"
+    },
+    "decode_context_parallel_size": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Decode context parallel size (vLLM 0.20+)",
+      "default": 1,
+      "cli_flag": "--decode-context-parallel-size",
+      "validation": {
+        "min": 1
+      },
+      "importance": "medium",
+      "hint": "Split decode across multiple GPUs for better throughput"
+    },
+    "prefill_context_parallel_size": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Prefill context parallel size (vLLM 0.20+)",
+      "default": 1,
+      "cli_flag": "--prefill-context-parallel-size",
+      "validation": {
+        "min": 1
+      },
+      "importance": "medium",
+      "hint": "Split prefill across multiple GPUs"
+    },
+    "dcp_comm_backend": {
+      "type": "choice",
+      "category": "parallelism",
+      "description": "DCP communication backend (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--dcp-comm-backend",
+      "choices": [
+        "auto",
+        "nccl",
+        null
+      ],
+      "importance": "low"
+    },
+    "numa_bind": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable NUMA binding for GPU workers (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--numa-bind",
+      "importance": "low",
+      "hint": "Improves performance on NUMA-aware systems"
+    },
+    "optimization_level": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Overall optimization level (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--optimization-level",
+      "choices": [
+        "O0",
+        "O1",
+        "O2",
+        "O3",
+        null
+      ],
+      "importance": "medium",
+      "hint": "Higher levels enable more aggressive optimizations"
+    },
+    "performance_mode": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Performance mode (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--performance-mode",
+      "choices": [
+        "latency",
+        "throughput",
+        null
+      ],
+      "importance": "medium",
+      "hint": "latency optimizes for low latency, throughput for high throughput"
+    },
+    "enable_return_routed_experts": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Return routed expert information (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-return-routed-experts",
+      "importance": "low",
+      "hint": "Useful for debugging MoE routing decisions"
+    },
+    "model_impl": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Model implementation backend (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--model-impl",
+      "choices": [
+        "transformers",
+        "vllm",
+        null
+      ],
+      "importance": "low",
+      "hint": "Use 'vllm' for native vLLM implementation, 'transformers' for HF transformers"
+    },
+    "logprobs_mode": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Logprobs computation mode (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--logprobs-mode",
+      "choices": [
+        "normal",
+        "fast",
+        null
+      ],
+      "importance": "low",
+      "hint": "'fast' mode may be less accurate but faster"
+    },
+    "disable_cascade_attn": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Disable cascade attention (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--disable-cascade-attn",
+      "importance": "low"
+    },
+    "skip_tokenizer_init": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Skip tokenizer initialization (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--skip-tokenizer-init",
+      "importance": "low",
+      "hint": "Useful for embedding-only models that don't need tokenization"
+    },
+    "enable_prompt_embeds": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Enable prompt embeddings input (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-prompt-embeds",
+      "importance": "low",
+      "hint": "Allows passing pre-computed embeddings instead of text prompts"
+    },
+    "override_attention_dtype": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Override attention data type (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--override-attention-dtype",
+      "importance": "low",
+      "hint": "Force a specific dtype for attention computation"
+    },
+    "cudagraph_capture_sizes": {
+      "type": "string",
+      "category": "advanced",
+      "description": "CUDA graph capture sizes (comma-separated, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--cudagraph-capture-sizes",
+      "importance": "low",
+      "hint": "Example: '1,2,4,8,16' for specific batch sizes"
+    },
+    "max_cudagraph_capture_size": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Maximum CUDA graph capture size (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--max-cudagraph-capture-size",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low"
+    },
+    "moe_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "MoE kernel backend (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--moe-backend",
+      "choices": [
+        "auto",
+        "triton",
+        "cutlass",
+        "trtllm",
+        "aiter",
+        null
+      ],
+      "importance": "medium",
+      "hint": "Controls which backend is used for MoE fused kernel"
+    },
+    "ir_op_priority": {
+      "type": "string",
+      "category": "advanced",
+      "description": "IR operator priority configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--ir-op-priority",
+      "importance": "low",
+      "hint": "JSON config for vLLM IR operator priorities"
+    },
+    "enable_flashinfer_autotune": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Enable FlashInfer autotuning (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-flashinfer-autotune",
+      "importance": "low",
+      "hint": "Auto-tunes FlashInfer kernel parameters for best performance"
+    },
+    "kv_transfer_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "KV transfer configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kv-transfer-config",
+      "importance": "low",
+      "hint": "JSON config for KV cache transfer in disaggregated serving"
+    },
+    "kv_events_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "KV events configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kv-events-config",
+      "importance": "low",
+      "hint": "JSON config for GPU-side KV events in HMA"
+    },
+    "ec_transfer_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "EC transfer configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--ec-transfer-config",
+      "importance": "low",
+      "hint": "JSON config for expert chunk transfer"
+    },
+    "reasoning_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Reasoning configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--reasoning-config",
+      "importance": "low",
+      "hint": "JSON config for reasoning model settings"
+    },
+    "structured_outputs_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Structured outputs configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--structured-outputs-config",
+      "importance": "low",
+      "hint": "JSON config for structured output settings"
+    },
+    "attention_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Attention configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--attention-config",
+      "importance": "low",
+      "hint": "JSON config for attention backend settings"
+    },
+    "kernel_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Kernel configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--kernel-config",
+      "importance": "low",
+      "hint": "JSON config for kernel-level settings"
+    },
+    "profiler_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Profiler configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--profiler-config",
+      "importance": "low",
+      "hint": "JSON config for profiling settings"
+    },
+    "weight_transfer_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Weight transfer configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--weight-transfer-config",
+      "importance": "low",
+      "hint": "JSON config for weight transfer settings"
+    },
+    "additional_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Additional vLLM configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--additional-config",
+      "importance": "low",
+      "hint": "JSON config for additional vLLM settings"
+    },
+    "mamba_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Mamba backend for hybrid models (vLLM 0.20+)",
+      "default": "triton",
+      "cli_flag": "--mamba-backend",
+      "choices": [
+        "triton",
+        "flashinfer"
+      ],
+      "importance": "low",
+      "hint": "Backend for Mamba state space models"
+    },
+    "enable_mamba_cache_stochastic_rounding": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Enable stochastic rounding for Mamba cache (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-mamba-cache-stochastic-rounding",
+      "importance": "low"
+    },
+    "mamba_block_size": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Mamba cache block size (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--mamba-block-size",
+      "validation": {
+        "min": 8
+      },
+      "importance": "low",
+      "hint": "Must be a multiple of 8. Only set when prefix caching is enabled."
+    },
+    "mamba_cache_mode": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Mamba cache mode (vLLM 0.20+)",
+      "default": "none",
+      "cli_flag": "--mamba-cache-mode",
+      "choices": [
+        "none",
+        "all",
+        "align"
+      ],
+      "importance": "low",
+      "hint": "'align' recommended for speculative decoding with Mamba models"
+    },
+    "mamba_cache_dtype": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Mamba cache data type (vLLM 0.20+)",
+      "default": "auto",
+      "cli_flag": "--mamba-cache-dtype",
+      "choices": [
+        "auto",
+        "float32",
+        "float16"
+      ],
+      "importance": "low"
+    },
+    "mamba_ssm_cache_dtype": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Mamba SSM cache data type (vLLM 0.20+)",
+      "default": "auto",
+      "cli_flag": "--mamba-ssm-cache-dtype",
+      "choices": [
+        "auto",
+        "float32",
+        "float16"
+      ],
+      "importance": "low"
+    },
+    "offload_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Offload backend for model weights (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--offload-backend",
+      "choices": [
+        "uva",
+        "prefetch",
+        null
+      ],
+      "importance": "low",
+      "hint": "Controls how model weights are offloaded to CPU"
+    },
+    "cpu_offload_params": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Parameters to offload to CPU (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--cpu-offload-params",
+      "importance": "low",
+      "hint": "Comma-separated list of parameter names to offload"
+    },
+    "offload_group_size": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Offload group size (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--offload-group-size",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low"
+    },
+    "offload_num_in_group": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Number of layers in each offload group (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--offload-num-in-group",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low"
+    },
+    "offload_prefetch_step": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Prefetch steps for offloading (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--offload-prefetch-step",
+      "validation": {
+        "min": 0
+      },
+      "importance": "low"
+    },
+    "offload_params": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Parameters to offload (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--offload-params",
+      "importance": "low"
+    },
+    "gdn_prefill_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "GDN prefill backend (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--gdn-prefill-backend",
+      "choices": [
+        "flashinfer",
+        "triton"
+      ],
+      "importance": "low",
+      "hint": "Backend for GDN (Grouped Dense Network) prefill"
+    },
+    "kv_cache_metrics": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable KV cache metrics (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--kv-cache-metrics",
+      "importance": "low"
+    },
+    "kv_cache_metrics_sample": {
+      "type": "float",
+      "category": "monitoring",
+      "description": "KV cache metrics sampling rate (vLLM 0.20+)",
+      "default": 1.0,
+      "cli_flag": "--kv-cache-metrics-sample",
+      "validation": {
+        "min": 0.0,
+        "max": 1.0
+      },
+      "importance": "low"
+    },
+    "cudagraph_metrics": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable CUDA graph metrics (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--cudagraph-metrics",
+      "importance": "low"
+    },
+    "enable_layerwise_nvtx_tracing": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable layerwise NVTX tracing (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-layerwise-nvtx-tracing",
+      "importance": "low",
+      "hint": "For profiling with Nsight Systems"
+    },
+    "enable_mfu_metrics": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable MFU (Model FLOPs Utilization) metrics (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-mfu-metrics",
+      "importance": "low"
+    },
+    "enable_logging_iteration_details": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable detailed iteration logging (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-logging-iteration-details",
+      "importance": "low"
+    },
+    "enable_mm_processor_stats": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable multimodal processor statistics (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--enable-mm-processor-stats",
+      "importance": "low"
+    },
+    "scheduling_policy": {
+      "type": "choice",
+      "category": "performance",
+      "description": "Scheduling policy (vLLM 0.20+)",
+      "default": "fcfs",
+      "cli_flag": "--scheduling-policy",
+      "choices": [
+        "fcfs",
+        "utilization"
+      ],
+      "importance": "low",
+      "hint": "fcfs = first-come-first-served, utilization = optimize GPU utilization"
+    },
+    "max_long_partial_prefills": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Max concurrent long partial prefills (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--max-long-partial-prefills",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low"
+    },
+    "scheduler_reserve_full_isl": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Reserve full inter-step latency for scheduler (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--scheduler-reserve-full-isl",
+      "importance": "low"
+    },
+    "disable_hybrid_kv_cache_manager": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Disable hybrid KV cache manager (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--disable-hybrid-kv-cache-manager",
+      "importance": "low",
+      "hint": "Set to false (--no-disable-hybrid-kv-cache-manager) to let vLLM decide. Required with KV connectors."
+    },
+    "stream_interval": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Streaming interval in tokens (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--stream-interval",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low",
+      "hint": "Number of tokens between streaming updates"
+    },
+    "disable_chunked_mm_input": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Disable chunked multimodal input (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--disable-chunked-mm-input",
+      "importance": "low"
+    },
+    "scheduler_cls": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Custom scheduler class (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--scheduler-cls",
+      "importance": "low"
+    },
+    "allowed_local_media_path": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Allowed local media path for multimodal inputs (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--allowed-local-media-path",
+      "importance": "low"
+    },
+    "allowed_media_domains": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Allowed media domains (comma-separated, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--allowed-media-domains",
+      "importance": "low"
+    },
+    "config_format": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Config format (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--config-format",
+      "choices": [
+        "auto",
+        "hf",
+        "vllm"
+      ],
+      "importance": "low"
+    },
+    "pooler_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Pooler configuration (JSON, vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--pooler-config",
+      "importance": "low",
+      "hint": "JSON config for pooling models"
+    },
+    "logits_processors": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Custom logit processors (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--logits-processors",
+      "importance": "low"
+    },
+    "io_processor_plugin": {
+      "type": "string",
+      "category": "advanced",
+      "description": "I/O processor plugin path (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--io-processor-plugin",
+      "importance": "low"
+    },
+    "renderer_num_workers": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Number of renderer workers (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--renderer-num-workers",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low"
+    },
+    "hf_config_path": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Path to HF config directory (vLLM 0.20+)",
+      "default": null,
+      "cli_flag": "--hf-config-path",
+      "importance": "low"
+    },
+    "allowed_origins": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed origins (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-origins",
+      "importance": "medium"
+    },
+    "allowed_headers": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed headers (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-headers",
+      "importance": "low"
+    },
+    "allowed_methods": {
+      "type": "string",
+      "category": "api",
+      "description": "CORS allowed methods (comma-separated)",
+      "default": "*",
+      "cli_flag": "--allowed-methods",
+      "importance": "low"
+    },
+    "disable_frontend_multiprocessing": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Run frontend in same process as engine (vLLM 0.20+)",
+      "default": false,
+      "cli_flag": "--disable-frontend-multiprocessing",
+      "importance": "low"
+    },
+    "tool_call_parser": {
+      "type": "choice",
+      "category": "api",
+      "description": "Tool call parser for function calling support",
+      "default": null,
+      "cli_flag": "--tool-call-parser",
+      "choices": [
+        "deepseek_v3",
+        "deepseek_v31",
+        "deepseek_v32",
+        "ernie45",
+        "functiongemma",
+        "gemma4",
+        "gigachat3",
+        "glm45",
+        "granite",
+        "granite4",
+        "granite-20b-fc",
+        "hermes",
+        "hunyuan_a13b",
+        "hyv3",
+        "jamba",
+        "kimi_k2",
+        "llama3_json",
+        "minimax_m2",
+        "mimo",
         "mistral",
         "olmo3",
         "openai",
