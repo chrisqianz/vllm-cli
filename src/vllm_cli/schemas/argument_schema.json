@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "vLLM server argument definitions and metadata",
   "arguments": {
     "model": {
@@ -96,7 +96,10 @@
         "max": 1.0
       },
       "importance": "high",
-      "hint": "Lower values leave room for other processes"
+      "hint": "Lower values leave room for other processes",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_num_seqs": {
       "type": "integer",
@@ -109,7 +112,10 @@
         "max": 10000
       },
       "importance": "high",
-      "hint": "Higher values increase throughput but use more memory"
+      "hint": "Higher values increase throughput but use more memory",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_num_batched_tokens": {
       "type": "integer",
@@ -121,7 +127,10 @@
         "min": 1,
         "max": 100000
       },
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "swap_space": {
       "type": "integer",
@@ -134,7 +143,10 @@
         "max": 1000
       },
       "importance": "medium",
-      "hint": "Allows handling more requests at the cost of speed"
+      "hint": "Allows handling more requests at the cost of speed",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_gb": {
       "type": "float",
@@ -160,7 +172,10 @@
         "max": 8
       },
       "importance": "high",
-      "hint": "Split model across multiple GPUs for large models"
+      "hint": "Split model across multiple GPUs for large models",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "pipeline_parallel_size": {
       "type": "integer",
@@ -172,7 +187,10 @@
         "min": 1,
         "max": 8
       },
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_size": {
       "type": "integer",
@@ -185,7 +203,10 @@
         "max": 64
       },
       "importance": "medium",
-      "hint": "For multi-node deployments"
+      "hint": "For multi-node deployments",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_size_local": {
       "type": "integer",
@@ -198,7 +219,10 @@
         "max": 64
       },
       "importance": "low",
-      "hint": "For multi-node DP+EP deployments"
+      "hint": "For multi-node DP+EP deployments",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_address": {
       "type": "string",
@@ -207,7 +231,10 @@
       "default": null,
       "cli_flag": "--data-parallel-address",
       "importance": "low",
-      "hint": "Required for multi-node data parallelism"
+      "hint": "Required for multi-node data parallelism",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_rpc_port": {
       "type": "integer",
@@ -220,7 +247,10 @@
         "max": 65535
       },
       "importance": "low",
-      "hint": "For multi-node data parallelism"
+      "hint": "For multi-node data parallelism",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_start_rank": {
       "type": "integer",
@@ -233,7 +263,10 @@
         "max": 1000
       },
       "importance": "low",
-      "hint": "For multi-node deployments (non-master nodes)"
+      "hint": "For multi-node deployments (non-master nodes)",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "headless": {
       "type": "boolean",
@@ -242,7 +275,10 @@
       "default": false,
       "cli_flag": "--headless",
       "importance": "low",
-      "hint": "For multi-node deployments (worker nodes)"
+      "hint": "For multi-node deployments (worker nodes)",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_expert_parallel": {
       "type": "boolean",
@@ -251,7 +287,10 @@
       "default": false,
       "cli_flag": "--enable-expert-parallel",
       "importance": "low",
-      "hint": "Only for Mixture of Experts models"
+      "hint": "Only for Mixture of Experts models",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "language_model_only": {
       "type": "boolean",
@@ -260,7 +299,10 @@
       "default": false,
       "cli_flag": "--language-model-only",
       "importance": "medium",
-      "hint": "Frees up memory for KV cache, use for text-only serving"
+      "hint": "Frees up memory for KV cache, use for text-only serving",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mm_encoder_tp_mode": {
       "type": "choice",
@@ -274,7 +316,10 @@
         null
       ],
       "importance": "low",
-      "hint": "data for data-parallel vision encoding"
+      "hint": "data for data-parallel vision encoding",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mm_processor_cache_type": {
       "type": "choice",
@@ -288,7 +333,10 @@
         null
       ],
       "importance": "low",
-      "hint": "shm for shared memory caching"
+      "hint": "shm for shared memory caching",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mm_processor_kwargs": {
       "type": "string",
@@ -297,7 +345,10 @@
       "default": null,
       "cli_flag": "--mm-processor-kwargs",
       "importance": "low",
-      "hint": "Example: '{\"video_kwargs\": {\"size\": {\"longest_edge\": 234881024}}}'"
+      "hint": "Example: '{\"video_kwargs\": {\"size\": {\"longest_edge\": 234881024}}}'",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "hf_overrides": {
       "type": "string",
@@ -315,7 +366,10 @@
       "default": false,
       "cli_flag": "--enable-chunked-prefill",
       "importance": "high",
-      "hint": "Recommended for long contexts"
+      "hint": "Recommended for long contexts",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_prefix_caching": {
       "type": "boolean",
@@ -324,7 +378,10 @@
       "default": false,
       "cli_flag": "--enable-prefix-caching",
       "importance": "high",
-      "hint": "Speeds up requests with shared prefixes"
+      "hint": "Speeds up requests with shared prefixes",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_dtype": {
       "type": "choice",
@@ -360,7 +417,10 @@
         "min": 0,
         "max": 100
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "block_size": {
       "type": "choice",
@@ -383,7 +443,10 @@
       "description": "Enable LoRA adapter support",
       "default": false,
       "cli_flag": "--enable-lora",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_loras": {
       "type": "integer",
@@ -448,7 +511,10 @@
       "description": "Model name to report in API responses",
       "default": null,
       "cli_flag": "--served-model-name",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "chat_template": {
       "type": "string",
@@ -538,7 +604,10 @@
       "default": false,
       "cli_flag": "--trust-remote-code",
       "importance": "high",
-      "hint": "Required for some models but has security implications"
+      "hint": "Required for some models but has security implications",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "rope_scaling": {
       "type": "string",
@@ -546,7 +615,10 @@
       "description": "RoPE scaling configuration (JSON)",
       "default": null,
       "cli_flag": "--rope-scaling",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "rope_theta": {
       "type": "float",
@@ -554,7 +626,10 @@
       "description": "RoPE theta value",
       "default": null,
       "cli_flag": "--rope-theta",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_logprobs": {
       "type": "integer",
@@ -574,7 +649,10 @@
       "description": "Disable sliding window attention",
       "default": false,
       "cli_flag": "--disable-sliding-window",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "revision": {
       "type": "string",
@@ -599,7 +677,10 @@
       "description": "Disable periodic stats logging",
       "default": false,
       "cli_flag": "--disable-log-stats",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_log_requests": {
       "type": "boolean",
@@ -607,7 +688,10 @@
       "description": "Log all API requests",
       "default": false,
       "cli_flag": "--enable-log-requests",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_log_len": {
       "type": "integer",
@@ -627,7 +711,10 @@
       "description": "OpenTelemetry traces endpoint",
       "default": null,
       "cli_flag": "--otlp-traces-endpoint",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_prompt_tokens_details": {
       "type": "boolean",
@@ -649,7 +736,10 @@
         "outlines",
         "xgrammar"
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "speculative_model": {
       "type": "string",
@@ -658,7 +748,10 @@
       "default": null,
       "cli_flag": "--speculative-model",
       "importance": "low",
-      "hint": "Can speed up generation with a smaller draft model"
+      "hint": "Can speed up generation with a smaller draft model",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "num_speculative_tokens": {
       "type": "integer",
@@ -671,7 +764,10 @@
         "max": 100
       },
       "importance": "low",
-      "depends_on": "speculative_model"
+      "depends_on": "speculative_model",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_parser": {
       "type": "choice",
@@ -680,25 +776,37 @@
       "default": null,
       "cli_flag": "--reasoning-parser",
       "choices": [
+        "cohere_command3",
+        "cohere_command4",
         "deepseek_r1",
         "deepseek_v3",
+        "deepseek_v4",
         "ernie45",
         "gemma4",
-        "GptOss",
+        "glm45",
         "granite",
+        "holo2",
         "hunyuan_a13b",
-        "hyv3",
-        "identity",
+        "hy_v3",
         "kimi_k2",
-        "minimax_m2",
         "mimo",
+        "minimax_m2",
+        "minimax_m2_append_think",
         "mistral",
         "nemotron_v3",
         "olmo3",
+        "openai_gptoss",
+        "poolside_v1",
         "qwen3",
-        "step3"
+        "seed_oss",
+        "step3",
+        "step3p5",
+        null
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_parser_plugin": {
       "type": "string",
@@ -707,7 +815,10 @@
       "default": null,
       "cli_flag": "--reasoning-parser-plugin",
       "importance": "low",
-      "hint": "Use with --reasoning-parser to specify custom parser"
+      "hint": "Use with --reasoning-parser to specify custom parser",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "distributed_executor_backend": {
       "type": "choice",
@@ -722,7 +833,10 @@
         "uni",
         null
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "disable_custom_all_reduce": {
       "type": "boolean",
@@ -730,7 +844,10 @@
       "description": "Disable custom all-reduce kernel",
       "default": false,
       "cli_flag": "--disable-custom-all-reduce",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_parallel_loading_workers": {
       "type": "integer",
@@ -743,7 +860,10 @@
         "max": 64
       },
       "importance": "medium",
-      "hint": "Useful for large models with tensor parallelism"
+      "hint": "Useful for large models with tensor parallelism",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_space": {
       "type": "float",
@@ -756,7 +876,10 @@
         "max": 1000
       },
       "importance": "medium",
-      "hint": "Virtual GPU memory extension using CPU RAM"
+      "hint": "Virtual GPU memory extension using CPU RAM",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_sleep_mode": {
       "type": "boolean",
@@ -765,7 +888,10 @@
       "default": false,
       "cli_flag": "--enable-sleep-mode",
       "importance": "low",
-      "hint": "Only supported for CUDA platform"
+      "hint": "Only supported for CUDA platform",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "disable_async_output_proc": {
       "type": "boolean",
@@ -773,7 +899,10 @@
       "description": "Disable async output processing",
       "default": false,
       "cli_flag": "--disable-async-output-proc",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "calculate_kv_scales": {
       "type": "boolean",
@@ -782,7 +911,10 @@
       "default": false,
       "cli_flag": "--calculate-kv-scales",
       "importance": "low",
-      "depends_on": "kv_cache_dtype"
+      "depends_on": "kv_cache_dtype",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "long_prefill_token_threshold": {
       "type": "integer",
@@ -795,7 +927,10 @@
         "max": 100000
       },
       "importance": "low",
-      "hint": "For chunked prefill optimization"
+      "hint": "For chunked prefill optimization",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_num_partial_prefills": {
       "type": "integer",
@@ -808,7 +943,10 @@
         "max": 100
       },
       "importance": "low",
-      "depends_on": "enable_chunked_prefill"
+      "depends_on": "enable_chunked_prefill",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "generation_config": {
       "type": "string",
@@ -816,7 +954,10 @@
       "description": "Path to generation config or 'auto'/'vllm'",
       "default": "auto",
       "cli_flag": "--generation-config",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "generation_config_override": {
       "type": "string",
@@ -825,7 +966,10 @@
       "default": null,
       "cli_flag": "--generation-config-override",
       "importance": "low",
-      "hint": "Example: {\"temperature\": 0.5}"
+      "hint": "Example: {\"temperature\": 0.5}",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "allowed_origins": {
       "type": "string",
@@ -854,10 +998,13 @@
     "disable_frontend_multiprocessing": {
       "type": "boolean",
       "category": "advanced",
-      "description": "Run frontend in same process as engine",
+      "description": "Run frontend in same process as engine (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--disable-frontend-multiprocessing",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "tool_call_parser": {
       "type": "choice",
@@ -866,36 +1013,49 @@
       "default": null,
       "cli_flag": "--tool-call-parser",
       "choices": [
+        "apertus",
+        "cohere_command3",
+        "cohere_command4",
         "deepseek_v3",
         "deepseek_v31",
         "deepseek_v32",
+        "deepseek_v4",
         "ernie45",
         "functiongemma",
         "gemma4",
         "gigachat3",
         "glm45",
+        "glm47",
         "granite",
         "granite4",
-        "granite-20b-fc",
         "hermes",
         "hunyuan_a13b",
-        "hyv3",
+        "hy_v3",
+        "internlm",
         "jamba",
         "kimi_k2",
+        "lfm2",
         "llama3_json",
-        "minimax_m2",
+        "llama4_json",
+        "llama4_pythonic",
+        "longcat",
         "mimo",
+        "minicpm5",
+        "minimax",
+        "minimax_m2",
         "mistral",
         "olmo3",
         "openai",
-        "phi4mini",
+        "phi4_mini_json",
+        "poolside_v1",
         "pythonic",
-        "qwen3coder",
-        "qwen3xml",
+        "qwen3_coder",
+        "qwen3_xml",
         "seed_oss",
         "step3",
         "step3p5",
-        "xlam"
+        "xlam",
+        null
       ],
       "importance": "medium",
       "hint": "Required when using --enable-auto-tool-choice. Use 'openai' for GPT-OSS models"
@@ -933,7 +1093,10 @@
       "default": false,
       "cli_flag": "--async-scheduling",
       "importance": "medium",
-      "hint": "May help reduce CPU overheads but not supported with all features"
+      "hint": "May help reduce CPU overheads but not supported with all features",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "compilation_config": {
       "type": "string",
@@ -951,7 +1114,10 @@
       "default": null,
       "cli_flag": "--speculative-config",
       "importance": "low",
-      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}"
+      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "attention_backend": {
       "type": "choice",
@@ -971,7 +1137,10 @@
         null
       ],
       "importance": "medium",
-      "hint": "Auto-selects the best backend. FlashAttention 4 is default for MLA prefill on Hopper+"
+      "hint": "Auto-selects the best backend. FlashAttention 4 is default for MLA prefill on Hopper+",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "tq_max_kv_splits_for_cuda_graph": {
       "type": "integer",
@@ -984,7 +1153,10 @@
         "max": 256
       },
       "importance": "low",
-      "hint": "Fixes split count for constant grid dimensions across captures. Used with TurboQuant KV cache."
+      "hint": "Fixes split count for constant grid dimensions across captures. Used with TurboQuant KV cache.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_memory_bytes": {
       "type": "integer",
@@ -996,7 +1168,10 @@
         "min": 1
       },
       "importance": "medium",
-      "hint": "Fine-grain control of KV cache memory. Overrides gpu_memory_utilization when set."
+      "hint": "Fine-grain control of KV cache memory. Overrides gpu_memory_utilization when set.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_offloading_size": {
       "type": "float",
@@ -1008,7 +1183,10 @@
         "min": 0
       },
       "importance": "medium",
-      "hint": "Enables KV cache offloading to CPU. Total buffer summed across all TP ranks when TP > 1."
+      "hint": "Enables KV cache offloading to CPU. Total buffer summed across all TP ranks when TP > 1.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_offloading_backend": {
       "type": "choice",
@@ -1021,7 +1199,10 @@
         "lmcache"
       ],
       "importance": "low",
-      "hint": "Only active when kv_offloading_size is set. 'native' uses vLLM CPU offloading, 'lmcache' uses LMCache."
+      "hint": "Only active when kv_offloading_size is set. 'native' uses vLLM CPU offloading, 'lmcache' uses LMCache.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_dtype_skip_layers": {
       "type": "string",
@@ -1030,7 +1211,10 @@
       "default": null,
       "cli_flag": "--kv-cache-dtype-skip-layers",
       "importance": "low",
-      "hint": "Accepts layer indices (e.g., '0,2,4') or attention type names (e.g., 'sliding_window'). Auto-skips first/last 2 layers for TurboQuant."
+      "hint": "Accepts layer indices (e.g., '0,2,4') or attention type names (e.g., 'sliding_window'). Auto-skips first/last 2 layers for TurboQuant.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "prefix_caching_hash_algo": {
       "type": "choice",
@@ -1045,7 +1229,10 @@
         "xxhash_cbor"
       ],
       "importance": "low",
-      "hint": "sha256 is most secure. xxhash variants are faster but non-cryptographic. Requires xxhash package for xxhash options."
+      "hint": "sha256 is most secure. xxhash variants are faster but non-cryptographic. Requires xxhash package for xxhash options.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_ep_weight_filter": {
       "type": "boolean",
@@ -1054,7 +1241,10 @@
       "default": false,
       "cli_flag": "--enable-ep-weight-filter",
       "importance": "low",
-      "hint": "Optimizes expert parallelism weight transfers"
+      "hint": "Optimizes expert parallelism weight transfers",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "all2all_backend": {
       "type": "choice",
@@ -1069,7 +1259,10 @@
         "naive"
       ],
       "importance": "low",
-      "hint": "DeepEP backends require the DeepEP package installed"
+      "hint": "DeepEP backends require the DeepEP package installed",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_dbo": {
       "type": "boolean",
@@ -1086,7 +1279,10 @@
       "default": false,
       "cli_flag": "--enable-elastic-ep",
       "importance": "low",
-      "hint": "Allows dynamic adjustment of expert parallelism"
+      "hint": "Allows dynamic adjustment of expert parallelism",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "expert_placement_strategy": {
       "type": "choice",
@@ -1101,7 +1297,10 @@
         null
       ],
       "importance": "low",
-      "hint": "Controls how MoE experts are distributed across GPUs"
+      "hint": "Controls how MoE experts are distributed across GPUs",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_eplb": {
       "type": "boolean",
@@ -1131,7 +1330,10 @@
         "min": 1
       },
       "importance": "medium",
-      "hint": "Split decode across multiple GPUs for better throughput"
+      "hint": "Split decode across multiple GPUs for better throughput",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "prefill_context_parallel_size": {
       "type": "integer",
@@ -1143,7 +1345,10 @@
         "min": 1
       },
       "importance": "medium",
-      "hint": "Split prefill across multiple GPUs"
+      "hint": "Split prefill across multiple GPUs",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "dcp_comm_backend": {
       "type": "choice",
@@ -1156,7 +1361,10 @@
         "nccl",
         null
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "numa_bind": {
       "type": "boolean",
@@ -1181,7 +1389,10 @@
         null
       ],
       "importance": "medium",
-      "hint": "Higher levels enable more aggressive optimizations"
+      "hint": "Higher levels enable more aggressive optimizations",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "performance_mode": {
       "type": "choice",
@@ -1204,7 +1415,10 @@
       "default": false,
       "cli_flag": "--enable-return-routed-experts",
       "importance": "low",
-      "hint": "Useful for debugging MoE routing decisions"
+      "hint": "Useful for debugging MoE routing decisions",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "model_impl": {
       "type": "choice",
@@ -1240,7 +1454,10 @@
       "description": "Disable cascade attention (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--disable-cascade-attn",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "skip_tokenizer_init": {
       "type": "boolean",
@@ -1249,7 +1466,10 @@
       "default": false,
       "cli_flag": "--skip-tokenizer-init",
       "importance": "low",
-      "hint": "Useful for embedding-only models that don't need tokenization"
+      "hint": "Useful for embedding-only models that don't need tokenization",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_prompt_embeds": {
       "type": "boolean",
@@ -1258,7 +1478,10 @@
       "default": false,
       "cli_flag": "--enable-prompt-embeds",
       "importance": "low",
-      "hint": "Allows passing pre-computed embeddings instead of text prompts"
+      "hint": "Allows passing pre-computed embeddings instead of text prompts",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "override_attention_dtype": {
       "type": "string",
@@ -1267,7 +1490,10 @@
       "default": null,
       "cli_flag": "--override-attention-dtype",
       "importance": "low",
-      "hint": "Force a specific dtype for attention computation"
+      "hint": "Force a specific dtype for attention computation",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "cudagraph_capture_sizes": {
       "type": "string",
@@ -1276,7 +1502,10 @@
       "default": null,
       "cli_flag": "--cudagraph-capture-sizes",
       "importance": "low",
-      "hint": "Example: '1,2,4,8,16' for specific batch sizes"
+      "hint": "Example: '1,2,4,8,16' for specific batch sizes",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_cudagraph_capture_size": {
       "type": "integer",
@@ -1287,7 +1516,10 @@
       "validation": {
         "min": 1
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "moe_backend": {
       "type": "choice",
@@ -1322,7 +1554,10 @@
       "default": false,
       "cli_flag": "--enable-flashinfer-autotune",
       "importance": "low",
-      "hint": "Auto-tunes FlashInfer kernel parameters for best performance"
+      "hint": "Auto-tunes FlashInfer kernel parameters for best performance",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_transfer_config": {
       "type": "string",
@@ -1331,7 +1566,10 @@
       "default": null,
       "cli_flag": "--kv-transfer-config",
       "importance": "low",
-      "hint": "JSON config for KV cache transfer in disaggregated serving"
+      "hint": "JSON config for KV cache transfer in disaggregated serving",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_events_config": {
       "type": "string",
@@ -1349,7 +1587,10 @@
       "default": null,
       "cli_flag": "--ec-transfer-config",
       "importance": "low",
-      "hint": "JSON config for expert chunk transfer"
+      "hint": "JSON config for expert chunk transfer",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_config": {
       "type": "string",
@@ -1367,7 +1608,10 @@
       "default": null,
       "cli_flag": "--structured-outputs-config",
       "importance": "low",
-      "hint": "JSON config for structured output settings"
+      "hint": "JSON config for structured output settings",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "attention_config": {
       "type": "string",
@@ -1403,7 +1647,10 @@
       "default": null,
       "cli_flag": "--weight-transfer-config",
       "importance": "low",
-      "hint": "JSON config for weight transfer settings"
+      "hint": "JSON config for weight transfer settings",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "additional_config": {
       "type": "string",
@@ -1433,7 +1680,10 @@
       "description": "Enable stochastic rounding for Mamba cache (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--enable-mamba-cache-stochastic-rounding",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mamba_block_size": {
       "type": "integer",
@@ -1459,7 +1709,10 @@
         "align"
       ],
       "importance": "low",
-      "hint": "'align' recommended for speculative decoding with Mamba models"
+      "hint": "'align' recommended for speculative decoding with Mamba models",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mamba_cache_dtype": {
       "type": "choice",
@@ -1472,7 +1725,10 @@
         "float32",
         "float16"
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "mamba_ssm_cache_dtype": {
       "type": "choice",
@@ -1485,7 +1741,10 @@
         "float32",
         "float16"
       ],
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "offload_backend": {
       "type": "choice",
@@ -1499,7 +1758,10 @@
         null
       ],
       "importance": "low",
-      "hint": "Controls how model weights are offloaded to CPU"
+      "hint": "Controls how model weights are offloaded to CPU",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_params": {
       "type": "string",
@@ -1519,7 +1781,10 @@
       "validation": {
         "min": 1
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "offload_num_in_group": {
       "type": "integer",
@@ -1530,7 +1795,10 @@
       "validation": {
         "min": 1
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "offload_prefetch_step": {
       "type": "integer",
@@ -1541,7 +1809,10 @@
       "validation": {
         "min": 0
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "offload_params": {
       "type": "string",
@@ -1562,7 +1833,10 @@
         "triton"
       ],
       "importance": "low",
-      "hint": "Backend for GDN (Grouped Dense Network) prefill"
+      "hint": "Backend for GDN (Grouped Dense Network) prefill",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_metrics": {
       "type": "boolean",
@@ -1570,7 +1844,10 @@
       "description": "Enable KV cache metrics (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--kv-cache-metrics",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_metrics_sample": {
       "type": "float",
@@ -1582,7 +1859,10 @@
         "min": 0.0,
         "max": 1.0
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "cudagraph_metrics": {
       "type": "boolean",
@@ -1590,7 +1870,10 @@
       "description": "Enable CUDA graph metrics (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--cudagraph-metrics",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_layerwise_nvtx_tracing": {
       "type": "boolean",
@@ -1599,7 +1882,10 @@
       "default": false,
       "cli_flag": "--enable-layerwise-nvtx-tracing",
       "importance": "low",
-      "hint": "For profiling with Nsight Systems"
+      "hint": "For profiling with Nsight Systems",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_mfu_metrics": {
       "type": "boolean",
@@ -1607,7 +1893,10 @@
       "description": "Enable MFU (Model FLOPs Utilization) metrics (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--enable-mfu-metrics",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_logging_iteration_details": {
       "type": "boolean",
@@ -1615,7 +1904,10 @@
       "description": "Enable detailed iteration logging (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--enable-logging-iteration-details",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "enable_mm_processor_stats": {
       "type": "boolean",
@@ -1623,7 +1915,10 @@
       "description": "Enable multimodal processor statistics (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--enable-mm-processor-stats",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "scheduling_policy": {
       "type": "choice",
@@ -1636,7 +1931,10 @@
         "utilization"
       ],
       "importance": "low",
-      "hint": "fcfs = first-come-first-served, utilization = optimize GPU utilization"
+      "hint": "fcfs = first-come-first-served, utilization = optimize GPU utilization",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "max_long_partial_prefills": {
       "type": "integer",
@@ -1647,7 +1945,10 @@
       "validation": {
         "min": 1
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "scheduler_reserve_full_isl": {
       "type": "boolean",
@@ -1655,7 +1956,10 @@
       "description": "Reserve full inter-step latency for scheduler (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--scheduler-reserve-full-isl",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "disable_hybrid_kv_cache_manager": {
       "type": "boolean",
@@ -1664,7 +1968,10 @@
       "default": null,
       "cli_flag": "--disable-hybrid-kv-cache-manager",
       "importance": "low",
-      "hint": "Set to false (--no-disable-hybrid-kv-cache-manager) to let vLLM decide. Required with KV connectors."
+      "hint": "Set to false (--no-disable-hybrid-kv-cache-manager) to let vLLM decide. Required with KV connectors.",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "stream_interval": {
       "type": "integer",
@@ -1676,7 +1983,10 @@
         "min": 1
       },
       "importance": "low",
-      "hint": "Number of tokens between streaming updates"
+      "hint": "Number of tokens between streaming updates",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "disable_chunked_mm_input": {
       "type": "boolean",
@@ -1684,7 +1994,10 @@
       "description": "Disable chunked multimodal input (vLLM 0.20+)",
       "default": false,
       "cli_flag": "--disable-chunked-mm-input",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "scheduler_cls": {
       "type": "string",
@@ -1692,7 +2005,10 @@
       "description": "Custom scheduler class (vLLM 0.20+)",
       "default": null,
       "cli_flag": "--scheduler-cls",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "allowed_local_media_path": {
       "type": "string",
@@ -1700,7 +2016,10 @@
       "description": "Allowed local media path for multimodal inputs (vLLM 0.20+)",
       "default": null,
       "cli_flag": "--allowed-local-media-path",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "allowed_media_domains": {
       "type": "string",
@@ -1708,7 +2027,10 @@
       "description": "Allowed media domains (comma-separated, vLLM 0.20+)",
       "default": null,
       "cli_flag": "--allowed-media-domains",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "config_format": {
       "type": "choice",
@@ -1738,7 +2060,10 @@
       "description": "Custom logit processors (vLLM 0.20+)",
       "default": null,
       "cli_flag": "--logits-processors",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "io_processor_plugin": {
       "type": "string",
@@ -1746,7 +2071,10 @@
       "description": "I/O processor plugin path (vLLM 0.20+)",
       "default": null,
       "cli_flag": "--io-processor-plugin",
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "renderer_num_workers": {
       "type": "integer",
@@ -1757,7 +2085,10 @@
       "validation": {
         "min": 1
       },
-      "importance": "low"
+      "importance": "low",
+      "deprecated": true,
+      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "removed_from_cli_in": "v0.22.0"
     },
     "hf_config_path": {
       "type": "string",
@@ -1767,131 +2098,464 @@
       "cli_flag": "--hf-config-path",
       "importance": "low"
     },
-    "allowed_origins": {
-      "type": "string",
-      "category": "api",
-      "description": "CORS allowed origins (comma-separated)",
-      "default": "*",
-      "cli_flag": "--allowed-origins",
-      "importance": "medium"
-    },
-    "allowed_headers": {
-      "type": "string",
-      "category": "api",
-      "description": "CORS allowed headers (comma-separated)",
-      "default": "*",
-      "cli_flag": "--allowed-headers",
-      "importance": "low"
-    },
-    "allowed_methods": {
-      "type": "string",
-      "category": "api",
-      "description": "CORS allowed methods (comma-separated)",
-      "default": "*",
-      "cli_flag": "--allowed-methods",
-      "importance": "low"
-    },
-    "disable_frontend_multiprocessing": {
+    "allow_credentials": {
       "type": "boolean",
-      "category": "advanced",
-      "description": "Run frontend in same process as engine (vLLM 0.20+)",
-      "default": false,
-      "cli_flag": "--disable-frontend-multiprocessing",
-      "importance": "low"
-    },
-    "tool_call_parser": {
-      "type": "choice",
       "category": "api",
-      "description": "Tool call parser for function calling support",
-      "default": null,
-      "cli_flag": "--tool-call-parser",
+      "description": "Allow credentials in CORS requests",
+      "cli_flag": "--allow-credentials",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "code_revision": {
+      "type": "string",
+      "category": "model",
+      "description": "Revision of the code (model implementation) to use from the model repo",
+      "cli_flag": "--code-revision",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "convert": {
+      "type": "choice",
+      "category": "model",
+      "description": "Convert model format on load",
+      "cli_flag": "--convert",
       "choices": [
-        "deepseek_v3",
-        "deepseek_v31",
-        "deepseek_v32",
-        "ernie45",
-        "functiongemma",
-        "gemma4",
-        "gigachat3",
-        "glm45",
-        "granite",
-        "granite4",
-        "granite-20b-fc",
-        "hermes",
-        "hunyuan_a13b",
-        "hyv3",
-        "jamba",
-        "kimi_k2",
-        "llama3_json",
-        "minimax_m2",
-        "mimo",
-        "mistral",
-        "olmo3",
-        "openai",
-        "phi4mini",
-        "pythonic",
-        "qwen3coder",
-        "qwen3xml",
-        "seed_oss",
-        "step3",
-        "step3p5",
-        "xlam"
+        "none",
+        "gguf",
+        "auto"
       ],
       "importance": "medium",
-      "hint": "Required when using --enable-auto-tool-choice. Use 'openai' for GPT-OSS models"
+      "added_in": "v0.22.0"
     },
-    "tool_parser_plugin": {
-      "type": "string",
-      "category": "api",
-      "description": "Path to custom tool parser plugin file",
-      "default": null,
-      "cli_flag": "--tool-parser-plugin",
-      "importance": "low",
-      "hint": "Use with --tool-call-parser to specify custom parser"
-    },
-    "enable_auto_tool_choice": {
-      "type": "boolean",
-      "category": "api",
-      "description": "Enable automatic tool choice",
-      "default": false,
-      "cli_flag": "--enable-auto-tool-choice",
-      "importance": "low",
-      "depends_on": "tool_call_parser"
-    },
-    "log_config_file": {
-      "type": "string",
-      "category": "monitoring",
-      "description": "Path to logging config JSON file",
-      "default": null,
-      "cli_flag": "--log-config-file",
-      "importance": "medium"
-    },
-    "async_scheduling": {
-      "type": "boolean",
-      "category": "performance",
-      "description": "EXPERIMENTAL: Perform async scheduling to reduce CPU overhead",
-      "default": false,
-      "cli_flag": "--async-scheduling",
+    "data_parallel_supervisor_port": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Port for data parallel supervisor communication",
+      "cli_flag": "--data-parallel-supervisor-port",
       "importance": "medium",
-      "hint": "May help reduce CPU overheads but not supported with all features"
+      "added_in": "v0.22.0"
     },
-    "compilation_config": {
+    "default_chat_template_kwargs": {
       "type": "string",
-      "category": "advanced",
-      "description": "Compilation configuration (JSON format)",
-      "default": null,
-      "cli_flag": "--compilation-config",
+      "category": "api",
+      "description": "Default kwargs for chat template rendering",
+      "cli_flag": "--default-chat-template-kwargs",
       "importance": "low",
-      "hint": "Example: {\"full_cuda_graph\": true} for AMD GPUs"
+      "added_in": "v0.22.0"
     },
-    "speculative_config": {
+    "default_mm_loras": {
       "type": "string",
-      "category": "optimization",
-      "description": "Speculative decoding configuration (JSON format)",
-      "default": null,
-      "cli_flag": "--speculative-config",
+      "category": "model",
+      "description": "Default multimodal LoRA modules to load",
+      "cli_flag": "--default-mm-loras",
       "importance": "low",
-      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}"
+      "added_in": "v0.22.0"
+    },
+    "disable_access_log_for_endpoints": {
+      "type": "string",
+      "category": "api",
+      "description": "Disable access logging for specific endpoints (comma-separated)",
+      "cli_flag": "--disable-access-log-for-endpoints",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "disable_fastapi_docs": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Disable FastAPI Swagger/ReDoc documentation endpoints",
+      "cli_flag": "--disable-fastapi-docs",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "disable_uvicorn_access_log": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Disable uvicorn access logging",
+      "cli_flag": "--disable-uvicorn-access-log",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "download_dir": {
+      "type": "string",
+      "category": "model",
+      "description": "Directory to download and cache models",
+      "cli_flag": "--download-dir",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "dp_supervisor_probe_failure_threshold": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Number of probe failures before considering DP worker unhealthy",
+      "cli_flag": "--dp-supervisor-probe-failure-threshold",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "dp_supervisor_probe_interval_s": {
+      "type": "float",
+      "category": "parallelism",
+      "description": "Interval in seconds between DP supervisor probes",
+      "cli_flag": "--dp-supervisor-probe-interval-s",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "dp_supervisor_probe_timeout_s": {
+      "type": "float",
+      "category": "parallelism",
+      "description": "Timeout in seconds for DP supervisor probe responses",
+      "cli_flag": "--dp-supervisor-probe-timeout-s",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_flash_late_interaction": {
+      "type": "boolean",
+      "category": "attention",
+      "description": "Enable FlashAttention late interaction for improved performance",
+      "cli_flag": "--enable-flash-late-interaction",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "enable_force_include_usage": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Force include usage statistics in responses",
+      "cli_flag": "--enable-force-include-usage",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_log_deltas": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Enable logging of response deltas for streaming",
+      "cli_flag": "--enable-log-deltas",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_log_outputs": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Enable logging of model outputs",
+      "cli_flag": "--enable-log-outputs",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_offline_docs": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Enable offline documentation access",
+      "cli_flag": "--enable-offline-docs",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_request_id_headers": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Include request ID in response headers",
+      "cli_flag": "--enable-request-id-headers",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_server_load_tracking": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable server load tracking metrics",
+      "cli_flag": "--enable-server-load-tracking",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "enable_ssl_refresh": {
+      "type": "boolean",
+      "category": "security",
+      "description": "Enable automatic SSL certificate refresh",
+      "cli_flag": "--enable-ssl-refresh",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "enable_tokenizer_info_endpoint": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Expose tokenizer information endpoint",
+      "cli_flag": "--enable-tokenizer-info-endpoint",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "exclude_tools_when_tool_choice_none": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Exclude tools from the prompt when tool_choice is none",
+      "cli_flag": "--exclude-tools-when-tool-choice-none",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "fingerprint_value": {
+      "type": "string",
+      "category": "api",
+      "description": "Custom fingerprint value for request tracking",
+      "cli_flag": "--fingerprint-value",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "h11_max_header_count": {
+      "type": "integer",
+      "category": "api",
+      "description": "Maximum number of HTTP headers allowed (h11 protocol)",
+      "cli_flag": "--h11-max-header-count",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "h11_max_incomplete_event_size": {
+      "type": "integer",
+      "category": "api",
+      "description": "Maximum size of incomplete HTTP events (h11 protocol)",
+      "cli_flag": "--h11-max-incomplete-event-size",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "hf_token": {
+      "type": "string",
+      "category": "model",
+      "description": "Hugging Face authentication token for private models",
+      "cli_flag": "--hf-token",
+      "importance": "high",
+      "added_in": "v0.22.0"
+    },
+    "ignore_patterns": {
+      "type": "string",
+      "category": "model",
+      "description": "Patterns to ignore when loading model files",
+      "cli_flag": "--ignore-patterns",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "linear_backend": {
+      "type": "choice",
+      "category": "performance",
+      "description": "Backend for linear layer operations",
+      "cli_flag": "--linear-backend",
+      "choices": [
+        "auto",
+        "flashinfer",
+        "cutlass",
+        "triton",
+        "native"
+      ],
+      "importance": "high",
+      "added_in": "v0.22.0"
+    },
+    "load_format": {
+      "type": "choice",
+      "category": "model",
+      "description": "Format for loading model weights",
+      "cli_flag": "--load-format",
+      "choices": [
+        "auto",
+        "pt",
+        "safetensors",
+        "npcache",
+        "dummy",
+        "tensorizer",
+        "gguf",
+        "bitsandbytes",
+        "modelscope"
+      ],
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "log_error_stack": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Include stack traces in error responses",
+      "cli_flag": "--log-error-stack",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "master_addr": {
+      "type": "string",
+      "category": "parallelism",
+      "description": "Master node address for distributed training",
+      "cli_flag": "--master-addr",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "master_port": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Master node port for distributed training",
+      "cli_flag": "--master-port",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "middleware": {
+      "type": "string",
+      "category": "api",
+      "description": "ASGI middleware to apply to the server",
+      "cli_flag": "--middleware",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "model_loader_extra_config": {
+      "type": "string",
+      "category": "model",
+      "description": "Extra configuration for model loading (JSON string)",
+      "cli_flag": "--model-loader-extra-config",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "nnodes": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Number of nodes in the cluster",
+      "cli_flag": "--nnodes",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "node_rank": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Rank of this node in the cluster",
+      "cli_flag": "--node-rank",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "return_tokens_as_token_ids": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Return tokens as token IDs instead of decoded strings",
+      "cli_flag": "--return-tokens-as-token-ids",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "root_path": {
+      "type": "string",
+      "category": "api",
+      "description": "Root path prefix for all API endpoints",
+      "cli_flag": "--root-path",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "runner": {
+      "type": "choice",
+      "category": "model",
+      "description": "Runner mode: llm, worker, or scraper",
+      "cli_flag": "--runner",
+      "choices": [
+        "llm",
+        "worker",
+        "scraper"
+      ],
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "spec_method": {
+      "type": "choice",
+      "category": "performance",
+      "description": "Speculative decoding method",
+      "cli_flag": "--spec-method",
+      "choices": [
+        "ngram",
+        "eagle",
+        "medusa",
+        "none"
+      ],
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "spec_model": {
+      "type": "string",
+      "category": "performance",
+      "description": "Speculative decoding draft model",
+      "cli_flag": "--spec-model",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "ssl_ca_certs": {
+      "type": "string",
+      "category": "security",
+      "description": "Path to SSL CA certificates file",
+      "cli_flag": "--ssl-ca-certs",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "ssl_cert_reqs": {
+      "type": "integer",
+      "category": "security",
+      "description": "SSL certificate requirements (0=none, 1=optional, 2=required)",
+      "cli_flag": "--ssl-cert-reqs",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "ssl_ciphers": {
+      "type": "string",
+      "category": "security",
+      "description": "SSL ciphers to use (OpenSSL cipher string)",
+      "cli_flag": "--ssl-ciphers",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "tokens_only": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Return only tokens without additional metadata",
+      "cli_flag": "--tokens-only",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "tool_server": {
+      "type": "string",
+      "category": "api",
+      "description": "URL of the tool server for function calling",
+      "cli_flag": "--tool-server",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "trust_request_chat_template": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Trust chat template provided in client requests",
+      "cli_flag": "--trust-request-chat-template",
+      "importance": "medium",
+      "added_in": "v0.22.0"
+    },
+    "uds": {
+      "type": "string",
+      "category": "api",
+      "description": "Unix domain socket path for server communication",
+      "cli_flag": "--uds",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "use_tqdm_on_load": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Show tqdm progress bar during model loading",
+      "cli_flag": "--use-tqdm-on-load",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "worker_cls": {
+      "type": "string",
+      "category": "parallelism",
+      "description": "Custom worker class for distributed execution",
+      "cli_flag": "--worker-cls",
+      "importance": "low",
+      "added_in": "v0.22.0"
+    },
+    "mamba_config": {
+      "type": "string",
+      "category": "model",
+      "description": "Mamba model configuration (JSON string)",
+      "cli_flag": "--mamba-config",
+      "importance": "low",
+      "added_in": "v0.22.0"
     }
-  }
+  },
+  "vllm_versions_supported": [
+    "0.20.0",
+    "0.21.0",
+    "0.22.0",
+    "0.22.1"
+  ],
+  "last_synced_version": "v0.22.1",
+  "deprecated_count": 103,
+  "new_in_v022_count": 52
 }

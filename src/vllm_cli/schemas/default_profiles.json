@@ -42,7 +42,7 @@
       "icon": "",
       "config": {
         "max_model_len": 4096,
-        "gpu_memory_utilization": 0.70,
+        "gpu_memory_utilization": 0.7,
         "enable_chunked_prefill": false,
         "trust_remote_code": true,
         "quantization": "fp8"
@@ -58,7 +58,7 @@
       "config": {
         "enable_expert_parallel": true,
         "trust_remote_code": true,
-        "gpu_memory_utilization": 0.90,
+        "gpu_memory_utilization": 0.9,
         "enable_chunked_prefill": true,
         "enable_prefix_caching": true,
         "async_scheduling": true
@@ -75,7 +75,7 @@
       "config": {
         "enable_expert_parallel": true,
         "trust_remote_code": true,
-        "gpu_memory_utilization": 0.90,
+        "gpu_memory_utilization": 0.9,
         "enable_chunked_prefill": true,
         "enable_prefix_caching": true,
         "async_scheduling": true
@@ -91,7 +91,7 @@
       "config": {
         "enable_expert_parallel": true,
         "trust_remote_code": true,
-        "gpu_memory_utilization": 0.90,
+        "gpu_memory_utilization": 0.9,
         "enable_chunked_prefill": true,
         "enable_prefix_caching": true,
         "async_scheduling": true
@@ -110,7 +110,7 @@
       "icon": "",
       "config": {
         "trust_remote_code": true,
-        "gpu_memory_utilization": 0.90,
+        "gpu_memory_utilization": 0.9,
         "enable_chunked_prefill": true,
         "enable_prefix_caching": true,
         "tool_call_parser": "openai",
@@ -127,7 +127,7 @@
       "icon": "",
       "config": {
         "trust_remote_code": true,
-        "gpu_memory_utilization": 0.70,
+        "gpu_memory_utilization": 0.7,
         "max_model_len": 4096,
         "max_num_seqs": 32,
         "enable_chunked_prefill": true,
@@ -162,7 +162,7 @@
       "icon": "",
       "config": {
         "tensor_parallel_size": 4,
-        "gpu_memory_utilization": 0.80,
+        "gpu_memory_utilization": 0.8,
         "trust_remote_code": true,
         "tool_call_parser": "hermes",
         "enable_auto_tool_choice": true
@@ -175,7 +175,7 @@
       "icon": "",
       "config": {
         "tensor_parallel_size": 4,
-        "gpu_memory_utilization": 0.80,
+        "gpu_memory_utilization": 0.8,
         "trust_remote_code": true,
         "tool_call_parser": "hermes",
         "enable_auto_tool_choice": true,
@@ -514,6 +514,60 @@
         "compilation_config": "{\"use_inductor\": false}"
       },
       "environment": {}
+    },
+    "deepseek_v4": {
+      "name": "DeepSeek-V4",
+      "description": "DeepSeek-V4 with NVFP4 MoE, CUDA graph, and MTP speculative decoding (vLLM 0.22+)",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.9,
+        "kv_cache_dtype": "nvfp4",
+        "reasoning_parser": "deepseek_v3",
+        "tool_call_parser": "deepseek_v32",
+        "enable_auto_tool_choice": true,
+        "speculative_config": "{\"method\": \"ngram\", \"num_speculative_tokens\": 2}"
+      },
+      "environment": {
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
+    },
+    "deepseek_v4_low_memory": {
+      "name": "DeepSeek-V4 (Low Memory)",
+      "description": "DeepSeek-V4 memory-optimized with FP8 KV cache (vLLM 0.22+)",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "tensor_parallel_size": 8,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.7,
+        "max_model_len": 4096,
+        "kv_cache_dtype": "fp8",
+        "reasoning_parser": "deepseek_v3",
+        "tool_call_parser": "deepseek_v32",
+        "enable_auto_tool_choice": true
+      },
+      "environment": {
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1",
+        "VLLM_CPU_KVCACHE_SPACE": "4"
+      }
+    },
+    "mellum_v2": {
+      "name": "Mellum v2",
+      "description": "JetBrains Mellum v2 - open-weights MoE code generation model (vLLM 0.22.1+)",
+      "icon": "",
+      "config": {
+        "enable_expert_parallel": true,
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.9,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": true
+      },
+      "environment": {
+        "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
+      }
     }
   }
 }

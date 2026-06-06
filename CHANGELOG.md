@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.9.6] - 2026-06-06
+
+### Added
+- **vLLM 0.22.0 / 0.22.1 Full Support**: Updated to support vLLM v0.22.0 and v0.22.1
+- **52 New CLI Arguments**: Schema expanded from 161 to 213 arguments
+- **Linear Backend Selection**: `--linear-backend` (auto, flashinfer, cutlass, triton, native)
+- **Speculative Decoding**: `--spec-method` (ngram, eagle, medusa, none) and `--spec-model`
+- **HF Token Support**: `--hf-token` for private model authentication
+- **Data Parallel Supervisor**: `--data-parallel-supervisor-port`, `--dp-supervisor-probe-*` args
+- **Distributed Training**: `--master-addr`, `--master-port`, `--nnodes`, `--node-rank`
+- **FlashAttention Late Interaction**: `--enable-flash-late-interaction`
+- **Model Loading**: `--load-format`, `--download-dir`, `--convert`, `--code-revision`, `--ignore-patterns`
+- **API Enhancements**: `--allow-credentials`, `--disable-fastapi-docs`, `--enable-request-id-headers`, `--root-path`, `--middleware`, `--tool-server`, `--trust-request-chat-template`, `--uds`
+- **SSL/TLS**: `--ssl-ca-certs`, `--ssl-cert-reqs`, `--ssl-ciphers`, `--enable-ssl-refresh`
+- **Monitoring**: `--enable-server-load-tracking`, `--log-error-stack`, `--use-tqdm-on-load`
+- **CLI Args Sync Tool**: Enhanced with version-specific sync (`--tag`), dataclass field extraction, and kwargs unpacking detection
+- **Schema v2.0**: Argument schema updated to version 2.0.0 with deprecation tracking
+
+### Changed
+- **103 CLI Arguments Deprecated**: Parameters moved from CLI to environment variables/config in vLLM 0.22
+- **Dependency Range**: vLLM updated to `>=0.20.0,<0.23.0`
+- **Schema Version**: Updated from 1.0.1 to 2.0.0
+
+### Deprecated
+- **103 v0.20/v0.21 CLI args**: `tensor_parallel_size`, `gpu_memory_utilization`, `swap_space`, `max_num_seqs`, `enable_lora`, `enable_prefix_caching`, `kv_offloading_backend`, `kv_offloading_size`, `enable_chunked_prefill`, and 93 more (still available via env vars/config)
+
+### Notes
+- vLLM 0.22 restructured CLI arguments to use dataclass-based `EngineArgs` with kwargs unpacking
+- Deprecated parameters remain in schema for backward compatibility
+- Use `python -m vllm_cli.config.cli_args_sync --tag v0.22.1 --verbose` to check for updates
+
 ## [v0.2.9.5] - 2026-04-29
 
 ### Added

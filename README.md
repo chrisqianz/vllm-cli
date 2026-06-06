@@ -27,6 +27,35 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.2.9.6
+
+### 🚀 vLLM 0.22.0 / 0.22.1 Full Support
+
+Updated to support vLLM v0.22.0 and v0.22.1. **213 CLI arguments** now supported (up from 161).
+
+**vLLM 0.22 Highlights:**
+- **DeepSeek V4 maturity**: Dedicated package with NVFP4 fused MoE, MTP speculative decoding
+- **Model Runner V2**: Default for Qwen3 dense models with sleep-mode weight reload
+- **Rust frontend**: Experimental Rust front-end with DP Supervisor
+- **Batch invariance**: Cutlass FP8 for 28.9% E2E latency improvement
+- **Multi-tier KV offloading**: Python filesystem tier, Mooncake disk offloading
+
+**New CLI Arguments (52 additions):**
+- **Linear backend**: `--linear-backend` (auto, flashinfer, cutlass, triton, native)
+- **Speculative decoding**: `--spec-method` (ngram, eagle, medusa) + `--spec-model`
+- **HF auth**: `--hf-token` for private models
+- **DP Supervisor**: `--data-parallel-supervisor-port`, `--dp-supervisor-probe-*`
+- **Distribution**: `--master-addr`, `--master-port`, `--nnodes`, `--node-rank`
+- **FlashAttention**: `--enable-flash-late-interaction`
+- **Model loading**: `--load-format`, `--download-dir`, `--convert`, `--code-revision`
+
+**Enhanced CLI Args Sync Tool:**
+- Version-specific sync: `--tag v0.22.1`
+- Dataclass field extraction for v0.22+ architecture
+- Kwargs unpacking detection
+
+> **Note**: vLLM 0.22 restructured its CLI — 103 arguments moved from CLI flags to environment variables/config. All remain available in the schema for backward compatibility.
+
 ## What's New in v0.2.9.5
 
 ### 🚀 vLLM 0.20.0 Full Support

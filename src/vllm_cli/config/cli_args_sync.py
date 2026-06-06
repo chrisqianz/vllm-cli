@@ -4,6 +4,11 @@ CLI Args Sync Module
 
 Fetches the latest vLLM CLI arguments from GitHub source code and compares
 with the local schema to identify new, deprecated, or modified arguments.
+Supports fetching from specific version tags or the main branch.
+
+In vLLM 0.22+, CLI arguments are defined as dataclass fields in EngineArgs
+and exposed through add_cli_args(). This module handles both the legacy
+add_argument pattern and the newer dataclass-based approach.
 """
 
 import json
@@ -14,10 +19,31 @@ from pathlib import Path
 from typing import Optional
 
 # GitHub URLs for vLLM source files
-VLLM_CLI_ARGS_URL = "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/entrypoints/openai/cli_args.py"
-VLLM_ARG_UTILS_URL = (
-    "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/engine/arg_utils.py"
-)
+VLLM_GITHUB_BASE = "https://raw.githubusercontent.com/vllm-project/vllm"
+VLLM_DEFAULT_BRANCH = "main"
+
+# Supported vLLM versions for targeted sync
+SUPPORTED_VLLM_VERSIONS = [
+    "v0.22.1",
+    "v0.22.0",
+    "v0.21.0",
+    "v0.20.2",
+    "v0.20.1",
+    "v0.20.0",
+]
+
+# Noise words to filter out from regex matches
+_NOISE_WORDS = frozenset({
+    "m", "n", "T", "K", "else", "try", "NOTE", "parser",
+    "https", "lora_list", "values", "option_string",
+    "frontend_kwargs", "model_config", "parallel_config",
+    "usage_context", "target_model_config", "target_parallel_config",
+})
+
+
+def _get_url(path: str, branch_or_tag: str = VLLM_DEFAULT_BRANCH) -> str:
+    """Build a GitHub raw URL for a given path and branch/tag."""
+    return f"{VLLM_GITHUB_BASE}/{branch_or_tag}/{path}"
 
 
 @dataclass
@@ -32,13 +58,16 @@ class ArgChange:
 class CLIArgsSync:
     """Syncs CLI arguments from vLLM GitHub repository."""
 
-    def __init__(self, schema_path: Optional[Path] = None):
+    def __init__(
+        self,
+        schema_path: Optional[Path] = None,
+        branch_or_tag: str = VLLM_DEFAULT_BRANCH,
+    ):
         if schema_path is None:
-            # Default to schemas directory relative to project root
-            # This file is in src/vllm_cli/config/, so go up 2 levels
             base_dir = Path(__file__).resolve().parent.parent
             schema_path = base_dir / "schemas" / "argument_schema.json"
         self.schema_path = schema_path
+        self.branch_or_tag = branch_or_tag
         self._schema: Optional[dict] = None
 
     @property
@@ -52,47 +81,77 @@ class CLIArgsSync:
                 self._schema = {"arguments": {}}
         return self._schema
 
+    def _get_source_urls(self) -> tuple[str, str]:
+        """Get the source URLs for the current branch/tag."""
+        cli_args_url = _get_url(
+            "vllm/entrypoints/openai/cli_args.py", self.branch_or_tag
+        )
+        arg_utils_url = _get_url("vllm/engine/arg_utils.py", self.branch_or_tag)
+        return cli_args_url, arg_utils_url
+
+    def _extract_cli_args_from_arg_utils(self, content: str) -> set[str]:
+        """
+        Extract CLI argument names from arg_utils.py.
+
+        Handles both legacy explicit add_argument calls and v0.22+ dataclass
+        field references with kwargs unpacking.
+        """
+        args = set()
+
+        # Pattern 1: Explicit add_argument("--name", ...)
+        for m in re.finditer(r'add_argument\("(--[a-z\-]+)"', content):
+            arg = m.group(1).lstrip("-").replace("-", "_")
+            args.add(arg)
+
+        # Pattern 2: kwargs unpacking: **xxx_kwargs["name"]
+        for m in re.finditer(r'\*\*(\w+)_kwargs\[([\"\'])+(\w+)\3', content):
+            field_name = m.group(3)
+            if field_name not in _NOISE_WORDS:
+                args.add(field_name)
+
+        # Pattern 3: get_field(XxxConfig, "field_name")
+        for m in re.finditer(r'get_field\(\w+, [\"\']([a-z_]+)[\"\']', content):
+            args.add(m.group(1))
+
+        return args
+
+    def _extract_frontend_args(self, content: str) -> set[str]:
+        """
+        Extract frontend/API argument names from cli_args.py.
+
+        Parses @dataclass field definitions from config classes.
+        """
+        args = set()
+        for m in re.findall(
+            r"^\s+([a-z_][a-z0-9_]*)\s*:\s*[\w\[\]|,\s\.\-\>]+(?:\s*=|\|)",
+            content,
+            re.MULTILINE,
+        ):
+            if m not in _NOISE_WORDS and not m.startswith("_"):
+                args.add(m)
+        return args
+
     def fetch_remote_args(self) -> set[str]:
-        """Fetch CLI arguments from GitHub using curl/urllib."""
+        """
+        Fetch CLI arguments from GitHub.
+
+        Combines arguments from both cli_args.py (frontend/API args) and
+        arg_utils.py (engine args). In vLLM 0.22+, engine args are defined
+        as dataclass fields and exposed through kwargs unpacking.
+        """
         all_args = set()
+        cli_args_url, arg_utils_url = self._get_source_urls()
 
         try:
-            # Fetch cli_args.py
-            cli_args_content = self._fetch_url(VLLM_CLI_ARGS_URL)
-            # Extract from @config classes (BaseFrontendArgs, FrontendArgs)
-            cli_params = re.findall(
-                r"^\s+([a-z_][a-z0-9_]*)\s*:\s*[\w\[\]|,\s\.\-\>]+(?:\s*=|\|)",
-                cli_args_content,
-                re.MULTILINE,
-            )
-            # Filter internal variables
-            cli_params = [
-                p
-                for p in cli_params
-                if not p.startswith("_")
-                and p
-                not in [
-                    "frontend_kwargs",
-                    "parser",
-                    "https",
-                    "try",
-                    "else",
-                    "lora_list",
-                    "values",
-                    "option_string",
-                ]
-            ]
-            all_args.update(cli_params)
+            # Fetch cli_args.py (frontend arguments)
+            cli_args_content = self._fetch_url(cli_args_url)
+            frontend_args = self._extract_frontend_args(cli_args_content)
+            all_args.update(frontend_args)
 
-            # Fetch arg_utils.py
-            arg_utils_content = self._fetch_url(VLLM_ARG_UTILS_URL)
-            # Extract from add_argument calls
-            arg_params = re.findall(
-                r'\.add_argument\("(--[a-z\-]+)"', arg_utils_content
-            )
-            # Convert --arg-name to arg_name
-            arg_params = [p.lstrip("-").replace("-", "_") for p in arg_params]
-            all_args.update(arg_params)
+            # Fetch arg_utils.py (engine arguments)
+            arg_utils_content = self._fetch_url(arg_utils_url)
+            engine_args = self._extract_cli_args_from_arg_utils(arg_utils_content)
+            all_args.update(engine_args)
 
         except Exception as e:
             raise RuntimeError(f"Failed to fetch CLI args from GitHub: {e}")
@@ -102,11 +161,9 @@ class CLIArgsSync:
     def _fetch_url(self, url: str) -> str:
         """Fetch content from URL using urllib (or curl if available)."""
         try:
-            # Try urllib first (no external dependencies)
             with urllib.request.urlopen(url, timeout=30) as response:
                 return response.read().decode("utf-8")
         except Exception:
-            # Fallback to subprocess curl
             import subprocess
 
             result = subprocess.run(
@@ -133,7 +190,6 @@ class CLIArgsSync:
         remote_args = self.fetch_remote_args()
         local_args = self.get_local_args()
 
-        # Find new arguments (in remote but not in local)
         new_args = [
             ArgChange(
                 name=arg, change_type="added", details="New argument in vLLM source"
@@ -141,7 +197,6 @@ class CLIArgsSync:
             for arg in sorted(remote_args - local_args)
         ]
 
-        # Find removed arguments (in local but not in remote)
         removed_args = [
             ArgChange(
                 name=arg,
@@ -174,10 +229,10 @@ class CLIArgsSync:
             "removed_count": len(removed_args),
             "total_remote": len(self.fetch_remote_args()),
             "total_local": len(self.get_local_args()),
+            "branch_or_tag": self.branch_or_tag,
         }
 
         if not dry_run and (new_args or removed_args):
-            # Update schema with new arguments
             for arg in new_args:
                 self.schema["arguments"][arg.name] = {
                     "type": "string",
@@ -187,17 +242,18 @@ class CLIArgsSync:
                     "synced": True,
                 }
 
-            # Note: We don't remove arguments to maintain backward compatibility
-            # Mark removed args as deprecated
+            # Mark removed args as deprecated (don't remove for backward compat)
             for arg in removed_args:
                 if arg.name in self.schema["arguments"]:
                     self.schema["arguments"][arg.name]["deprecated"] = True
-                    self.schema["arguments"][arg.name]["deprecation_note"] = arg.details
+                    self.schema["arguments"][arg.name]["deprecation_note"] = (
+                        arg.details
+                    )
 
-            # Update schema version
-            self.schema["version"] = self.schema.get("version", "1.0") + ".1"
+            self.schema["version"] = str(
+                float(self.schema.get("version", "1.0")) + 0.1
+            )
 
-            # Save updated schema
             with open(self.schema_path, "w") as f:
                 json.dump(self.schema, f, indent=2)
 
@@ -206,23 +262,30 @@ class CLIArgsSync:
         return result
 
 
-def sync_cli_args(dry_run: bool = True, verbose: bool = False) -> dict:
+def sync_cli_args(
+    dry_run: bool = True,
+    verbose: bool = False,
+    branch_or_tag: str = VLLM_DEFAULT_BRANCH,
+) -> dict:
     """
     Convenience function to sync CLI args.
 
     Args:
         dry_run: If True, only report changes
         verbose: Print detailed output
+        branch_or_tag: Git branch or tag to fetch from (default: main)
 
     Returns:
         Sync result dict
     """
-    sync = CLIArgsSync()
+    sync = CLIArgsSync(branch_or_tag=branch_or_tag)
 
     if verbose:
+        cli_args_url, arg_utils_url = sync._get_source_urls()
         print("Fetching latest CLI arguments from vLLM GitHub...")
-        print(f"  Source: {VLLM_CLI_ARGS_URL}")
-        print(f"  Source: {VLLM_ARG_UTILS_URL}")
+        print(f"  Branch/Tag: {branch_or_tag}")
+        print(f"  Source: {cli_args_url}")
+        print(f"  Source: {arg_utils_url}")
 
     result = sync.sync(dry_run=dry_run)
 
@@ -244,7 +307,7 @@ def sync_cli_args(dry_run: bool = True, verbose: bool = False) -> dict:
                 print(f"  ... and {len(result['removed_args']) - 10} more")
 
         if not dry_run and result.get("updated"):
-            print(f"\n✓ Schema updated: {sync.schema_path}")
+            print(f"\nSchema updated: {sync.schema_path}")
 
     return result
 
@@ -257,10 +320,19 @@ if __name__ == "__main__":
         "--apply", action="store_true", help="Apply changes to local schema"
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default=VLLM_DEFAULT_BRANCH,
+        help=f"Git branch or tag to fetch from (default: {VLLM_DEFAULT_BRANCH}). "
+        f"Available tags: {', '.join(SUPPORTED_VLLM_VERSIONS)}",
+    )
 
     args = parser.parse_args()
 
-    result = sync_cli_args(dry_run=not args.apply, verbose=args.verbose)
+    result = sync_cli_args(
+        dry_run=not args.apply, verbose=args.verbose, branch_or_tag=args.tag
+    )
 
     if result["new_count"] > 0 or result["removed_count"] > 0:
         print(f"\nRun with --apply to update the schema.")
