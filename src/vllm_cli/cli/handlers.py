@@ -1204,6 +1204,10 @@ def handle_recipes(args: argparse.Namespace) -> bool:
                 console.print(
                     "\n[green]✓ CLI args schema updated successfully![/green]"
                 )
+                if result["removed_count"] > 0:
+                    console.print(
+                        "\n[yellow]Run with --clean-deprecated to remove deprecated arguments from the schema.[/yellow]"
+                    )
         else:
             console.print("\n[green]✓ CLI args are up to date.[/green]")
         return True
