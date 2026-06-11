@@ -176,6 +176,29 @@ class CLIArgsSync:
                 raise RuntimeError(f"curl failed: {result.stderr}")
             return result.stdout
 
+    @staticmethod
+    def _bump_version(version: str) -> str:
+        """Bump the patch part of a semantic version string.
+
+        Handles versions like '1.0.0', '2.0.0', '0.9', '1.0', or plain floats.
+        Falls back to a simple float-based bump for non-semver strings.
+        """
+        parts = version.split(".")
+        try:
+            # Try to bump the last numeric component
+            *major, patch = parts
+            patch_int = int(patch)
+            parts = major + [str(patch_int + 1)]
+            return ".".join(parts)
+        except (ValueError, IndexError):
+            pass
+        # Fallback: treat as simple float (e.g. '1.0')
+        try:
+            return str(float(version) + 0.1)
+        except ValueError:
+            # Last resort: append .1
+            return f"{version}.1"
+
     def get_local_args(self) -> set[str]:
         """Get arguments from local schema."""
         return set(self.schema.get("arguments", {}).keys())
@@ -250,8 +273,8 @@ class CLIArgsSync:
                         arg.details
                     )
 
-            self.schema["version"] = str(
-                float(self.schema.get("version", "1.0")) + 0.1
+            self.schema["version"] = self._bump_version(
+                self.schema.get("version", "1.0.0")
             )
 
             with open(self.schema_path, "w") as f:
@@ -260,6 +283,35 @@ class CLIArgsSync:
             result["updated"] = True
 
         return result
+
+    def clean_deprecated(self) -> dict:
+        """Remove all deprecated arguments from the schema.
+
+        Returns:
+            Dict with cleanup results
+        """
+        deprecated_names = [
+            name
+            for name, info in self.schema.get("arguments", {}).items()
+            if info.get("deprecated")
+        ]
+
+        for name in deprecated_names:
+            del self.schema["arguments"][name]
+
+        if deprecated_names:
+            self.schema["version"] = self._bump_version(
+                self.schema.get("version", "1.0.0")
+            )
+            with open(self.schema_path, "w") as f:
+                json.dump(self.schema, f, indent=2)
+
+        return {
+            "success": True,
+            "cleaned_count": len(deprecated_names),
+            "cleaned_args": deprecated_names,
+            "remaining_args": len(self.schema.get("arguments", {})),
+        }
 
 
 def sync_cli_args(
@@ -308,6 +360,32 @@ def sync_cli_args(
 
         if not dry_run and result.get("updated"):
             print(f"\nSchema updated: {sync.schema_path}")
+
+    return result
+
+
+def clean_deprecated_args(verbose: bool = False) -> dict:
+    """
+    Convenience function to clean deprecated CLI args.
+
+    Args:
+        verbose: Print detailed output
+
+    Returns:
+        Cleanup result dict
+    """
+    sync = CLIArgsSync()
+    result = sync.clean_deprecated()
+
+    if verbose:
+        print(f"Cleaning deprecated arguments...")
+        print(f"  Cleaned: {result['cleaned_count']} arguments")
+        print(f"  Remaining: {result['remaining_args']} arguments")
+        if result["cleaned_args"]:
+            print(f"  Removed: {', '.join(result['cleaned_args'][:10])}")
+            if len(result["cleaned_args"]) > 10:
+                print(f"    ... and {len(result['cleaned_args']) - 10} more")
+        print(f"  Schema updated: {sync.schema_path}")
 
     return result
 

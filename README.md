@@ -115,8 +115,11 @@ Integrated configurations from official vLLM recipes with 8 new optimized profil
 
 **CLI Argument Sync:**
 - Automate sync of vLLM CLI arguments from GitHub source
-- Command: `vllm-cli recipes --sync-args`
-- New CLI args, deprecated args tracking
+- Commands:
+  - `vllm-cli recipes --sync-args` — Check for new/removed CLI args
+  - `vllm-cli recipes --sync-args --apply-args` — Apply changes to local schema
+  - `vllm-cli recipes --clean-deprecated` — Remove deprecated args from schema
+- New CLI args, deprecated args tracking, and cleanup
 
 See [Release Notes](RELEASE_NOTES_v0.2.9.md) for details.
 

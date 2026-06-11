@@ -1208,6 +1208,18 @@ def handle_recipes(args: argparse.Namespace) -> bool:
             console.print("\n[green]✓ CLI args are up to date.[/green]")
         return True
 
+    elif getattr(args, "clean_deprecated", False):
+        from ..config.cli_args_sync import clean_deprecated_args as do_clean
+
+        result = do_clean(verbose=True)
+        if result["cleaned_count"] > 0:
+            console.print(
+                f"\n[green]✓ Cleaned {result['cleaned_count']} deprecated arguments![/green]"
+            )
+        else:
+            console.print("\n[green]✓ No deprecated arguments to clean.[/green]")
+        return True
+
     elif args.sync_parsers:
         from ..config.parser_sync import sync_parsers as do_sync_parsers
 

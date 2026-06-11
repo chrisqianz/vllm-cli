@@ -592,6 +592,12 @@ def _add_recipes_parser(subparsers) -> None:
     )
 
     recipes_parser.add_argument(
+        "--clean-deprecated",
+        action="store_true",
+        help="Remove all deprecated arguments from the schema",
+    )
+
+    recipes_parser.add_argument(
         "--apply-parsers",
         action="store_true",
         help="Apply synced parsers to local schema (use with --sync-parsers)",

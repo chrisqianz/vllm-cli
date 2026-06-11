@@ -138,6 +138,7 @@ The CLI args sync tool has been enhanced to support:
 - **Version-specific sync**: Fetch arguments from specific vLLM version tags
 - **Dataclass field extraction**: Properly handles v0.22+ dataclass-based argument definitions
 - **Kwargs unpacking detection**: Extracts arguments from `**kwargs["name"]` patterns
+- **Deprecated args cleanup**: Remove deprecated arguments from the schema
 
 ```bash
 # Sync against specific version
@@ -145,6 +146,11 @@ python -m vllm_cli.config.cli_args_sync --tag v0.22.1 --verbose
 
 # Sync against main branch (default)
 python -m vllm_cli.config.cli_args_sync --verbose
+
+# CLI commands
+vllm-cli recipes --sync-args                    # Check for new/removed args
+vllm-cli recipes --sync-args --apply-args       # Apply changes to schema
+vllm-cli recipes --clean-deprecated             # Remove deprecated args from schema
 ```
 
 ### Dependency Updates
