@@ -177,6 +177,33 @@ class CLIArgsSync:
             return result.stdout
 
     @staticmethod
+    def _guess_category(arg_name: str) -> str:
+        """Guess the category for an argument based on its name.
+
+        Returns 'advanced' as default for unknown parameters.
+        """
+        name = arg_name.lower()
+        if any(k in name for k in ["gpu", "memory", "kv_cache", "swap", "offload"]):
+            return "memory"
+        if any(k in name for k in ["tensor", "pipeline", "data_parallel", "parallel", "distributed", "worker"]):
+            return "parallelism"
+        if any(k in name for k in ["log", "metric", "monitor", "trace", "profiler"]):
+            return "monitoring"
+        if any(k in name for k in ["model", "tokenizer", "quantization", "load", "revision"]):
+            return "model"
+        if any(k in name for k in ["scheduler", "batch", "prefill", "decode", "scheduling"]):
+            return "scheduling"
+        if any(k in name for k in ["lora", "adapter", "finetune"]):
+            return "lora"
+        if any(k in name for k in ["quant", "fp8", "int8", "nf4"]):
+            return "quantization"
+        if any(k in name for k in ["speculative", "draft", "eagle"]):
+            return "speculative"
+        if any(k in name for k in ["ssl", "cors", "endpoint", "api", "server", "middleware"]):
+            return "api"
+        return "advanced"
+
+    @staticmethod
     def _bump_version(version: str) -> str:
         """Bump the patch part of a semantic version string.
 
@@ -259,6 +286,7 @@ class CLIArgsSync:
             for arg in new_args:
                 self.schema["arguments"][arg.name] = {
                     "type": "string",
+                    "category": self._guess_category(arg.name),
                     "description": f"Synced from vLLM GitHub: {arg.details}",
                     "cli_flag": f"--{arg.name.replace('_', '-')}",
                     "importance": "medium",

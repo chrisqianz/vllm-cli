@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "vLLM server argument definitions and metadata",
   "arguments": {
     "model": {
@@ -98,7 +98,7 @@
       "importance": "high",
       "hint": "Lower values leave room for other processes",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_num_seqs": {
@@ -114,7 +114,7 @@
       "importance": "high",
       "hint": "Higher values increase throughput but use more memory",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_num_batched_tokens": {
@@ -129,7 +129,7 @@
       },
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "swap_space": {
@@ -145,7 +145,7 @@
       "importance": "medium",
       "hint": "Allows handling more requests at the cost of speed",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_gb": {
@@ -174,7 +174,7 @@
       "importance": "high",
       "hint": "Split model across multiple GPUs for large models",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "pipeline_parallel_size": {
@@ -189,7 +189,7 @@
       },
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_size": {
@@ -205,7 +205,7 @@
       "importance": "medium",
       "hint": "For multi-node deployments",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_size_local": {
@@ -221,7 +221,7 @@
       "importance": "low",
       "hint": "For multi-node DP+EP deployments",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_address": {
@@ -233,7 +233,7 @@
       "importance": "low",
       "hint": "Required for multi-node data parallelism",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_rpc_port": {
@@ -249,7 +249,7 @@
       "importance": "low",
       "hint": "For multi-node data parallelism",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "data_parallel_start_rank": {
@@ -265,7 +265,7 @@
       "importance": "low",
       "hint": "For multi-node deployments (non-master nodes)",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "headless": {
@@ -277,7 +277,7 @@
       "importance": "low",
       "hint": "For multi-node deployments (worker nodes)",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_expert_parallel": {
@@ -289,7 +289,7 @@
       "importance": "low",
       "hint": "Only for Mixture of Experts models",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "language_model_only": {
@@ -301,7 +301,7 @@
       "importance": "medium",
       "hint": "Frees up memory for KV cache, use for text-only serving",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mm_encoder_tp_mode": {
@@ -318,7 +318,7 @@
       "importance": "low",
       "hint": "data for data-parallel vision encoding",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mm_processor_cache_type": {
@@ -335,7 +335,7 @@
       "importance": "low",
       "hint": "shm for shared memory caching",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mm_processor_kwargs": {
@@ -347,7 +347,7 @@
       "importance": "low",
       "hint": "Example: '{\"video_kwargs\": {\"size\": {\"longest_edge\": 234881024}}}'",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "hf_overrides": {
@@ -368,7 +368,7 @@
       "importance": "high",
       "hint": "Recommended for long contexts",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_prefix_caching": {
@@ -380,7 +380,7 @@
       "importance": "high",
       "hint": "Speeds up requests with shared prefixes",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_dtype": {
@@ -419,7 +419,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "block_size": {
@@ -445,7 +445,7 @@
       "cli_flag": "--enable-lora",
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_loras": {
@@ -513,7 +513,7 @@
       "cli_flag": "--served-model-name",
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "chat_template": {
@@ -606,7 +606,7 @@
       "importance": "high",
       "hint": "Required for some models but has security implications",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "rope_scaling": {
@@ -617,7 +617,7 @@
       "cli_flag": "--rope-scaling",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "rope_theta": {
@@ -628,7 +628,7 @@
       "cli_flag": "--rope-theta",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_logprobs": {
@@ -651,7 +651,7 @@
       "cli_flag": "--disable-sliding-window",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "revision": {
@@ -679,7 +679,7 @@
       "cli_flag": "--disable-log-stats",
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_log_requests": {
@@ -690,7 +690,7 @@
       "cli_flag": "--enable-log-requests",
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_log_len": {
@@ -713,7 +713,7 @@
       "cli_flag": "--otlp-traces-endpoint",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_prompt_tokens_details": {
@@ -738,7 +738,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "speculative_model": {
@@ -750,7 +750,7 @@
       "importance": "low",
       "hint": "Can speed up generation with a smaller draft model",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "num_speculative_tokens": {
@@ -766,7 +766,7 @@
       "importance": "low",
       "depends_on": "speculative_model",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_parser": {
@@ -805,7 +805,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_parser_plugin": {
@@ -817,7 +817,7 @@
       "importance": "low",
       "hint": "Use with --reasoning-parser to specify custom parser",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "distributed_executor_backend": {
@@ -835,7 +835,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "disable_custom_all_reduce": {
@@ -846,7 +846,7 @@
       "cli_flag": "--disable-custom-all-reduce",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_parallel_loading_workers": {
@@ -862,7 +862,7 @@
       "importance": "medium",
       "hint": "Useful for large models with tensor parallelism",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_space": {
@@ -878,7 +878,7 @@
       "importance": "medium",
       "hint": "Virtual GPU memory extension using CPU RAM",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_sleep_mode": {
@@ -890,7 +890,7 @@
       "importance": "low",
       "hint": "Only supported for CUDA platform",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "disable_async_output_proc": {
@@ -901,7 +901,7 @@
       "cli_flag": "--disable-async-output-proc",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "calculate_kv_scales": {
@@ -913,7 +913,7 @@
       "importance": "low",
       "depends_on": "kv_cache_dtype",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "long_prefill_token_threshold": {
@@ -929,7 +929,7 @@
       "importance": "low",
       "hint": "For chunked prefill optimization",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_num_partial_prefills": {
@@ -945,7 +945,7 @@
       "importance": "low",
       "depends_on": "enable_chunked_prefill",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "generation_config": {
@@ -956,7 +956,7 @@
       "cli_flag": "--generation-config",
       "importance": "medium",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "generation_config_override": {
@@ -968,7 +968,7 @@
       "importance": "low",
       "hint": "Example: {\"temperature\": 0.5}",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "allowed_origins": {
@@ -1003,7 +1003,7 @@
       "cli_flag": "--disable-frontend-multiprocessing",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "tool_call_parser": {
@@ -1095,7 +1095,7 @@
       "importance": "medium",
       "hint": "May help reduce CPU overheads but not supported with all features",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "compilation_config": {
@@ -1116,7 +1116,7 @@
       "importance": "low",
       "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "attention_backend": {
@@ -1139,7 +1139,7 @@
       "importance": "medium",
       "hint": "Auto-selects the best backend. FlashAttention 4 is default for MLA prefill on Hopper+",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "tq_max_kv_splits_for_cuda_graph": {
@@ -1155,7 +1155,7 @@
       "importance": "low",
       "hint": "Fixes split count for constant grid dimensions across captures. Used with TurboQuant KV cache.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_memory_bytes": {
@@ -1170,7 +1170,7 @@
       "importance": "medium",
       "hint": "Fine-grain control of KV cache memory. Overrides gpu_memory_utilization when set.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_offloading_size": {
@@ -1185,7 +1185,7 @@
       "importance": "medium",
       "hint": "Enables KV cache offloading to CPU. Total buffer summed across all TP ranks when TP > 1.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_offloading_backend": {
@@ -1201,7 +1201,7 @@
       "importance": "low",
       "hint": "Only active when kv_offloading_size is set. 'native' uses vLLM CPU offloading, 'lmcache' uses LMCache.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_dtype_skip_layers": {
@@ -1231,7 +1231,7 @@
       "importance": "low",
       "hint": "sha256 is most secure. xxhash variants are faster but non-cryptographic. Requires xxhash package for xxhash options.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_ep_weight_filter": {
@@ -1243,7 +1243,7 @@
       "importance": "low",
       "hint": "Optimizes expert parallelism weight transfers",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "all2all_backend": {
@@ -1261,7 +1261,7 @@
       "importance": "low",
       "hint": "DeepEP backends require the DeepEP package installed",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_dbo": {
@@ -1281,7 +1281,7 @@
       "importance": "low",
       "hint": "Allows dynamic adjustment of expert parallelism",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "expert_placement_strategy": {
@@ -1299,7 +1299,7 @@
       "importance": "low",
       "hint": "Controls how MoE experts are distributed across GPUs",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_eplb": {
@@ -1332,7 +1332,7 @@
       "importance": "medium",
       "hint": "Split decode across multiple GPUs for better throughput",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "prefill_context_parallel_size": {
@@ -1347,7 +1347,7 @@
       "importance": "medium",
       "hint": "Split prefill across multiple GPUs",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "dcp_comm_backend": {
@@ -1363,7 +1363,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "numa_bind": {
@@ -1391,7 +1391,7 @@
       "importance": "medium",
       "hint": "Higher levels enable more aggressive optimizations",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "performance_mode": {
@@ -1417,7 +1417,7 @@
       "importance": "low",
       "hint": "Useful for debugging MoE routing decisions",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "model_impl": {
@@ -1456,7 +1456,7 @@
       "cli_flag": "--disable-cascade-attn",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "skip_tokenizer_init": {
@@ -1468,7 +1468,7 @@
       "importance": "low",
       "hint": "Useful for embedding-only models that don't need tokenization",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_prompt_embeds": {
@@ -1480,7 +1480,7 @@
       "importance": "low",
       "hint": "Allows passing pre-computed embeddings instead of text prompts",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "override_attention_dtype": {
@@ -1492,7 +1492,7 @@
       "importance": "low",
       "hint": "Force a specific dtype for attention computation",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "cudagraph_capture_sizes": {
@@ -1504,7 +1504,7 @@
       "importance": "low",
       "hint": "Example: '1,2,4,8,16' for specific batch sizes",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_cudagraph_capture_size": {
@@ -1568,7 +1568,7 @@
       "importance": "low",
       "hint": "JSON config for KV cache transfer in disaggregated serving",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_events_config": {
@@ -1589,7 +1589,7 @@
       "importance": "low",
       "hint": "JSON config for expert chunk transfer",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_config": {
@@ -1682,7 +1682,7 @@
       "cli_flag": "--enable-mamba-cache-stochastic-rounding",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mamba_block_size": {
@@ -1711,7 +1711,7 @@
       "importance": "low",
       "hint": "'align' recommended for speculative decoding with Mamba models",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mamba_cache_dtype": {
@@ -1727,7 +1727,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "mamba_ssm_cache_dtype": {
@@ -1743,7 +1743,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "offload_backend": {
@@ -1760,7 +1760,7 @@
       "importance": "low",
       "hint": "Controls how model weights are offloaded to CPU",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_params": {
@@ -1783,7 +1783,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "offload_num_in_group": {
@@ -1797,7 +1797,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "offload_prefetch_step": {
@@ -1811,7 +1811,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "offload_params": {
@@ -1835,7 +1835,7 @@
       "importance": "low",
       "hint": "Backend for GDN (Grouped Dense Network) prefill",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_metrics": {
@@ -1846,7 +1846,7 @@
       "cli_flag": "--kv-cache-metrics",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_metrics_sample": {
@@ -1872,7 +1872,7 @@
       "cli_flag": "--cudagraph-metrics",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_layerwise_nvtx_tracing": {
@@ -1884,7 +1884,7 @@
       "importance": "low",
       "hint": "For profiling with Nsight Systems",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_mfu_metrics": {
@@ -1895,7 +1895,7 @@
       "cli_flag": "--enable-mfu-metrics",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_logging_iteration_details": {
@@ -1906,7 +1906,7 @@
       "cli_flag": "--enable-logging-iteration-details",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_mm_processor_stats": {
@@ -1917,7 +1917,7 @@
       "cli_flag": "--enable-mm-processor-stats",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "scheduling_policy": {
@@ -1933,7 +1933,7 @@
       "importance": "low",
       "hint": "fcfs = first-come-first-served, utilization = optimize GPU utilization",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_long_partial_prefills": {
@@ -1947,7 +1947,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "scheduler_reserve_full_isl": {
@@ -1958,7 +1958,7 @@
       "cli_flag": "--scheduler-reserve-full-isl",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "disable_hybrid_kv_cache_manager": {
@@ -1970,7 +1970,7 @@
       "importance": "low",
       "hint": "Set to false (--no-disable-hybrid-kv-cache-manager) to let vLLM decide. Required with KV connectors.",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "stream_interval": {
@@ -1985,7 +1985,7 @@
       "importance": "low",
       "hint": "Number of tokens between streaming updates",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "disable_chunked_mm_input": {
@@ -1996,7 +1996,7 @@
       "cli_flag": "--disable-chunked-mm-input",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "scheduler_cls": {
@@ -2007,7 +2007,7 @@
       "cli_flag": "--scheduler-cls",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "allowed_local_media_path": {
@@ -2018,7 +2018,7 @@
       "cli_flag": "--allowed-local-media-path",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "allowed_media_domains": {
@@ -2029,7 +2029,7 @@
       "cli_flag": "--allowed-media-domains",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "config_format": {
@@ -2062,7 +2062,7 @@
       "cli_flag": "--logits-processors",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "io_processor_plugin": {
@@ -2073,7 +2073,7 @@
       "cli_flag": "--io-processor-plugin",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "renderer_num_workers": {
@@ -2087,7 +2087,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Removed from CLI in vLLM 0.22.0. Parameter still available as EngineArgs field and can be set via environment variables or configuration files.",
+      "deprecation_note": "Argument no longer in vLLM source",
       "removed_from_cli_in": "v0.22.0"
     },
     "hf_config_path": {
@@ -2547,6 +2547,30 @@
       "cli_flag": "--mamba-config",
       "importance": "low",
       "added_in": "v0.22.0"
+    },
+    "limit_per_prompt": {
+      "type": "string",
+      "description": "Synced from vLLM GitHub: New argument in vLLM source",
+      "cli_flag": "--limit-per-prompt",
+      "importance": "medium",
+      "synced": true,
+      "category": "advanced"
+    },
+    "media_io_kwargs": {
+      "type": "string",
+      "description": "Synced from vLLM GitHub: New argument in vLLM source",
+      "cli_flag": "--media-io-kwargs",
+      "importance": "medium",
+      "synced": true,
+      "category": "advanced"
+    },
+    "override_generation_config": {
+      "type": "string",
+      "description": "Synced from vLLM GitHub: New argument in vLLM source",
+      "cli_flag": "--override-generation-config",
+      "importance": "medium",
+      "synced": true,
+      "category": "advanced"
     }
   },
   "vllm_versions_supported": [
