@@ -110,7 +110,7 @@ class CLIArgsSync:
                 args.add(field_name)
 
         # Pattern 3: get_field(XxxConfig, "field_name")
-        for m in re.finditer(r'get_field\(\w+, [\"\']([a-z_]+)[\"\']', content):
+        for m in re.finditer(r'get_field\s*\(\s*\w+\s*,\s*[\"\']([a-z_]+)[\"\']', content, re.DOTALL):
             args.add(m.group(1))
 
         return args
