@@ -27,6 +27,32 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.2.9.7
+
+### 🚀 vLLM 0.24.0 Full Support
+
+Updated to support vLLM v0.24.0. **276 CLI arguments** now supported (up from 216).
+
+**vLLM 0.24 Highlights:**
+- **Streaming Parser Engine**: Unified tool-call/reasoning parsing — parsers are built-in (no plugin files needed)
+- **Model Runner V2**: Quantized models by default, GraniteMoE default, DFlash speculative decoding
+- **DeepEP v2**: Integrated for expert parallelism
+- **Rust Frontend**: API server migrated to Rust with new endpoints
+- **Diffusion LLMs**: DiffusionGemma support with CPU path
+- **Device Selection (BREAKING)**: `--device-ids` replaces `CUDA_VISIBLE_DEVICES`
+
+**New CLI Arguments (60 additions):**
+- **Device**: `--device-ids` (replaces CUDA_VISIBLE_DEVICES)
+- **Data Parallel**: `--data-parallel-backend`, `--data-parallel-external-lb`, `--data-parallel-rank`
+- **LoRA**: `--lora-dtype`, `--lora-target-modules`, `--fully-sharded-loras`
+- **Multimodal**: `--mm-encoder-attn-backend`, `--mm-processor-cache-gb`, `--video-pruning-rate`
+- **Model Loading**: `--safetensors-load-strategy`, `--model-weights`
+- **Diffusion**: `--diffusion-config`
+- **Streaming Parsers**: `glm47`, `glm51`, `glm52`, `nemotron_v3` added to reasoning_parser and tool_call_parser
+
+**Deprecated (13 arguments):**
+`--swap-space`, `--cpu-offload-space`, `--num-lookahead-slots`, `--num-speculative-tokens`, `--speculative-model`, `--rope-scaling`, `--rope-theta`, `--guided-decoding-backend`, `--generation-config-override`, `--limit-per-prompt`, `--tq-max-kv-splits-for-cuda-graph`, `--disable-async-output-proc`, `--disable-frontend-multiprocessing`
+
 ## What's New in v0.2.9.6
 
 ### 🚀 vLLM 0.22.0 / 0.22.1 Full Support
