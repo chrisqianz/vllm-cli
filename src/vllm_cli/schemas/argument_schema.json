@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "vLLM server argument definitions and metadata",
   "arguments": {
     "model": {
@@ -145,7 +145,7 @@
       "importance": "medium",
       "hint": "Allows handling more requests at the cost of speed",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "cpu_offload_gb": {
@@ -419,7 +419,7 @@
       },
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "block_size": {
@@ -617,7 +617,7 @@
       "cli_flag": "--rope-scaling",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "rope_theta": {
@@ -628,7 +628,7 @@
       "cli_flag": "--rope-theta",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "max_logprobs": {
@@ -738,7 +738,7 @@
       ],
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "speculative_model": {
@@ -750,7 +750,7 @@
       "importance": "low",
       "hint": "Can speed up generation with a smaller draft model",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "num_speculative_tokens": {
@@ -766,7 +766,7 @@
       "importance": "low",
       "depends_on": "speculative_model",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "reasoning_parser": {
@@ -801,12 +801,16 @@
         "seed_oss",
         "step3",
         "step3p5",
-        null
+        null,
+        "glm47",
+        "glm51",
+        "glm52"
       ],
-      "importance": "low",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "importance": "high",
+      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core.",
+      "deprecated": false,
+      "deprecation_note": null,
+      "removed_from_cli_in": null
     },
     "reasoning_parser_plugin": {
       "type": "string",
@@ -817,7 +821,7 @@
       "importance": "low",
       "hint": "Use with --reasoning-parser to specify custom parser",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Streaming Parser Engine (v0.24.0+) uses built-in parsers. Plugin files are no longer needed.",
       "removed_from_cli_in": "v0.22.0"
     },
     "distributed_executor_backend": {
@@ -878,7 +882,7 @@
       "importance": "medium",
       "hint": "Virtual GPU memory extension using CPU RAM",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "enable_sleep_mode": {
@@ -901,7 +905,7 @@
       "cli_flag": "--disable-async-output-proc",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "calculate_kv_scales": {
@@ -968,7 +972,7 @@
       "importance": "low",
       "hint": "Example: {\"temperature\": 0.5}",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "allowed_origins": {
@@ -1003,7 +1007,7 @@
       "cli_flag": "--disable-frontend-multiprocessing",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "tool_call_parser": {
@@ -1016,7 +1020,6 @@
         "apertus",
         "cohere_command3",
         "cohere_command4",
-        "deepseek_v3",
         "deepseek_v31",
         "deepseek_v32",
         "deepseek_v4",
@@ -1027,6 +1030,7 @@
         "glm45",
         "glm47",
         "granite",
+        "granite-20b-fc",
         "granite4",
         "hermes",
         "hunyuan_a13b",
@@ -1055,10 +1059,14 @@
         "step3",
         "step3p5",
         "xlam",
-        null
+        null,
+        "qwen3",
+        "glm51",
+        "glm52",
+        "nemotron_v3"
       ],
-      "importance": "medium",
-      "hint": "Required when using --enable-auto-tool-choice. Use 'openai' for GPT-OSS models"
+      "importance": "high",
+      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. Parsers: openai, hermes, mistral, internlm, llama3_json, granite, jamba, deepseek_v3, deepseek_v31, glm45, hunyuan_a13b, kimi_k2, qwen3, minimax_m2, glm47/51/52, nemotron_v3"
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -1067,7 +1075,9 @@
       "default": null,
       "cli_flag": "--tool-parser-plugin",
       "importance": "low",
-      "hint": "Use with --tool-call-parser to specify custom parser"
+      "hint": "Use with --tool-call-parser to specify custom parser",
+      "deprecated": true,
+      "deprecation_note": "Streaming Parser Engine (v0.24.0+) uses built-in parsers. Plugin files are no longer needed."
     },
     "enable_auto_tool_choice": {
       "type": "boolean",
@@ -1155,7 +1165,7 @@
       "importance": "low",
       "hint": "Fixes split count for constant grid dimensions across captures. Used with TurboQuant KV cache.",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
+      "deprecation_note": "Removed in vLLM v0.24.0",
       "removed_from_cli_in": "v0.22.0"
     },
     "kv_cache_memory_bytes": {
@@ -2554,7 +2564,9 @@
       "cli_flag": "--limit-per-prompt",
       "importance": "medium",
       "synced": true,
-      "category": "advanced"
+      "category": "advanced",
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.24.0"
     },
     "media_io_kwargs": {
       "type": "string",
@@ -2571,15 +2583,604 @@
       "importance": "medium",
       "synced": true,
       "category": "advanced"
+    },
+    "device_ids": {
+      "type": "list",
+      "category": "essential",
+      "description": "Device IDs to use (replaces CUDA_VISIBLE_DEVICES). List of GPU indices or device strings.",
+      "cli_flag": "--device-ids",
+      "importance": "critical",
+      "hint": "vLLM v0.24.0+ no longer sets CUDA_VISIBLE_DEVICES internally. Use this to specify GPUs.",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "data_parallel_backend": {
+      "type": "choice",
+      "category": "parallelism",
+      "description": "Data parallel backend for distributed serving.",
+      "cli_flag": "--data-parallel-backend",
+      "default": "auto",
+      "choices": [
+        "auto",
+        "ray",
+        "mp"
+      ],
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "data_parallel_external_lb": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable external load balancer for data parallel.",
+      "cli_flag": "--data-parallel-external-lb",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "data_parallel_hybrid_lb": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable hybrid load balancing for data parallel.",
+      "cli_flag": "--data-parallel-hybrid-lb",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "data_parallel_multi_port_external_lb": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable multi-port external load balancer for data parallel.",
+      "cli_flag": "--data-parallel-multi-port-external-lb",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "data_parallel_rank": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Data parallel rank for this process.",
+      "cli_flag": "--data-parallel-rank",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "disable_nccl_for_dp_synchronization": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Disable NCCL for data parallel synchronization.",
+      "cli_flag": "--disable-nccl-for-dp-synchronization",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "dbo_decode_token_threshold": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Token threshold for DBO decode phase.",
+      "cli_flag": "--dbo-decode-token-threshold",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "dbo_prefill_token_threshold": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Token threshold for DBO prefill phase.",
+      "cli_flag": "--dbo-prefill-token-threshold",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "dcp_kv_cache_interleave_size": {
+      "type": "integer",
+      "category": "memory",
+      "description": "DCP KV cache interleave size.",
+      "cli_flag": "--dcp-kv-cache-interleave-size",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "cp_kv_cache_interleave_size": {
+      "type": "integer",
+      "category": "memory",
+      "description": "CP KV cache interleave size.",
+      "cli_flag": "--cp-kv-cache-interleave-size",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "distributed_timeout_seconds": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "Distributed communication timeout in seconds.",
+      "cli_flag": "--distributed-timeout-seconds",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "cpu_distributed_timeout_seconds": {
+      "type": "integer",
+      "category": "parallelism",
+      "description": "CPU distributed communication timeout in seconds.",
+      "cli_flag": "--cpu-distributed-timeout-seconds",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "lora_dtype": {
+      "type": "string",
+      "category": "lora",
+      "description": "Data type for LoRA weights.",
+      "cli_flag": "--lora-dtype",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "lora_target_modules": {
+      "type": "list",
+      "category": "lora",
+      "description": "Target modules for LoRA fine-tuning.",
+      "cli_flag": "--lora-target-modules",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "enable_mixed_moe_lora_format": {
+      "type": "boolean",
+      "category": "lora",
+      "description": "Enable mixed MoE LoRA format.",
+      "cli_flag": "--enable-mixed-moe-lora-format",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "enable_tower_connector_lora": {
+      "type": "boolean",
+      "category": "lora",
+      "description": "Enable tower connector LoRA.",
+      "cli_flag": "--enable-tower-connector-lora",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "specialize_active_lora": {
+      "type": "boolean",
+      "category": "lora",
+      "description": "Specialize active LoRA adapters.",
+      "cli_flag": "--specialize-active-lora",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "fully_sharded_loras": {
+      "type": "boolean",
+      "category": "lora",
+      "description": "Enable fully sharded LoRA.",
+      "cli_flag": "--fully-sharded-loras",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_attn_backend": {
+      "type": "choice",
+      "category": "model",
+      "description": "Attention backend for multimodal encoder.",
+      "cli_flag": "--mm-encoder-attn-backend",
+      "choices": [
+        "auto",
+        "flash_attn",
+        "triton",
+        "xformers"
+      ],
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_attn_dtype": {
+      "type": "string",
+      "category": "model",
+      "description": "Attention data type for multimodal encoder.",
+      "cli_flag": "--mm-encoder-attn-dtype",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_fp8_scale_path": {
+      "type": "string",
+      "category": "model",
+      "description": "Path to FP8 scale for multimodal encoder.",
+      "cli_flag": "--mm-encoder-fp8-scale-path",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_fp8_scale_save_path": {
+      "type": "string",
+      "category": "model",
+      "description": "Path to save FP8 scale for multimodal encoder.",
+      "cli_flag": "--mm-encoder-fp8-scale-save-path",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_fp8_scale_save_margin": {
+      "type": "float",
+      "category": "model",
+      "description": "FP8 scale save margin for multimodal encoder.",
+      "cli_flag": "--mm-encoder-fp8-scale-save-margin",
+      "default": 0.0,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_encoder_only": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Run multimodal encoder only.",
+      "cli_flag": "--mm-encoder-only",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_processor_cache_gb": {
+      "type": "float",
+      "category": "model",
+      "description": "Multimodal processor cache size in GB.",
+      "cli_flag": "--mm-processor-cache-gb",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_shm_cache_max_object_size_mb": {
+      "type": "integer",
+      "category": "model",
+      "description": "Max shared memory cache object size in MB.",
+      "cli_flag": "--mm-shm-cache-max-object-size-mb",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mm_tensor_ipc": {
+      "type": "choice",
+      "category": "model",
+      "description": "Multimodal tensor IPC mode.",
+      "cli_flag": "--mm-tensor-ipc",
+      "default": "auto",
+      "choices": [
+        "auto",
+        "on",
+        "off"
+      ],
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "interleave_mm_strings": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Interleave multimodal strings.",
+      "cli_flag": "--interleave-mm-strings",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "limit_mm_per_prompt": {
+      "type": "dict",
+      "category": "model",
+      "description": "Limit multimodal inputs per prompt.",
+      "cli_flag": "--limit-mm-per-prompt",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "skip_mm_profiling": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Skip multimodal profiling.",
+      "cli_flag": "--skip-mm-profiling",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "video_pruning_rate": {
+      "type": "float",
+      "category": "model",
+      "description": "Video pruning rate for multimodal inputs.",
+      "cli_flag": "--video-pruning-rate",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "enable_mm_embeds": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Enable multimodal embeddings.",
+      "cli_flag": "--enable-mm-embeds",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "safetensors_load_strategy": {
+      "type": "choice",
+      "category": "model",
+      "description": "Safetensors loading strategy.",
+      "cli_flag": "--safetensors-load-strategy",
+      "choices": [
+        "auto",
+        "parallel",
+        "sequential"
+      ],
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "safetensors_prefetch_block_size": {
+      "type": "integer",
+      "category": "model",
+      "description": "Safetensors prefetch block size.",
+      "cli_flag": "--safetensors-prefetch-block-size",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "safetensors_prefetch_num_threads": {
+      "type": "integer",
+      "category": "model",
+      "description": "Safetensors prefetch number of threads.",
+      "cli_flag": "--safetensors-prefetch-num-threads",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "pt_load_map_location": {
+      "type": "string",
+      "category": "model",
+      "description": "PyTorch load map location.",
+      "cli_flag": "--pt-load-map-location",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "model_weights": {
+      "type": "string",
+      "category": "model",
+      "description": "Path to model weights file.",
+      "cli_flag": "--model-weights",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "allow_deprecated_quantization": {
+      "type": "boolean",
+      "category": "quantization",
+      "description": "Allow deprecated quantization methods.",
+      "cli_flag": "--allow-deprecated-quantization",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "kv_sharing_fast_prefill": {
+      "type": "boolean",
+      "category": "memory",
+      "description": "Enable fast prefill for KV sharing.",
+      "cli_flag": "--kv-sharing-fast-prefill",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "num_gpu_blocks_override": {
+      "type": "integer",
+      "category": "memory",
+      "description": "Override number of GPU blocks.",
+      "cli_flag": "--num-gpu-blocks-override",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "numa_bind_cpus": {
+      "type": "list",
+      "category": "parallelism",
+      "description": "NUMA bind CPU list.",
+      "cli_flag": "--numa-bind-cpus",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "numa_bind_nodes": {
+      "type": "list",
+      "category": "parallelism",
+      "description": "NUMA bind nodes list.",
+      "cli_flag": "--numa-bind-nodes",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "prefill_schedule_interval": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Prefill schedule interval.",
+      "cli_flag": "--prefill-schedule-interval",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "sliding_window": {
+      "type": "integer",
+      "category": "model",
+      "description": "Sliding window size.",
+      "cli_flag": "--sliding-window",
+      "importance": "medium",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "aggregate_engine_logging": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Aggregate engine logging.",
+      "cli_flag": "--aggregate-engine-logging",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "collect_detailed_traces": {
+      "type": "list",
+      "category": "monitoring",
+      "description": "Collect detailed traces for specified modules.",
+      "cli_flag": "--collect-detailed-traces",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "diffusion_config": {
+      "type": "dict",
+      "category": "model",
+      "description": "Configuration for diffusion models (e.g., DiffusionGemma).",
+      "cli_flag": "--diffusion-config",
+      "importance": "medium",
+      "hint": "Required for DiffusionGemma and other diffusion LLMs.",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "enable_cumem_allocator": {
+      "type": "boolean",
+      "category": "memory",
+      "description": "Enable cuMem allocator.",
+      "cli_flag": "--enable-cumem-allocator",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "fail_on_environ_validation": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Fail on environment validation errors.",
+      "cli_flag": "--fail-on-environ-validation",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "jit_monitor_verbose": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable verbose JIT monitoring.",
+      "cli_flag": "--jit-monitor-verbose",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "mamba_cache_philox_rounds": {
+      "type": "integer",
+      "category": "model",
+      "description": "Mamba cache Philox rounding rounds.",
+      "cli_flag": "--mamba-cache-philox-rounds",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "show_hidden_metrics_for_version": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Show hidden metrics for specified version.",
+      "cli_flag": "--show-hidden-metrics-for-version",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "shutdown_timeout": {
+      "type": "integer",
+      "category": "advanced",
+      "description": "Shutdown timeout in seconds.",
+      "cli_flag": "--shutdown-timeout",
+      "default": 0,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "tokenizer_revision": {
+      "type": "string",
+      "category": "model",
+      "description": "Tokenizer revision.",
+      "cli_flag": "--tokenizer-revision",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "use_fp64_gumbel": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Use FP64 for Gumbel sampling.",
+      "cli_flag": "--use-fp64-gumbel",
+      "default": false,
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "watermark": {
+      "type": "float",
+      "category": "scheduling",
+      "description": "Watermark value for KV cache scheduling.",
+      "cli_flag": "--watermark",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "worker_extension_cls": {
+      "type": "string",
+      "category": "parallelism",
+      "description": "Worker extension class.",
+      "cli_flag": "--worker-extension-cls",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "default_max_num_seqs": {
+      "type": "dict",
+      "category": "scheduling",
+      "description": "Default max number of sequences by usage context.",
+      "cli_flag": "--default-max-num-seqs",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
+    },
+    "default_max_num_batched_tokens": {
+      "type": "dict",
+      "category": "scheduling",
+      "description": "Default max batched tokens by usage context.",
+      "cli_flag": "--default-max-num-batched-tokens",
+      "importance": "low",
+      "new_in": "v0.24.0",
+      "synced": true
     }
   },
   "vllm_versions_supported": [
     "0.20.0",
     "0.21.0",
     "0.22.0",
-    "0.22.1"
+    "0.22.1",
+    "0.23.0",
+    "0.24.0"
   ],
-  "last_synced_version": "v0.22.1",
-  "deprecated_count": 103,
-  "new_in_v022_count": 52
+  "last_synced_version": "v0.24.0",
+  "deprecated_count": 116,
+  "new_in_v022_count": 52,
+  "new_in_v024_count": 60
 }

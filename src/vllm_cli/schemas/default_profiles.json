@@ -517,22 +517,19 @@
     },
     "deepseek_v4": {
       "name": "DeepSeek-V4",
-      "description": "DeepSeek-V4 with NVFP4 MoE, CUDA graph, and MTP speculative decoding (vLLM 0.22+)",
+      "description": "Optimized for DeepSeek-V4 with FlashInfer sparse index cache and DeepEP v2",
       "icon": "",
       "config": {
         "enable_expert_parallel": true,
-        "tensor_parallel_size": 8,
         "trust_remote_code": true,
         "gpu_memory_utilization": 0.9,
-        "kv_cache_dtype": "nvfp4",
-        "reasoning_parser": "deepseek_v3",
-        "tool_call_parser": "deepseek_v32",
-        "enable_auto_tool_choice": true,
-        "speculative_config": "{\"method\": \"ngram\", \"num_speculative_tokens\": 2}"
+        "tool_call_parser": "deepseek_v31",
+        "enable_auto_tool_choice": true
       },
       "environment": {
         "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
-      }
+      },
+      "new_in": "v0.2.9.7"
     },
     "deepseek_v4_low_memory": {
       "name": "DeepSeek-V4 (Low Memory)",
@@ -568,6 +565,18 @@
       "environment": {
         "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": "1"
       }
+    },
+    "diffusion_gemma": {
+      "name": "Diffusion Gemma",
+      "description": "For DiffusionGemma and diffusion-based LLMs",
+      "icon": "",
+      "config": {
+        "trust_remote_code": true,
+        "gpu_memory_utilization": 0.85,
+        "diffusion_config": {}
+      },
+      "environment": {},
+      "new_in": "v0.2.9.7"
     }
   }
 }

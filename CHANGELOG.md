@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.9.7] - 2026-06-30
+
+### Added
+- **vLLM 0.24.0 Full Support**: Updated to support vLLM v0.24.0
+- **60 New CLI Arguments**: Schema expanded from 216 to 276 arguments
+- **Device Selection (BREAKING)**: `--device-ids` replaces `CUDA_VISIBLE_DEVICES` — vLLM no longer sets CUDA_VISIBLE_DEVICES internally
+- **Streaming Parser Engine**: Unified tool-call/reasoning parsing with new parsers: `qwen3`, `minimax_m2`, `glm47`, `glm51`, `glm52`, `nemotron_v3`
+- **Data Parallel Enhancements**: `--data-parallel-backend`, `--data-parallel-external-lb`, `--data-parallel-hybrid-lb`, `--data-parallel-multi-port-external-lb`, `--data-parallel-rank`, `--disable-nccl-for-dp-synchronization`
+- **DBO Token Thresholds**: `--dbo-decode-token-threshold`, `--dbo-prefill-token-threshold`
+- **LoRA Enhancements**: `--lora-dtype`, `--lora-target-modules`, `--enable-mixed-moe-lora-format`, `--enable-tower-connector-lora`, `--specialize-active-lora`, `--fully-sharded-loras`
+- **Multimodal Encoder**: `--mm-encoder-attn-backend`, `--mm-encoder-attn-dtype`, `--mm-encoder-fp8-scale-path`, `--mm-encoder-only`, `--mm-processor-cache-gb`, `--mm-tensor-ipc`, `--interleave-mm-strings`, `--limit-mm-per-prompt`, `--skip-mm-profiling`, `--video-pruning-rate`, `--enable-mm-embeds`
+- **Model Loading**: `--safetensors-load-strategy`, `--safetensors-prefetch-block-size`, `--safetensors-prefetch-num-threads`, `--pt-load-map-location`, `--model-weights`
+- **Diffusion Models**: `--diffusion-config` for DiffusionGemma support
+- **KV Cache**: `--kv-sharing-fast-prefill`, `--num-gpu-blocks-override`, `--cp-kv-cache-interleave-size`, `--dcp-kv-cache-interleave-size`
+- **NUMA Binding**: `--numa-bind-cpus`, `--numa-bind-nodes`
+- **Scheduler**: `--prefill-schedule-interval`, `--sliding-window`, `--watermark`
+- **Monitoring**: `--aggregate-engine-logging`, `--collect-detailed-traces`, `--jit-monitor-verbose`
+- **Quantization**: `--allow-deprecated-quantization`
+- **Misc**: `--enable-cumem-allocator`, `--fail-on-environ-validation`, `--mamba-cache-philox-rounds`, `--show-hidden-metrics-for-version`, `--shutdown-timeout`, `--tokenizer-revision`, `--use-fp64-gumbel`, `--worker-extension-cls`, `--default-max-num-seqs`, `--default-max-num-batched-tokens`, `--distributed-timeout-seconds`, `--cpu-distributed-timeout-seconds`
+- **New Profiles**: `diffusion_gemma`, `deepseek_v4`
+- **Schema v2.1**: Argument schema updated to version 2.1.0 with v0.24.0 sync
+
+### Changed
+- **Dependency Range**: vLLM updated to `>=0.20.0,<0.25.0`
+- **13 CLI Arguments Deprecated**: `--swap-space`, `--cpu-offload-space`, `--num-lookahead-slots`, `--num-speculative-tokens`, `--speculative-model`, `--rope-scaling`, `--rope-theta`, `--guided-decoding-backend`, `--generation-config-override`, `--limit-per-prompt`, `--tq-max-kv-splits-for-cuda-graph`, `--disable-async-output-proc`, `--disable-frontend-multiprocessing`
+- **reasoning_parser**: Added `glm47`, `glm51`, `glm52`, `nemotron_v3` streaming parsers
+- **tool_call_parser**: Added `qwen3`, `minimax_m2`, `glm47`, `glm51`, `glm52`, `nemotron_v3` streaming parsers
+
+### Notes
+- vLLM 0.24.0 introduces Rust frontend as the main API server
+- Model Runner V2 (MRv2) supports quantized models by default
+- DeepEP v2 integrated for expert parallelism
+- DiffusionGemma and other diffusion LLMs supported
+- `--device-ids` is the new way to select GPUs (replaces CUDA_VISIBLE_DEVICES)
+
 ## [v0.2.9.6] - 2026-06-06
 
 ### Added

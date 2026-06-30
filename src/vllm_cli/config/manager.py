@@ -309,6 +309,16 @@ class ConfigManager:
                     args.append(cli_flag)
             elif arg_type in ["integer", "float", "string", "choice"]:
                 args.extend([cli_flag, str(value)])
+            elif arg_type == "list":
+                if isinstance(value, list):
+                    args.extend([cli_flag, ",".join(str(v) for v in value)])
+                elif isinstance(value, str):
+                    args.extend([cli_flag, value])
+            elif arg_type == "dict":
+                if isinstance(value, dict):
+                    args.extend([cli_flag, json.dumps(value)])
+                elif isinstance(value, str):
+                    args.extend([cli_flag, value])
             else:
                 logger.warning(f"Unknown argument type for {arg_name}: {arg_type}")
 
