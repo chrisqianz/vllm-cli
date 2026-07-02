@@ -134,21 +134,16 @@ class VLLMServer:
                     else:
                         logger.debug(f"Setting profile {key}=<hidden>")
 
-            # Handle GPU device selection
-            # vLLM v0.24.0+: Use --device-ids CLI arg (preferred)
-            # Fallback: CUDA_VISIBLE_DEVICES env var (still works on NVIDIA)
-            if self.config.get("device"):
-                device_str = str(self.config["device"])
-                # Set CUDA_VISIBLE_DEVICES for backward compatibility
-                env["CUDA_VISIBLE_DEVICES"] = device_str
-                logger.info(f"Setting CUDA_VISIBLE_DEVICES={device_str}")
-                # Also add device_ids to config for vLLM v0.24.0+
-                device_list = [d.strip() for d in device_str.split(",")]
-                self.config["device_ids"] = device_list
-                logger.info(f"Setting device_ids={device_list} for vLLM v0.24.0+ compatibility")
+            # Handle GPU device selection via --device-ids (vLLM v0.24.0+)
+            if self.config.get("device_ids"):
+                device_ids = self.config["device_ids"]
+                if isinstance(device_ids, list):
+                    device_list = device_ids
+                else:
+                    device_list = [d.strip() for d in str(device_ids).split(",")]
+                logger.info(f"Setting device_ids={device_list}")
 
                 # If using specific GPUs, adjust tensor parallel size if needed
-                device_list = [d.strip() for d in device_str.split(",")]
                 num_devices = len(device_list)
 
                 # Check if tensor_parallel_size is set and compatible

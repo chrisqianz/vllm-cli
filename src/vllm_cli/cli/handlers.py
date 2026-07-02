@@ -648,7 +648,15 @@ def _build_serve_config(
 
     # Handle GPU device selection
     if hasattr(args, "device") and args.device:
-        config["device"] = args.device
+        device_str = str(args.device)
+        try:
+            config["device_ids"] = [
+                int(v.strip()) for v in device_str.split(",") if v.strip()
+            ]
+        except ValueError:
+            config["device_ids"] = [
+                v.strip() for v in device_str.split(",") if v.strip()
+            ]
 
     # Handle LoRA adapters
     if hasattr(args, "lora") and args.lora:

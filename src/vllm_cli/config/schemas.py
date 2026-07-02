@@ -60,7 +60,7 @@ class SchemaManager:
         """Get all arguments belonging to a specific category."""
         args = []
         for arg_name, arg_info in self.argument_schema.items():
-            if arg_info.get("category") == category:
+            if arg_info.get("category") == category and not arg_info.get("ui_hidden"):
                 args.append({"name": arg_name, **arg_info})
         # Sort by importance (critical > high > medium > low)
         importance_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}

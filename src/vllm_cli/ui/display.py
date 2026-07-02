@@ -52,7 +52,7 @@ def display_config(config: Dict[str, Any], title: str = "Configuration") -> None
             display_key = "Custom Arguments"
         elif key == "dtype":
             display_key = "Data Type"
-        elif key == "device":
+        elif key == "device_ids":
             display_key = "GPU Devices"
 
         table.add_row(display_key, value_str)

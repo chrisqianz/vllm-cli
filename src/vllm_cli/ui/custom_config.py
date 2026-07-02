@@ -110,15 +110,22 @@ def configure_by_categories(
     configure_gpus = inquirer.confirm("Configure GPU selection?", default=False)
 
     if configure_gpus:
-        current_device = config.get("device")
-        new_device = select_gpus(current_device)
+        current_device_ids = config.get("device_ids")
+        # Convert list to comma-separated string for select_gpus
+        current_str = (
+            ",".join(str(v) for v in current_device_ids)
+            if isinstance(current_device_ids, list)
+            else None
+        )
+        new_device = select_gpus(current_str)
         if new_device is not None:
-            config["device"] = new_device
-            console.print(f"[green]GPU selection: {new_device}[/green]")
+            device_list = [int(v.strip()) for v in new_device.split(",")]
+            config["device_ids"] = device_list
+            console.print(f"[green]GPU selection: {device_list}[/green]")
 
             # Check tensor_parallel_size compatibility if already configured
             if config.get("tensor_parallel_size"):
-                num_selected = len(new_device.split(","))
+                num_selected = len(device_list)
                 tp_size = config["tensor_parallel_size"]
 
                 if tp_size > num_selected:
@@ -138,9 +145,9 @@ def configure_by_categories(
                         f"may not utilize all GPUs efficiently[/yellow]"
                     )
 
-        elif new_device is None and current_device:
+        elif new_device is None and current_device_ids:
             # User cleared the selection
-            del config["device"]
+            del config["device_ids"]
             console.print("[yellow]GPU selection cleared[/yellow]")
 
     # Now ask about advanced options with hierarchical menu
@@ -194,8 +201,8 @@ def configure_advanced_hierarchical(
 
         # Add GPU selection as the first option
         gpu_status = ""
-        if "device" in config:
-            gpu_status = f" [GPUs: {config['device']}]"
+        if "device_ids" in config:
+            gpu_status = f" [GPUs: {config['device_ids']}]"
         category_choices.append(f"GPU Selection{gpu_status}")
 
         for cat_id, cat_info in advanced_categories:
@@ -230,15 +237,21 @@ def configure_advanced_hierarchical(
 
         # Handle GPU selection
         if selected.startswith("GPU Selection"):
-            current_device = config.get("device")
-            new_device = select_gpus(current_device)
+            current_device_ids = config.get("device_ids")
+            current_str = (
+                ",".join(str(v) for v in current_device_ids)
+                if isinstance(current_device_ids, list)
+                else None
+            )
+            new_device = select_gpus(current_str)
             if new_device is not None:
-                config["device"] = new_device
-                console.print(f"[green]GPU selection updated: {new_device}[/green]")
+                device_list = [int(v.strip()) for v in new_device.split(",")]
+                config["device_ids"] = device_list
+                console.print(f"[green]GPU selection updated: {device_list}[/green]")
 
                 # Check tensor_parallel_size compatibility
                 if config.get("tensor_parallel_size"):
-                    num_selected = len(new_device.split(","))
+                    num_selected = len(device_list)
                     tp_size = config["tensor_parallel_size"]
 
                     if tp_size > num_selected:
@@ -259,9 +272,9 @@ def configure_advanced_hierarchical(
                             f"may not utilize all GPUs efficiently[/yellow]"
                         )
 
-            elif new_device is None and current_device:
+            elif new_device is None and current_device_ids:
                 # User cleared the selection
-                del config["device"]
+                del config["device_ids"]
                 console.print("[yellow]GPU selection cleared[/yellow]")
             continue
 
@@ -563,11 +576,11 @@ def configure_argument(
             from ..system.gpu import get_gpu_info
 
             # Check if specific GPUs are selected
-            if config.get("device"):
-                device_str = config["device"]
-                num_gpus = len(device_str.split(","))
+            if config.get("device_ids"):
+                device_ids = config["device_ids"]
+                num_gpus = len(device_ids) if isinstance(device_ids, list) else 1
                 console.print(
-                    f"[dim]Using {num_gpus} selected GPU(s): {device_str}[/dim]"
+                    f"[dim]Using {num_gpus} selected GPU(s): {device_ids}[/dim]"
                 )
             else:
                 try:
@@ -840,6 +853,33 @@ def configure_argument(
             response = input(prompt_text).strip()
             if response:
                 config[arg_name] = response
+
+    elif arg_type == "list":
+        # Generic list input - comma-separated values
+        # Note: device_ids is handled by GPU Selection, not exposed here
+        if arg_name == "device_ids":
+            console.print(
+                "[yellow]Device IDs are managed via GPU Selection. Skipping.[/yellow]"
+            )
+        elif isinstance(current_value, list) and current_value:
+            current_display = ", ".join(str(v) for v in current_value)
+            prompt_text = (
+                f"Enter values (comma-separated, current: {current_display}) or press Enter to skip: "
+            )
+            response = input(prompt_text).strip()
+            if response:
+                config[arg_name] = [
+                    v.strip() for v in response.split(",") if v.strip()
+                ]
+        else:
+            prompt_text = (
+                "Enter values (comma-separated) or press Enter to skip: "
+            )
+            response = input(prompt_text).strip()
+            if response:
+                config[arg_name] = [
+                    v.strip() for v in response.split(",") if v.strip()
+                ]
 
     return config
 

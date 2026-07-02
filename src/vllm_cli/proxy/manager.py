@@ -663,8 +663,8 @@ class ProxyManager:
 
         # Handle GPU assignment
         if model_config.gpu_ids:
-            # Set CUDA_VISIBLE_DEVICES via device field
-            config["device"] = ",".join(str(gpu) for gpu in model_config.gpu_ids)
+            # Set device_ids as list for vLLM v0.24.0+
+            config["device_ids"] = list(model_config.gpu_ids)
 
             num_gpus = len(model_config.gpu_ids)
 

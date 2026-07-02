@@ -84,6 +84,24 @@ class ConfigManager:
         """Get all profiles (default and user-created)."""
         return self.profile_manager.get_all_profiles()
 
+    @staticmethod
+    def _migrate_config(config: Dict[str, Any]) -> Dict[str, Any]:
+        """Migrate legacy config keys to new format."""
+        # Migrate "device" (comma-separated string) to "device_ids" (list)
+        if "device" in config and "device_ids" not in config:
+            device_str = str(config["device"])
+            try:
+                config["device_ids"] = [
+                    int(v.strip()) for v in device_str.split(",") if v.strip()
+                ]
+            except ValueError:
+                config["device_ids"] = [
+                    v.strip() for v in device_str.split(",") if v.strip()
+                ]
+            # Remove old key to avoid warnings
+            del config["device"]
+        return config
+
     def get_profile(self, name: str) -> Optional[Dict[str, Any]]:
         """Get a specific profile by name with dynamic defaults applied."""
         profile = self.profile_manager.get_profile(name)
@@ -92,6 +110,8 @@ class ConfigManager:
             profile["config"] = self.profile_manager.apply_dynamic_defaults(
                 profile["config"]
             )
+            # Migrate legacy keys
+            profile["config"] = self._migrate_config(profile["config"])
         return profile
 
     def save_user_profile(self, name: str, profile: Dict[str, Any]) -> bool:

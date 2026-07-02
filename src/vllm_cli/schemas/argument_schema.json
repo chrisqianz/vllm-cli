@@ -2586,13 +2586,23 @@
     },
     "device_ids": {
       "type": "list",
-      "category": "essential",
+      "category": "internal",
       "description": "Device IDs to use (replaces CUDA_VISIBLE_DEVICES). List of GPU indices or device strings.",
       "cli_flag": "--device-ids",
       "importance": "critical",
-      "hint": "vLLM v0.24.0+ no longer sets CUDA_VISIBLE_DEVICES internally. Use this to specify GPUs.",
+      "hint": "Managed by GPU Selection. vLLM v0.24.0+ uses --device-ids instead of CUDA_VISIBLE_DEVICES.",
       "new_in": "v0.24.0",
+      "ui_hidden": true,
       "synced": true
+    },
+    "device": {
+      "type": "string",
+      "category": "internal",
+      "description": "Deprecated: use device_ids instead. Comma-separated GPU indices.",
+      "cli_flag": "",
+      "importance": "low",
+      "ui_hidden": true,
+      "deprecated": true
     },
     "data_parallel_backend": {
       "type": "choice",
