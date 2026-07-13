@@ -59,6 +59,21 @@ Updated to support vLLM v0.25.0. **291 CLI arguments** now supported (276 active
 - Tool call: `cohere_command`, `deepseek_v3`, `minimax_m3`, `rust`
 - Reasoning: `cohere_command`, `identity`, `minimax_m3`
 
+### 🔧 Dependency Doctor
+
+New on-demand dependency health checker for diagnosing missing system libraries:
+
+```bash
+vllm-cli doctor
+```
+
+Detects:
+- Missing FFmpeg shared libraries (required by torchcodec in vLLM 0.25.0+)
+- torchcodec availability and LD_LIBRARY_PATH issues
+- CUDA/PyTorch/vLLM installation status
+
+Runs **only on-demand** (not on every startup), so it has zero impact on performance.
+
 ## What's New in v0.2.9.7
 
 ### 🚀 vLLM 0.24.0 Full Support
