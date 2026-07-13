@@ -1290,3 +1290,220 @@ def check_optimization_recommendations() -> List[str]:
         recommendations.append("Install Triton for optimized CUDA kernels")
 
     return recommendations
+
+
+# ==============================================================================
+# Doctor: Dependency checker for vLLM CLI
+# ==============================================================================
+# Detects missing system dependencies (FFmpeg, torchcodec libs) and provides
+# automated fixes or clear guidance for manual resolution.
+#
+# This runs only on-demand (vllm-cli doctor), not on every startup.
+#
+# vLLM 0.25.0+ introduces torchcodec as a dependency, which requires FFmpeg
+# shared libraries at runtime. The multiprocessing spawn mode doesn't inherit
+# LD_LIBRARY_PATH from the parent process, causing child processes to fail
+# when loading torchcodec.
+# ==============================================================================
+
+from pathlib import Path
+from typing import Optional
+
+
+class DependencyIssue:
+    """Represents a detected dependency issue."""
+
+    def __init__(
+        self,
+        name: str,
+        severity: str,  # "critical", "warning", "info"
+        description: str,
+        fix_command: Optional[str] = None,
+        fix_description: Optional[str] = None,
+    ):
+        self.name = name
+        self.severity = severity
+        self.description = description
+        self.fix_command = fix_command
+        self.fix_description = fix_description
+
+
+def check_torchcodec_available() -> bool:
+    """Check if torchcodec can be imported without errors."""
+    try:
+        import torchcodec
+
+        from torchcodec._internally_replaced_utils import (
+            load_torchcodec_shared_libraries,
+        )
+
+        load_torchcodec_shared_libraries()
+        return True
+    except Exception as e:
+        logger.debug(f"torchcodec check failed: {e}")
+        return False
+
+
+def find_ffmpeg_libs() -> list[Path]:
+    """Find FFmpeg shared libraries on the system."""
+    libs_to_find = [
+        "libavutil",
+        "libavcodec",
+        "libavformat",
+        "libswscale",
+        "libswresample",
+        "libvpx",
+        "libdav1d",
+    ]
+
+    found_libs = []
+    search_dirs = [
+        Path("/usr/lib"),
+        Path("/usr/lib/x86_64-linux-gnu"),
+        Path("/usr/local/lib"),
+        Path("/opt/homebrew/lib"),
+    ]
+
+    for search_dir in search_dirs:
+        if not search_dir.exists():
+            continue
+        for lib_pattern in libs_to_find:
+            for lib_file in search_dir.glob(f"{lib_pattern}*.so*"):
+                if lib_file.is_file():
+                    found_libs.append(lib_file)
+
+    return found_libs
+
+
+def get_torchcodec_issues() -> list[DependencyIssue]:
+    """Check for torchcodec-related dependency issues."""
+    issues = []
+
+    try:
+        import torchcodec
+    except ImportError:
+        issues.append(
+            DependencyIssue(
+                name="torchcodec",
+                severity="warning",
+                description="torchcodec is not installed. Video processing will use opencv backend.",
+                fix_command="pip install torchcodec",
+                fix_description="Install torchcodec for hardware-accelerated video decoding.",
+            )
+        )
+        return issues
+
+    if not check_torchcodec_available():
+        ffmpeg_libs = find_ffmpeg_libs()
+        if not ffmpeg_libs:
+            issues.append(
+                DependencyIssue(
+                    name="torchcodec-libs",
+                    severity="critical",
+                    description="torchcodec cannot load FFmpeg shared libraries. "
+                    "FFmpeg development libraries are not installed on the system.",
+                    fix_command="sudo apt install ffmpeg libav-dev libvpx-dev libdav1d-dev",
+                    fix_description="Install FFmpeg development libraries, then run: vllm-cli doctor --fix",
+                )
+            )
+        else:
+            issues.append(
+                DependencyIssue(
+                    name="torchcodec-libs",
+                    severity="warning",
+                    description="torchcodec cannot load FFmpeg shared libraries. "
+                    f"Found {len(ffmpeg_libs)} system FFmpeg libs, but version may be incompatible.",
+                    fix_description="Run 'vllm-cli doctor --fix' to auto-configure library paths.",
+                )
+            )
+
+    return issues
+
+
+def get_system_dependency_issues() -> list[DependencyIssue]:
+    """Check for all system dependency issues."""
+    issues = []
+
+    # Check CUDA
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            issues.append(
+                DependencyIssue(
+                    name="cuda",
+                    severity="warning",
+                    description="CUDA is not available. GPU acceleration will not work.",
+                    fix_description="Install CUDA-compatible PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cu121",
+                )
+            )
+    except ImportError:
+        issues.append(
+            DependencyIssue(
+                name="pytorch",
+                severity="critical",
+                description="PyTorch is not installed.",
+                fix_command="pip install torch",
+                fix_description="Install PyTorch for model serving.",
+            )
+        )
+
+    # Check vLLM
+    try:
+        import vllm
+    except ImportError:
+        issues.append(
+            DependencyIssue(
+                name="vllm",
+                severity="critical",
+                description="vLLM is not installed.",
+                fix_command="pip install vllm",
+                fix_description="Install vLLM for model serving.",
+            )
+        )
+
+    # Check torchcodec (vLLM 0.25.0+ dependency)
+    issues.extend(get_torchcodec_issues())
+
+    return issues
+
+
+def run_dependency_check(verbose: bool = False) -> list[DependencyIssue]:
+    """Run all dependency checks and return issues.
+
+    Use this for on-demand checks (doctor command), not on every startup.
+    """
+    issues = get_system_dependency_issues()
+    if verbose:
+        for issue in issues:
+            logger.info(f"[{issue.severity.upper()}] {issue.name}: {issue.description}")
+    return issues
+
+
+def print_dependency_report(issues: list[DependencyIssue]) -> None:
+    """Print a formatted dependency report."""
+    from rich.console import Console
+    from rich.panel import Panel
+
+    console = Console()
+
+    if not issues:
+        console.print("[green]✓ All dependencies are properly configured.[/green]")
+        return
+
+    critical = [i for i in issues if i.severity == "critical"]
+    warnings = [i for i in issues if i.severity == "warning"]
+
+    if critical:
+        console.print("\n[red bold]Critical Issues:[/red bold]")
+        for issue in critical:
+            console.print(f"  ✗ {issue.name}: {issue.description}")
+            if issue.fix_command:
+                console.print(f"    Fix: [cyan]{issue.fix_command}[/cyan]")
+
+    if warnings:
+        console.print("\n[yellow bold]Warnings:[/yellow bold]")
+        for issue in warnings:
+            console.print(f"  ⚠ {issue.name}: {issue.description}")
+            if issue.fix_description:
+                console.print(f"    {issue.fix_description}")

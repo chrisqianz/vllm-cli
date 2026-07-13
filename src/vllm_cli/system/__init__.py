@@ -23,11 +23,17 @@ from .capabilities import (
 # Dependencies and capabilities
 from .dependencies import (
     check_optimization_recommendations,
+    DependencyIssue,
+    check_torchcodec_available,
+    find_ffmpeg_libs,
     get_attention_backend_info,
     get_core_dependencies,
     get_dependency_info,
     get_environment_info,
     get_quantization_info,
+    get_system_dependency_issues,
+    print_dependency_report,
+    run_dependency_check,
 )
 
 # Environment utilities
@@ -66,6 +72,13 @@ __all__ = [
     "get_core_dependencies",
     "get_environment_info",
     "check_optimization_recommendations",
+    # Doctor (on-demand dependency checking)
+    "DependencyIssue",
+    "check_torchcodec_available",
+    "find_ffmpeg_libs",
+    "get_system_dependency_issues",
+    "print_dependency_report",
+    "run_dependency_check",
     # Capabilities
     "get_gpu_capabilities",
     "get_attention_backend_capabilities",

@@ -27,6 +27,38 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.2.9.8
+
+### 🚀 vLLM 0.25.0 Full Support
+
+Updated to support vLLM v0.25.0. **291 CLI arguments** now supported (276 active + 15 new).
+
+**vLLM 0.25 Highlights:**
+- **Model Runner V2 Default**: Now the standard execution path for all dense models with EVS, realtime embeddings, Mamba hybrid prefix caching, multimodal-prefix bidirectional attention, and dynamic speculative decoding
+- **PagedAttention Removed**: Legacy attention implementation deleted — V1/MRv2 backends are the only path
+- **Transformers Backend Parity**: Now as fast as native vLLM with FP8 MoE support, CUDA graph fixes, and GPTBigCode/Starcoder2/RoBERTa migration
+- **New Streaming Parser Engine**: Unified tool-call/reasoning parsing with Kimi k2.5/k2.6/k2.7, seed_oss, and DeepSeek V4 parsers
+- **Universal Speculative Decoding**: Heterogeneous vocabulary support (TLI), new DSpark and DFlash drafters
+- **New Models**: LLaVA-OneVision-2, Unlimited OCR, MOSS-Transcribe-Diarize, openai/privacy-filter, Hy3, GLM-5 family, MiniMax-M3
+- **Hardware**: Blackwell/GB300 FlashInfer tuning, Helion kernels, AMD/ROCm torch 2.11 stable, Intel XPU W8A8 FP8, RISC-V/POWER support
+
+**New CLI Arguments (14 additions):**
+- **Backend**: `--backend` (mp, ray, debug engine backend selection)
+- **Cache**: `--cache-dtype` (KV cache data type)
+- **Monitoring**: `--enable-per-request-metrics`, `--jit-monitor-mode`, `--ray-workers-use-nsight`
+- **Quantization**: `--enable-stochastic-rounding`, `--quantization-config`, `--stochastic-rounding-philox-rounds`
+- **Multimodal**: `--mm-ipc-gpu-memory-gb`
+- **Scheduling**: `--policy`, `--ubatch-size`
+- **LoRA**: `--target-modules`
+- **Debug**: `--model-class-overrides`, `--method`
+
+**Deprecated (9 arguments):**
+`--aggregate-engine-logging`, `--data-parallel-multi-port-external-lb`, `--default-max-num-seqs`, `--fail-on-environ-validation`, `--limit-mm-per-prompt`, `--mamba-cache-philox-rounds`, `--shutdown-timeout`, `--sliding-window`, plus legacy v0.24.0 removals
+
+**New Parsers:**
+- Tool call: `cohere_command`, `deepseek_v3`, `minimax_m3`, `rust`
+- Reasoning: `cohere_command`, `identity`, `minimax_m3`
+
 ## What's New in v0.2.9.7
 
 ### 🚀 vLLM 0.24.0 Full Support

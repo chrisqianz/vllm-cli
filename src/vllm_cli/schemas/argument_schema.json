@@ -1,6 +1,6 @@
 {
-  "version": "2.1.0",
-  "description": "vLLM server argument definitions and metadata",
+  "version": "2.2.0",
+  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.25.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -776,22 +776,20 @@
       "default": null,
       "cli_flag": "--reasoning-parser",
       "choices": [
-        "cohere_command3",
-        "cohere_command4",
+        "cohere_command",
         "deepseek_r1",
         "deepseek_v3",
         "deepseek_v4",
         "ernie45",
         "gemma4",
-        "glm45",
+        "glm47",
         "granite",
-        "holo2",
         "hunyuan_a13b",
         "hy_v3",
+        "identity",
         "kimi_k2",
-        "mimo",
         "minimax_m2",
-        "minimax_m2_append_think",
+        "minimax_m3",
         "mistral",
         "nemotron_v3",
         "olmo3",
@@ -802,12 +800,13 @@
         "step3",
         "step3p5",
         null,
-        "glm47",
+        "glm45",
         "glm51",
-        "glm52"
+        "glm52",
+        "mimo"
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core.",
+      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core. New in v0.25.0: cohere_command, identity, minimax_m3. Parsers: deepseek_r1, deepseek_v3/v4, gemma4, glm47, granite, hunyuan_a13b, hy_v3, kimi_k2, minimax_m2/m3, mistral, nemotron_v3, olmo3, openai_gptoss, poolside_v1, qwen3, seed_oss, step3/3p5, ernie45",
       "deprecated": false,
       "deprecation_note": null,
       "removed_from_cli_in": null
@@ -1018,8 +1017,8 @@
       "cli_flag": "--tool-call-parser",
       "choices": [
         "apertus",
-        "cohere_command3",
-        "cohere_command4",
+        "cohere_command",
+        "deepseek_v3",
         "deepseek_v31",
         "deepseek_v32",
         "deepseek_v4",
@@ -1027,7 +1026,6 @@
         "functiongemma",
         "gemma4",
         "gigachat3",
-        "glm45",
         "glm47",
         "granite",
         "granite-20b-fc",
@@ -1040,33 +1038,34 @@
         "kimi_k2",
         "lfm2",
         "llama3_json",
-        "llama4_json",
-        "llama4_pythonic",
         "longcat",
-        "mimo",
         "minicpm5",
-        "minimax",
         "minimax_m2",
+        "minimax_m3",
         "mistral",
         "olmo3",
         "openai",
         "phi4_mini_json",
         "poolside_v1",
         "pythonic",
-        "qwen3_coder",
-        "qwen3_xml",
+        "qwen3",
+        "rust",
         "seed_oss",
         "step3",
         "step3p5",
         "xlam",
         null,
-        "qwen3",
+        "qwen3_coder",
+        "qwen3_xml",
+        "glm45",
         "glm51",
         "glm52",
-        "nemotron_v3"
+        "nemotron_v3",
+        "llama4_json",
+        "llama4_pythonic"
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. Parsers: openai, hermes, mistral, internlm, llama3_json, granite, jamba, deepseek_v3, deepseek_v31, glm45, hunyuan_a13b, kimi_k2, qwen3, minimax_m2, glm47/51/52, nemotron_v3"
+      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. Parsers: openai, hermes, mistral, internlm, llama3_json, granite, jamba, deepseek_v3/v31/v32/v4, glm47, hunyuan_a13b, kimi_k2, qwen3, minimax_m2/m3, ernie45, gemma4, apertus, cohere_command, functiongemma, gigachat3, gptoss, lfm2, olmo3, phi4_mini_json, poolside_v1, pythonic, rust, xlam"
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -2647,7 +2646,9 @@
       "default": false,
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - use data_parallel_external_lb with hybrid_lb instead"
     },
     "data_parallel_rank": {
       "type": "integer",
@@ -2892,7 +2893,9 @@
       "cli_flag": "--limit-mm-per-prompt",
       "importance": "medium",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - multimodal limits handled internally"
     },
     "skip_mm_profiling": {
       "type": "boolean",
@@ -3036,7 +3039,9 @@
       "cli_flag": "--sliding-window",
       "importance": "medium",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - sliding window managed by attention_config"
     },
     "aggregate_engine_logging": {
       "type": "boolean",
@@ -3046,7 +3051,9 @@
       "default": false,
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - engine logging aggregation consolidated into core logging"
     },
     "collect_detailed_traces": {
       "type": "list",
@@ -3085,7 +3092,9 @@
       "default": false,
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - environment validation is always enforced"
     },
     "jit_monitor_verbose": {
       "type": "boolean",
@@ -3104,7 +3113,9 @@
       "cli_flag": "--mamba-cache-philox-rounds",
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - use stochastic_rounding_philox_rounds instead"
     },
     "show_hidden_metrics_for_version": {
       "type": "string",
@@ -3123,7 +3134,9 @@
       "default": 0,
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - shutdown timeout managed internally"
     },
     "tokenizer_revision": {
       "type": "string",
@@ -3169,7 +3182,9 @@
       "cli_flag": "--default-max-num-seqs",
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.25.0 - sequence limits managed dynamically"
     },
     "default_max_num_batched_tokens": {
       "type": "dict",
@@ -3179,6 +3194,134 @@
       "importance": "low",
       "new_in": "v0.24.0",
       "synced": true
+    },
+    "backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Backend engine to use (e.g., mp, ray, debug). Selects the execution backend.",
+      "cli_flag": "--backend",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "cache_dtype": {
+      "type": "string",
+      "category": "memory",
+      "description": "Data type for KV cache storage.",
+      "cli_flag": "--cache-dtype",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "enable_per_request_metrics": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable per-request timing metrics on API responses.",
+      "cli_flag": "--enable-per-request-metrics",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "enable_stochastic_rounding": {
+      "type": "boolean",
+      "category": "quantization",
+      "description": "Enable stochastic rounding for quantized operations.",
+      "cli_flag": "--enable-stochastic-rounding",
+      "importance": "low",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "jit_monitor_mode": {
+      "type": "choice",
+      "category": "monitoring",
+      "description": "JIT monitor mode for runtime performance monitoring.",
+      "cli_flag": "--jit-monitor-mode",
+      "importance": "low",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "method": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Inference method override for development/debugging.",
+      "cli_flag": "--method",
+      "importance": "low",
+      "ui_hidden": true,
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "mm_ipc_gpu_memory_gb": {
+      "type": "number",
+      "category": "memory",
+      "description": "GPU memory size in GB for multimodal IPC shared memory.",
+      "cli_flag": "--mm-ipc-gpu-memory-gb",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "model_class_overrides": {
+      "type": "string",
+      "category": "model",
+      "description": "Override model class for development/debugging.",
+      "cli_flag": "--model-class-overrides",
+      "importance": "low",
+      "ui_hidden": true,
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "policy": {
+      "type": "string",
+      "category": "scheduling",
+      "description": "Scheduling policy override.",
+      "cli_flag": "--policy",
+      "importance": "low",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "quantization_config": {
+      "type": "string",
+      "category": "quantization",
+      "description": "Path to quantization configuration file.",
+      "cli_flag": "--quantization-config",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "ray_workers_use_nsight": {
+      "type": "boolean",
+      "category": "monitoring",
+      "description": "Enable NVIDIA Nsight profiler for Ray workers.",
+      "cli_flag": "--ray-workers-use-nsight",
+      "importance": "low",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "stochastic_rounding_philox_rounds": {
+      "type": "number",
+      "category": "quantization",
+      "description": "Number of Philox rounds for stochastic rounding.",
+      "cli_flag": "--stochastic-rounding-philox-rounds",
+      "importance": "low",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "target_modules": {
+      "type": "list",
+      "category": "lora",
+      "description": "Target modules for LoRA/adapter application.",
+      "cli_flag": "--target-modules",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
+    },
+    "ubatch_size": {
+      "type": "number",
+      "category": "scheduling",
+      "description": "Micro-batch size for compilation optimization.",
+      "cli_flag": "--ubatch-size",
+      "importance": "medium",
+      "new_in": "v0.25.0",
+      "synced": true
     }
   },
   "vllm_versions_supported": [
@@ -3187,10 +3330,12 @@
     "0.22.0",
     "0.22.1",
     "0.23.0",
-    "0.24.0"
+    "0.24.0",
+    "0.25.0"
   ],
-  "last_synced_version": "v0.24.0",
-  "deprecated_count": 116,
+  "last_synced_version": "v0.25.0",
+  "deprecated_count": 113,
   "new_in_v022_count": 52,
-  "new_in_v024_count": 60
+  "new_in_v024_count": 60,
+  "new_in_v025_count": 14
 }

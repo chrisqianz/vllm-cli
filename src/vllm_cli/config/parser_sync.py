@@ -25,18 +25,36 @@ VLLM_RAW_BASE = "https://raw.githubusercontent.com/vllm-project/vllm/main"
 TOOL_PARSER_NAME_MAP = {
     "deepseekv3": "deepseek_v3",
     "deepseekv31": "deepseek_v31",
-    "deepseekv32": "deepseek_v32",
+    "deepseekv32_engine": "deepseek_v32",
+    "deepseekv4_engine": "deepseek_v4",
     "granite_20b_fc": "granite-20b-fc",
     "glm4_moe": "glm45",
-    "glm47_moe": "glm45",
+    "glm47_moe": "glm47",
+    "glm47_engine": "glm47",
+    "gemma4_engine": "gemma4",
     "llama4_pythonic": "llama3_json",
     "minimax": "minimax_m2",
+    "minimax_m2": "minimax_m2",
+    "minimax_m3": "minimax_m3",
+    "qwen3_engine": "qwen3",
+    "seed_oss_engine": "seed_oss",
+    "nemotron_v3_engine": "nemotron_v3",
+    "phi4mini": "phi4_mini_json",
+    "minicpm5xml": "minicpm5",
+    "internlm2": "internlm",
 }
 
 REASONING_PARSER_NAME_MAP = {
-    "gptoss": "GptOss",
+    "gptoss": "openai_gptoss",
     "seedoss": "GptOss",
     "step3p5": "step3",
+    "seed_oss_engine": "seed_oss",
+    "qwen3_engine": "qwen3",
+    "deepseek_v4_engine": "deepseek_v4",
+    "gemma4_engine": "gemma4",
+    "nemotron_v3_engine": "nemotron_v3",
+    "glm47_moe": "glm47",
+    "minimax_m3": "minimax_m3",
 }
 
 

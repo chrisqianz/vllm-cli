@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.9.8] - 2026-07-13
+
+### Added
+- **vLLM 0.25.0 Full Support**: Updated to support vLLM v0.25.0
+- **14 New CLI Arguments**: Schema expanded to 291 arguments
+- **Backend Selection**: `--backend` (mp, ray, debug engine backend)
+- **Cache**: `--cache-dtype` (KV cache data type)
+- **Monitoring**: `--enable-per-request-metrics`, `--jit-monitor-mode`, `--ray-workers-use-nsight`
+- **Quantization**: `--enable-stochastic-rounding`, `--quantization-config`, `--stochastic-rounding-philoX-rounds`
+- **Multimodal**: `--mm-ipc-gpu-memory-gb`
+- **Scheduling**: `--policy`, `--ubatch-size`
+- **LoRA**: `--target-modules`
+- **Debug**: `--model-class-overrides`, `--method`
+- **New Tool Call Parsers**: `cohere_command`, `deepseek_v3`, `minimax_m3`, `rust`
+- **New Reasoning Parsers**: `cohere_command`, `identity`, `minimax_m3`
+- **Schema v2.2**: Argument schema updated to version 2.2.0 with v0.25.0 sync
+- **Dependency Doctor**: On-demand dependency health checker for detecting missing system libraries (FFmpeg, torchcodec)
+  - `vllm-cli doctor` command with severity levels and fix commands
+  - `get_system_dependency_issues()` for programmatic dependency checking
+  - Detects torchcodec/FFmpeg issues common with vLLM 0.25.0+
+
+### Deprecated
+- `--aggregate-engine-logging` (removed in vLLM v0.25.0)
+- `--data-parallel-multi-port-external-lb` (use data_parallel_external_lb with hybrid_lb)
+- `--default-max-num-seqs` (sequence limits managed dynamically)
+- `--fail-on-environ-validation` (env validation always enforced)
+- `--limit-mm-per-prompt` (multimodal limits handled internally)
+- `--mamba-cache-philox-rounds` (use stochastic_rounding_philoX_rounds)
+- `--shutdown-timeout` (managed internally)
+- `--sliding-window` (managed by attention_config)
+
+### Notes
+- **PagedAttention Removed**: Legacy attention backend fully deleted in vLLM v0.25.0
+- **Model Runner V2 Default**: Standard execution path for all dense models
+- **Transformers Backend Parity**: Now matches native vLLM performance
+
 ## [v0.2.9.7] - 2026-06-30
 
 ### Added

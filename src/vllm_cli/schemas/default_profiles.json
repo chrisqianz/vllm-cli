@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "description": "Default configuration profiles for vLLM CLI",
+  "version": "1.1",
+  "description": "Default configuration profiles for vLLM CLI (supports v0.20.0 - v0.25.0)",
   "profiles": {
     "standard": {
       "name": "Standard",
