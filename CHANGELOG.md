@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v0.2.9.8] - 2026-07-13
+## [v0.2.9.9] - 2026-07-27
+
+### Added
+- **vLLM 0.26.0 Full Support**: Updated to support vLLM v0.26.0
+- **Inkling Model Family**: Full support including tool call parser, reasoning parser, speculative decoding, LoRA, and NVFP4 quantization
+- **13 New Tool Call Parsers**: `inkling`, `apertus`, `ernie45`, `functiongemma`, `gigachat3`, `granite4`, `hermes`, `hunyuan_a13b`, `lfm2`, `olmo3`, `poolside_v1`, `pythonic`, `xlam`
+- **5 New Reasoning Parsers**: `inkling`, `ernie45`, `hunyuan_a13b`, `olmo3`, `poolside_v1`
+- **DeepSeek-V4 Performance**: Specialized routing kernel, fused_topk_bias, redundant repeat/copy removal
+- **Decode Context Parallel (DCP)**: Hybrid attention support, DCP + Eagle for Tokenspeed MLA
+- **PD Disaggregation**: NIXL pipeline-parallel prefill in push mode
+- **Expanded Quantization**: Humming w[2-7]a[4,8], NVFP4/MXFP4, INT2 XPU weight-only
+- **Transformers 5.13.0**: Olmo/Olmo2, MistralLarge3, HunyuanVL migration
+- **Rust Frontend**: Multimodal video and audio support
+- **OpenAI Compatibility**: `bad_words`, `logprob_token_ids`, `include_reasoning` for non-Harmony
+- **Endpoint Plugins Framework**: Extensible endpoint architecture
+- **Deepstream Video Decoding**: Hardware-accelerated video backend
+- **Schema v2.3**: Argument schema updated for v0.26.0 sync
+- `cli_args_sync.py`: Added v0.26.0 to SUPPORTED_VLLM_VERSIONS
+- `parser_sync.py`: Added 13 tool parsers and 5 reasoning parsers with name mappings
+
+### Removed
+- **TeleChat model**: Removed upstream in vLLM v0.26.0
+- **Persimmon model**: Removed upstream in vLLM v0.26.0
+- **Fuyu model**: Removed upstream in vLLM v0.26.0
+
+### Changed
+- **Dependency Range**: vLLM updated to `>=0.20.0,<0.27.0`
+
+### Notes
+- vLLM 0.26.0 features 411 commits from 212 contributors (61 new)
+- Transformers 5.13.0 is now the supported backend
+- DCP and PD disaggregation enable new large-scale serving topologies
+- Inkling model family has full support stack (modeling, CUDA graphs, FA4, LoRA, NVFP4)
 
 ### Added
 - **vLLM 0.25.0 Full Support**: Updated to support vLLM v0.25.0

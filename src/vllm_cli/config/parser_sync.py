@@ -42,6 +42,20 @@ TOOL_PARSER_NAME_MAP = {
     "phi4mini": "phi4_mini_json",
     "minicpm5xml": "minicpm5",
     "internlm2": "internlm",
+    # v0.26.0 additions
+    "inkling": "inkling",
+    "apertus": "apertus",
+    "ernie45": "ernie45",
+    "functiongemma": "functiongemma",
+    "gigachat3": "gigachat3",
+    "granite4": "granite4",
+    "hermes": "hermes",
+    "hunyuan_a13b": "hunyuan_a13b",
+    "lfm2": "lfm2",
+    "olmo3": "olmo3",
+    "poolside_v1": "poolside_v1",
+    "pythonic": "pythonic",
+    "xlam": "xlam",
 }
 
 REASONING_PARSER_NAME_MAP = {
@@ -55,6 +69,12 @@ REASONING_PARSER_NAME_MAP = {
     "nemotron_v3_engine": "nemotron_v3",
     "glm47_moe": "glm47",
     "minimax_m3": "minimax_m3",
+    # v0.26.0 additions
+    "inkling": "inkling",
+    "ernie45": "ernie45",
+    "hunyuan_a13b": "hunyuan_a13b",
+    "olmo3": "olmo3",
+    "poolside_v1": "poolside_v1",
 }
 
 
@@ -134,6 +154,8 @@ class ParserSync:
                 "basic_parsers.py",
                 "utils.py",
                 "gemma4_utils.py",
+                "streaming.py",
+                "structural_tag_registry.py",
             ):
                 continue
 

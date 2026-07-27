@@ -1,0 +1,19 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# macOS
+.DS_Store
+
+# Pi session
+.pi/
+
+# Build
+*.egg-info/
+dist/
+build/
+
+# Zip archives
+*-src.zip
