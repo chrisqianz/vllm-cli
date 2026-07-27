@@ -27,6 +27,36 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.2.9.9
+
+### 🚀 vLLM 0.26.0 Full Support
+
+Updated to support vLLM v0.26.0 (411 commits from 212 contributors).
+
+**vLLM 0.26 Highlights:**
+- **Inkling Model Family**: Full support stack — base modeling, piecewise CUDA graphs, Hopper FA4 relative attention, MTP=1 speculative decoding, LoRA, and ModelOpt NVFP4 quantization
+- **DeepSeek-V4 Performance Push**: Specialized routing kernel (2.94% E2E TPOT), `fused_topk_bias` (1.5-2x kernel), redundant repeat/copy removal (1.8% E2E TPOT)
+- **Transformers 5.13.0**: Olmo/Olmo2, MistralLarge3 (AutoWeightsLoader), HunyuanVL native processor
+- **Decode Context Parallel (DCP)**: Hybrid attention support, DCP + Eagle for Tokenspeed MLA
+- **PD Disaggregation**: NIXL pipeline-parallel prefill in push mode
+- **Expanded Quantization**: Humming w[2-7]a[4,8], NVFP4/MXFP4 (`nvfp4_per_token` online MoE), INT2 XPU weight-only
+- **API & Frontend**: Rust frontend multimodal video/audio, OpenAI `bad_words`/`logprob_token_ids`/`include_reasoning`, endpoint plugins framework, deepstream video decoding
+- **Models Removed**: TeleChat, Persimmon, Fuyu (removed upstream)
+
+**New Tool Call Parsers (13 additions):**
+`inkling`, `apertus`, `ernie45`, `functiongemma`, `gigachat3`, `granite4`, `hermes`, `hunyuan_a13b`, `lfm2`, `olmo3`, `poolside_v1`, `pythonic`, `xlam`
+
+**New Reasoning Parsers (5 additions):**
+`inkling`, `ernie45`, `hunyuan_a13b`, `olmo3`, `poolside_v1`
+
+**Hardware & Performance:**
+- **Blackwell**: FlashInfer fused all-reduce (world_size=16), CuTeDSL/FA4-MLA warmup, B12x backend
+- **AMD/ROCm**: torch 2.11 stable ABI, AITER FlashAttention MLA, HybridW4A16 linear kernel
+- **Intel XPU**: INT2 weight-only quant, DSpark speculative decoding
+- **CPU/RISC-V**: Accelerated unquantized MoE (AArch64), w8a8 int8 MoE, RVV W4A8 INT4 GEMM
+
+> See [Release Notes](RELEASE_NOTES_v0.2.9.9.md) for full details.
+
 ## What's New in v0.2.9.8
 
 ### 🚀 vLLM 0.25.0 Full Support

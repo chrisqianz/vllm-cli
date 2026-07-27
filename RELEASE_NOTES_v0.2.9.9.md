@@ -1,8 +1,8 @@
-# vllm-cli v0.2.9.9 Release Notes
+# vllm-cli v0.2.9.9 Release Notes (2026-07-27)
 
 ## Overview
 
-vllm-cli v0.2.9.9 adds full support for **vLLM v0.26.0**, including the Inkling model family, DeepSeek-V4 performance optimizations, Transformers 5.13.0 migration, Decode Context Parallel (DCP), PD disaggregation with NIXL, and expanded quantization support (Humming, NVFP4/MXFP4, INT2 XPU).
+vllm-cli v0.2.9.9 adds full support for **vLLM v0.26.0** (411 commits from 212 contributors, 61 new), including the Inkling model family, DeepSeek-V4 performance optimizations, Transformers 5.13.0 migration, Decode Context Parallel (DCP), PD disaggregation with NIXL, and expanded quantization support (Humming, NVFP4/MXFP4, INT2 XPU).
 
 ## Key Changes
 

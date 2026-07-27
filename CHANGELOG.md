@@ -10,19 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.2.9.9] - 2026-07-27
 
 ### Added
-- **vLLM 0.26.0 Full Support**: Updated to support vLLM v0.26.0
+- **vLLM 0.26.0 Full Support**: Updated to support vLLM v0.26.0 (411 commits from 212 contributors)
 - **Inkling Model Family**: Full support including tool call parser, reasoning parser, speculative decoding, LoRA, and NVFP4 quantization
 - **13 New Tool Call Parsers**: `inkling`, `apertus`, `ernie45`, `functiongemma`, `gigachat3`, `granite4`, `hermes`, `hunyuan_a13b`, `lfm2`, `olmo3`, `poolside_v1`, `pythonic`, `xlam`
 - **5 New Reasoning Parsers**: `inkling`, `ernie45`, `hunyuan_a13b`, `olmo3`, `poolside_v1`
-- **DeepSeek-V4 Performance**: Specialized routing kernel, fused_topk_bias, redundant repeat/copy removal
+- **DeepSeek-V4 Performance**: Specialized routing kernel (2.94% TPOT), fused_topk_bias (1.5-2x), redundant repeat/copy removal (1.8% TPOT)
 - **Decode Context Parallel (DCP)**: Hybrid attention support, DCP + Eagle for Tokenspeed MLA
 - **PD Disaggregation**: NIXL pipeline-parallel prefill in push mode
-- **Expanded Quantization**: Humming w[2-7]a[4,8], NVFP4/MXFP4, INT2 XPU weight-only
-- **Transformers 5.13.0**: Olmo/Olmo2, MistralLarge3, HunyuanVL migration
+- **Expanded Quantization**: Humming w[2-7]a[4,8], NVFP4/MXFP4 (nvfp4_per_token online MoE), INT2 XPU weight-only, CuTe-DSL FlashInfer MXFP4
+- **Transformers 5.13.0**: Olmo/Olmo2, MistralLarge3 (AutoWeightsLoader), HunyuanVL native processor migration
 - **Rust Frontend**: Multimodal video and audio support
-- **OpenAI Compatibility**: `bad_words`, `logprob_token_ids`, `include_reasoning` for non-Harmony
+- **OpenAI Compatibility**: `bad_words` in `/v1/completions`, `logprob_token_ids`, `include_reasoning` for non-Harmony models
 - **Endpoint Plugins Framework**: Extensible endpoint architecture
 - **Deepstream Video Decoding**: Hardware-accelerated video backend
+- **Human-Readable CLI Args**: Integer formatting for more arguments
+- **Grammar Compilation Safety**: Handle grammar compilation failures without crashing the engine
 - **Schema v2.3**: Argument schema updated for v0.26.0 sync
 - `cli_args_sync.py`: Added v0.26.0 to SUPPORTED_VLLM_VERSIONS
 - `parser_sync.py`: Added 13 tool parsers and 5 reasoning parsers with name mappings
@@ -36,10 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependency Range**: vLLM updated to `>=0.20.0,<0.27.0`
 
 ### Notes
-- vLLM 0.26.0 features 411 commits from 212 contributors (61 new)
 - Transformers 5.13.0 is now the supported backend
 - DCP and PD disaggregation enable new large-scale serving topologies
 - Inkling model family has full support stack (modeling, CUDA graphs, FA4, LoRA, NVFP4)
+
+## [v0.2.9.8] - 2026-07-13
 
 ### Added
 - **vLLM 0.25.0 Full Support**: Updated to support vLLM v0.25.0
