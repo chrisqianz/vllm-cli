@@ -14,6 +14,7 @@ from rich.console import Console
 
 from .handlers import (
     handle_dirs,
+    handle_import,
     handle_info,
     handle_models,
     handle_proxy,
@@ -54,6 +55,7 @@ def handle_cli_command(args: argparse.Namespace) -> bool:
             "stop": handle_stop,
             "dirs": handle_dirs,
             "recipes": handle_recipes,
+            "import": handle_import,
         }
 
         command = args.command

@@ -97,7 +97,7 @@ def create_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(
         dest="command",
         help="Available commands",
-        metavar="{serve,proxy,info,models,shortcuts,status,stop,dirs,recipes}",
+        metavar="{serve,proxy,info,models,shortcuts,status,stop,dirs,recipes,import}",
     )
 
     # Add individual command parsers
@@ -110,6 +110,7 @@ def create_parser() -> argparse.ArgumentParser:
     _add_stop_parser(subparsers)
     _add_dirs_parser(subparsers)
     _add_recipes_parser(subparsers)
+    _add_import_parser(subparsers)
 
     return parser
 
@@ -601,4 +602,44 @@ def _add_recipes_parser(subparsers) -> None:
         "--apply-parsers",
         action="store_true",
         help="Apply synced parsers to local schema (use with --sync-parsers)",
+    )
+
+
+def _add_import_parser(subparsers) -> None:
+    """Add the import command parser."""
+    import_parser = subparsers.add_parser(
+        "import",
+        help="Import a vllm serve command as a profile",
+        description="Parse a raw vllm serve command line and convert it to a profile configuration",
+    )
+
+    import_parser.add_argument(
+        "raw_command",
+        type=str,
+        nargs="?",
+        help="Raw vllm serve command to import (e.g., 'vllm serve model --flag value')",
+    )
+
+    import_parser.add_argument(
+        "--name",
+        type=str,
+        help="Profile name (auto-generated from model if not provided)",
+    )
+
+    import_parser.add_argument(
+        "--description",
+        type=str,
+        help="Profile description",
+    )
+
+    import_parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Show preview of parsed configuration without saving",
+    )
+
+    import_parser.add_argument(
+        "--file",
+        type=str,
+        help="Read command from a file instead of command line argument",
     )

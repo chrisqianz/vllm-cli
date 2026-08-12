@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.0.0] - 2025-08-12
+
+### Added
+- **One-Click Command Import**: New `vllm-cli import` command to parse raw `vllm serve` commands into profiles
+  - Supports standard CLI flags (`--flag value`, `--boolean-flag`)
+  - Supports dot-notation config keys (`--speculative_config.method dflash`)
+  - Auto-generates profile names from model paths
+  - Preview mode with `--preview` flag
+  - File input with `--file` option
+- **vLLM 0.27.1 / 0.27.0 Full Support**: Updated to support vLLM v0.27.x (561 commits from 242 contributors in v0.27.0)
+- **Kimi K3 Full Stack Support**: New model with dedicated tool call parser, reasoning parser, DSpark AR fusion, DeepGEMM, compressed-tensors quantized checkpoints, and optional shared-expert sharding
+- **Qwen3.5 Support**: Text-only dense and MoE models with EVS video token pruning
+- **New Models**: K-EXAONE-2.0-750B-A37B, VaultGemma (Transformers backend), jina-embeddings-v5-text-nano (EuroBERT encoder)
+- **New Tool Call Parsers**: `kimi_k3`, `mimo`, `llama4_json`, `llama4_pythonic`, `cohere_command3`, `cohere_command4`, `glm45`
+- **New Reasoning Parser**: `kimi_k3`
+- **`--spec-tokens` parameter**: Added missing speculative decoding token count parameter
+- **PyTorch 2.13.0**: Breaking environment upgrade with torchvision 0.28.0 and Triton 3.7.1
+- **FlashAttention 4 Deepened**: FP8 KV cache support, headdim-256, JIT warmup infrastructure, runner-owned Triton kernel warmup
+- **DeepSeek-V4 Performance**: Sequence parallelism, ~2x kernel improvement, 3.4% E2E TTFT, adaptive topk width, compact MXFP4 indexer KV cache
+- **Model Runner V2**: Expands to non-generative workloads (encoder-only, embedding/classification, multimodal on CPU)
+- **New Quantization**: FP4 Qutlass (compressed-tensors), CuTeDSL MoE for ReLU2 NVFP4, MXFP8 linear (INC), AutoRound W4A16 MoE, MXFP4 (XPU), KV quant mode (TurboQuant), ModelOpt FP8 (SM80), `--linear-backend` for ModelOpt W4A16
+- **API Enhancements**: Cohere chat v2, `cache_salt` (Anthropic Messages), strict tool calling (GPT-OSS Harmony), unified Mistral parser, `stream_interval` per-request, `--limit-mm-per-prompt`
+- **Hardware**: `sm_107` target (NVIDIA Rubin), ROCm gfx1250, NCCL 2.30.7 (DeepEPv2)
+- **Rust Frontend**: gRPC control plane, `vllm-bench` integrated into `vllm` CLI
+- **Schema v2.4**: Argument schema updated for v0.27.0 sync
+- `cli_args_sync.py`: Added v0.27.1 and v0.27.0 to SUPPORTED_VLLM_VERSIONS
+- `parser_sync.py`: Added kimi_k3, mimo, llama4_json, llama4_pythonic, cohere_command3/4 name mappings
+
+### Removed
+- **Plamo2 model**: Removed upstream in vLLM v0.27.0
+- **Ouro model**: Removed upstream in vLLM v0.27.0
+- **`max_num_partial_prefills` argument**: Removed in vLLM v0.27.0
+- **`max_long_partial_prefills` argument**: Removed in vLLM v0.27.0
+- **`qwen3` tool parser**: Replaced by `qwen3_coder` and `qwen3_xml` for more specific selection
+- **`rust` tool parser**: No longer in vLLM 0.27.0
+- **`granite-20b-fc` tool parser**: No longer in vLLM 0.27.0
+
+### Changed
+- **Dependency Range**: vLLM updated to `>=0.20.0,<0.28.0`
+- **Version**: Major bump from 0.2.9.x to 0.3.0.0 (vLLM major version 0.26 → 0.27)
+- **`--speculative-config`**: Fixed incorrect deprecation status (was marked as removed in v0.22.0, but is still active)
+- **`--spec-method`**: Updated choices to include `ngram_gpu`, `eagle3`, `mtp`, `dflash`, `dspark`
+- **`--spec-tokens`**: Added missing parameter
+
+### Notes
+- PyTorch 2.13.0 is a breaking environment change; ensure compatible CUDA/toolchain
+- Transformers 5.14.1 is now the supported backend
+- FlashInfer 0.6.16.post3 required for latest kernel optimizations
+- Kimi K3 requires `--trust-remote-code` for initial loading
+- Speculative decoding: `--spec-method`/`--spec-model`/`--spec-tokens` are convenience flags that populate `--speculative-config`; they are mutually exclusive for the same keys
+
 ## [v0.2.9.9] - 2026-07-27
 
 ### Added

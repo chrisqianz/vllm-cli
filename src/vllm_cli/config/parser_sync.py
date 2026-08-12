@@ -36,7 +36,9 @@ TOOL_PARSER_NAME_MAP = {
     "minimax": "minimax_m2",
     "minimax_m2": "minimax_m2",
     "minimax_m3": "minimax_m3",
-    "qwen3_engine": "qwen3",
+    "qwen3_engine": "qwen3_coder",
+    "qwen3_coder": "qwen3_coder",
+    "qwen3_xml": "qwen3_xml",
     "seed_oss_engine": "seed_oss",
     "nemotron_v3_engine": "nemotron_v3",
     "phi4mini": "phi4_mini_json",
@@ -56,6 +58,13 @@ TOOL_PARSER_NAME_MAP = {
     "poolside_v1": "poolside_v1",
     "pythonic": "pythonic",
     "xlam": "xlam",
+    # v0.27.0 additions
+    "kimi_k3": "kimi_k3",
+    "mimo": "mimo",
+    "llama4_json": "llama4_json",
+    "llama4_pythonic": "llama4_pythonic",
+    "cohere_command3": "cohere_command3",
+    "cohere_command4": "cohere_command4",
 }
 
 REASONING_PARSER_NAME_MAP = {
@@ -75,6 +84,8 @@ REASONING_PARSER_NAME_MAP = {
     "hunyuan_a13b": "hunyuan_a13b",
     "olmo3": "olmo3",
     "poolside_v1": "poolside_v1",
+    # v0.27.0 additions
+    "kimi_k3": "kimi_k3",
 }
 
 

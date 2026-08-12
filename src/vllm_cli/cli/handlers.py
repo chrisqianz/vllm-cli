@@ -1257,3 +1257,84 @@ def handle_recipes(args: argparse.Namespace) -> bool:
             "[yellow]Please specify an action: --list, --sync, --sync-args, --sync-parsers, or --import[/yellow]"
         )
         return False
+
+
+def handle_import(args: argparse.Namespace) -> bool:
+    """
+    Handle the 'import' command to parse a vllm serve command and create a profile.
+
+    Args:
+        args: Parsed command line arguments
+
+    Returns:
+        True if import successful, False otherwise
+    """
+    try:
+        from ..config.command_import import CommandImporter
+
+        # Get the command
+        command = getattr(args, 'raw_command', None)
+        if args.file:
+            try:
+                with open(args.file, "r") as f:
+                    command = f.read().strip()
+            except Exception as e:
+                console.print(f"[red]Error reading file: {e}[/red]")
+                return False
+
+        if not command:
+            console.print("[red]Error: No command provided.[/red]")
+            console.print("Usage: vllm-cli import 'vllm serve model --flag value'")
+            console.print("   or: vllm-cli import --file command.txt")
+            console.print("")
+            console.print("You can also pipe a command via stdin:")
+            console.print("   echo 'vllm serve model --flag value' | vllm-cli import --stdin")
+            return False
+
+        # Parse the command
+        importer = CommandImporter()
+
+        if args.preview:
+            # Show preview
+            preview = importer.preview(command)
+            console.print(Panel(
+                preview,
+                title="[cyan]Import Preview[/cyan]",
+                border_style="cyan",
+            ))
+            return True
+
+        # Convert to profile
+        profile = importer.to_profile(command, name=args.name, description=args.description)
+
+        # Display the profile
+        console.print(f"[green]Parsed configuration:[/green]")
+        console.print(f"  Model: {profile['config'].get('model', profile.get('model', 'N/A'))}")
+        console.print(f"  Profile name: {profile['name']}")
+        console.print(f"  Config keys: {len(profile['config'])}")
+        console.print("")
+
+        # Show config summary
+        table = Table(title="Configuration")
+        table.add_column("Key", style="cyan")
+        table.add_column("Value", style="green")
+
+        for key, value in sorted(profile["config"].items()):
+            table.add_row(key, str(value))
+
+        console.print(table)
+
+        # Save the profile
+        config_manager = ConfigManager()
+        if config_manager.save_user_profile(profile["name"], profile):
+            console.print(f"\n[green]✓ Profile '{profile['name']}' saved successfully![/green]")
+            console.print(f"  Use: vllm-cli serve --profile {profile['name']}")
+            return True
+        else:
+            console.print(f"\n[red]Failed to save profile '{profile['name']}'[/red]")
+            return False
+
+    except Exception as e:
+        console.print(f"[red]Error importing command: {e}[/red]")
+        logger.exception("Import failed")
+        return False

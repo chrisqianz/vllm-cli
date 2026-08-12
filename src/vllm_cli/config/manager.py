@@ -5,6 +5,7 @@ Configuration manager for vLLM CLI.
 Handles configuration file management and validation using
 the new validation framework.
 """
+import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -328,7 +329,12 @@ class ConfigManager:
                 if value:  # Only add flag if True
                     args.append(cli_flag)
             elif arg_type in ["integer", "float", "string", "choice"]:
-                args.extend([cli_flag, str(value)])
+                # If value is a dict (e.g., speculative_config stored as dict in profile),
+                # serialize to JSON string for CLI
+                if isinstance(value, dict):
+                    args.extend([cli_flag, json.dumps(value)])
+                else:
+                    args.extend([cli_flag, str(value)])
             elif arg_type == "list":
                 if isinstance(value, list):
                     args.extend([cli_flag, ",".join(str(v) for v in value)])

@@ -1,6 +1,6 @@
 {
-  "version": "2.2.0",
-  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.25.0)",
+  "version": "2.4.0",
+  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.27.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -68,10 +68,11 @@
         "experts_int8",
         "modelopt_fp4",
         "modelopt_mxfp8",
-        "humming"
+        "humming",
+        "nvfp4"
       ],
       "importance": "high",
-      "hint": "Reduces memory usage but may impact quality"
+      "hint": "Reduces memory usage but may impact quality. New in v0.27.0: nvfp4 (NVFP4 via compressed-tensors)"
     },
     "max_model_len": {
       "type": "integer",
@@ -788,6 +789,7 @@
         "hy_v3",
         "identity",
         "kimi_k2",
+        "kimi_k3",
         "minimax_m2",
         "minimax_m3",
         "mistral",
@@ -799,14 +801,10 @@
         "seed_oss",
         "step3",
         "step3p5",
-        null,
-        "glm45",
-        "glm51",
-        "glm52",
-        "mimo"
+        null
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core. New in v0.25.0: cohere_command, identity, minimax_m3. Parsers: deepseek_r1, deepseek_v3/v4, gemma4, glm47, granite, hunyuan_a13b, hy_v3, kimi_k2, minimax_m2/m3, mistral, nemotron_v3, olmo3, openai_gptoss, poolside_v1, qwen3, seed_oss, step3/3p5, ernie45",
+      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core. New in v0.25.0: cohere_command, identity, minimax_m3. New in v0.27.0: kimi_k3. Parsers: deepseek_r1, deepseek_v3/v4, gemma4, glm47, granite, hunyuan_a13b, hy_v3, kimi_k2/k3, minimax_m2/m3, mistral, nemotron_v3, olmo3, openai_gptoss, poolside_v1, qwen3, seed_oss, step3/3p5, ernie45",
       "deprecated": false,
       "deprecation_note": null,
       "removed_from_cli_in": null
@@ -1017,7 +1015,8 @@
       "cli_flag": "--tool-call-parser",
       "choices": [
         "apertus",
-        "cohere_command",
+        "cohere_command3",
+        "cohere_command4",
         "deepseek_v3",
         "deepseek_v31",
         "deepseek_v32",
@@ -1026,19 +1025,24 @@
         "functiongemma",
         "gemma4",
         "gigachat3",
+        "glm45",
         "glm47",
         "granite",
-        "granite-20b-fc",
         "granite4",
         "hermes",
         "hunyuan_a13b",
         "hy_v3",
+        "inkling",
         "internlm",
         "jamba",
         "kimi_k2",
+        "kimi_k3",
         "lfm2",
         "llama3_json",
+        "llama4_json",
+        "llama4_pythonic",
         "longcat",
+        "mimo",
         "minicpm5",
         "minimax_m2",
         "minimax_m3",
@@ -1048,24 +1052,16 @@
         "phi4_mini_json",
         "poolside_v1",
         "pythonic",
-        "qwen3",
-        "rust",
+        "qwen3_coder",
+        "qwen3_xml",
         "seed_oss",
         "step3",
         "step3p5",
         "xlam",
-        null,
-        "qwen3_coder",
-        "qwen3_xml",
-        "glm45",
-        "glm51",
-        "glm52",
-        "nemotron_v3",
-        "llama4_json",
-        "llama4_pythonic"
+        null
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. Parsers: openai, hermes, mistral, internlm, llama3_json, granite, jamba, deepseek_v3/v31/v32/v4, glm47, hunyuan_a13b, kimi_k2, qwen3, minimax_m2/m3, ernie45, gemma4, apertus, cohere_command, functiongemma, gigachat3, gptoss, lfm2, olmo3, phi4_mini_json, poolside_v1, pythonic, rust, xlam"
+      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. v0.27.0: qwen3 replaced by qwen3_coder/qwen3_xml, added kimi_k3, glm45, mimo, llama4_json, llama4_pythonic, cohere_command3/4. Removed: rust, granite-20b-fc. Use qwen3_coder for Qwen3 coding models, qwen3_xml for XML output."
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -1119,14 +1115,14 @@
     "speculative_config": {
       "type": "string",
       "category": "optimization",
-      "description": "Speculative decoding configuration (JSON format)",
+      "description": "Speculative decoding configuration (JSON format). Primary method for v0.22+.",
       "default": null,
       "cli_flag": "--speculative-config",
-      "importance": "low",
-      "hint": "Example: {\"method\": \"qwen3_next_mtp\", \"num_speculative_tokens\": 2}",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "importance": "medium",
+      "hint": "Example: {\"method\": \"mtp\", \"num_speculative_tokens\": 3} or {\"method\": \"dspark\", \"num_speculative_tokens\": 7, \"draft_sample_method\": \"probabilistic\"}. Mutually exclusive with --spec-method/--spec-model/--spec-tokens for the same keys.",
+      "deprecated": false,
+      "deprecation_note": null,
+      "removed_from_cli_in": null
     },
     "attention_backend": {
       "type": "choice",
@@ -1539,13 +1535,25 @@
       "choices": [
         "auto",
         "triton",
+        "batched_triton",
+        "deep_gemm",
+        "deep_gemm_mega_moe",
         "cutlass",
-        "trtllm",
+        "flashinfer_trtllm",
+        "flashinfer_cutlass",
+        "flashinfer_cutedsl",
+        "flashinfer_b12x",
+        "marlin",
+        "humming",
+        "triton_unfused",
         "aiter",
+        "flydsl",
+        "hpc",
+        "emulation",
         null
       ],
       "importance": "medium",
-      "hint": "Controls which backend is used for MoE fused kernel"
+      "hint": "Controls which backend is used for MoE fused kernel. v0.27.0: added deep_gemm, deep_gemm_mega_moe, flashinfer_trtllm, flashinfer_cutlass, flashinfer_cutedsl, flashinfer_b12x, marlin, humming, triton_unfused, flydsl, hpc, emulation, batched_triton"
     },
     "ir_op_priority": {
       "type": "string",
@@ -2458,23 +2466,44 @@
     "spec_method": {
       "type": "choice",
       "category": "performance",
-      "description": "Speculative decoding method",
+      "description": "Speculative decoding method. Convenience flag for --speculative-config['method'].",
       "cli_flag": "--spec-method",
       "choices": [
         "ngram",
-        "eagle",
+        "ngram_gpu",
         "medusa",
+        "eagle",
+        "eagle3",
+        "mtp",
+        "dflash",
+        "dspark",
         "none"
       ],
       "importance": "medium",
+      "hint": "Mutually exclusive with --speculative-config['method']. Use --speculative-config for advanced options. Methods: mtp (Multi-Token Prediction), dspark (DSpark AR fusion), dflash (DFlash), eagle/eagle3 (EAGLE draft), medusa, ngram/ngram_gpu. Model-specific MTP types (e.g., qwen3_next_mtp) are auto-detected via --speculative-config.",
       "added_in": "v0.22.0"
     },
     "spec_model": {
       "type": "string",
       "category": "performance",
-      "description": "Speculative decoding draft model",
+      "description": "Speculative decoding draft model. Convenience flag for --speculative-config['model'].",
       "cli_flag": "--spec-model",
       "importance": "medium",
+      "hint": "Mutually exclusive with --speculative-config['model']. For MTP/DSpark, the draft module is typically embedded in the model checkpoint.",
+      "added_in": "v0.22.0"
+    },
+    "spec_tokens": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Number of speculative tokens. Convenience flag for --speculative-config['num_speculative_tokens'].",
+      "cli_flag": "--spec-tokens",
+      "default": null,
+      "validation": {
+        "min": 1,
+        "max": 100
+      },
+      "importance": "medium",
+      "hint": "Mutually exclusive with --speculative-config['num_speculative_tokens']. Typical values: 3 for MTP, 7 for DSpark.",
       "added_in": "v0.22.0"
     },
     "ssl_ca_certs": {

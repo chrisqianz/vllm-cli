@@ -16,6 +16,7 @@ with rich formatting and comprehensive error handling.
 
 # Individual command handlers
 from .handlers import (
+    handle_import,
     handle_info,
     handle_models,
     handle_recipes,
@@ -50,6 +51,7 @@ __all__ = [
     "parse_args",
     # Command handlers
     "handle_serve",
+    "handle_import",
     "handle_info",
     "handle_models",
     "handle_recipes",

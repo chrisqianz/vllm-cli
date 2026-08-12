@@ -24,6 +24,7 @@ from .persistence import PersistenceManager
 from .profiles import ProfileManager
 from .schemas import SchemaManager
 from .shortcuts import ShortcutManager
+from .command_import import CommandImporter
 
 __all__ = [
     "ConfigManager",
@@ -31,4 +32,5 @@ __all__ = [
     "SchemaManager",
     "PersistenceManager",
     "ShortcutManager",
+    "CommandImporter",
 ]
