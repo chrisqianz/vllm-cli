@@ -24,8 +24,69 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 - **📝 Advanced Configuration** - Full control over vLLM parameters with validation
 - **🔄 CLI Argument Sync** - Automatic synchronization with vLLM source code
 - **📦 Official Recipes** - Import optimized profiles from vLLM community
+- **📋 One-Click Import** - Parse raw `vllm serve` commands into profiles instantly
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
+
+## What's New in v0.3.0.0
+
+### 🚀 vLLM 0.27.x Full Support
+
+Updated to support vLLM v0.27.0/v0.27.1 (561 commits from 242 contributors). **Major version bump** from 0.2.9.x to 0.3.0.0.
+
+**vLLM 0.27 Highlights:**
+- **Kimi K3 Full Stack**: Core model files, kernels, Python/Rust frontends, AttnRes, DeepGEMM, compressed-tensors, DSpark AR fusion, shared-expert sharding
+- **Qwen3.5**: Text-only dense and MoE models with EVS video token pruning
+- **PyTorch 2.13.0**: Breaking environment upgrade with torchvision 0.28.0 and Triton 3.7.1
+- **FlashAttention 4 Deepened**: FP8 KV cache, headdim-256, JIT warmup, runner-owned Triton kernel warmup
+- **DeepSeek-V4 Performance**: Sequence parallelism, ~2x kernel improvement, adaptive topk width, compact MXFP4 indexer
+- **Model Runner V2**: Expands to encoder-only, embedding/classification, multimodal on CPU
+- **Expanded Quantization**: FP4 Qutlass, CuTeDSL MoE (NVFP4), MXFP8 linear (INC), AutoRound W4A16 MoE, MXFP4 (XPU), TurboQuant KV quant
+- **New Models**: K-EXAONE-2.0-750B-A37B, VaultGemma, jina-embeddings-v5-text-nano
+- **Hardware**: `sm_107` (NVIDIA Rubin), ROCm gfx1250, NCCL 2.30.7 (DeepEPv2)
+- **Models Removed**: Plamo2, Ouro
+
+**New Tool Call Parsers (7 additions):**
+`kimi_k3`, `mimo`, `llama4_json`, `llama4_pythonic`, `cohere_command3`, `cohere_command4`, `glm45`
+
+**New Reasoning Parsers (1 addition):**
+`kimi_k3`
+
+**Speculative Decoding Fixes:**
+- `--speculative-config` deprecation status corrected (was incorrectly marked as removed)
+- Added `--spec-tokens` parameter
+- Updated `--spec-method` choices: `ngram`, `ngram_gpu`, `medusa`, `eagle`, `eagle3`, `mtp`, `dflash`, `dspark`
+- Fixed dict-to-JSON serialization in CLI argument builder
+
+**MoE Backend Expansion:**
+- Expanded from 5 to 17 backends: `auto`, `triton`, `batched_triton`, `deep_gemm`, `deep_gemm_mega_moe`, `cutlass`, `flashinfer_trtllm`, `flashinfer_cutlass`, `flashinfer_cutedsl`, `flashinfer_b12x`, `marlin`, `humming`, `triton_unfused`, `aiter`, `flydsl`, `hpc`, `emulation`
+
+### 📋 One-Click Command Import
+
+New `vllm-cli import` command to parse raw `vllm serve` commands into profiles:
+
+```bash
+# Import a command directly
+vllm-cli import 'vllm serve model --flag value --boolean-flag'
+
+# With custom name
+vllm-cli import 'vllm serve model --flag value' --name my-profile
+
+# Preview without saving
+vllm-cli import 'vllm serve model --flag value' --preview
+
+# From file
+vllm-cli import --file command.txt
+```
+
+Supports:
+- Standard CLI flags (`--flag value`, `--boolean-flag`)
+- Dot-notation config keys (`--speculative_config.method dflash`)
+- Auto-generated profile names from model paths
+- Type conversion (strings to int/float/boolean)
+- Nested config dictionaries
+
+> See [Release Notes](RELEASE_NOTES_v0.3.0.0.md) for full details.
 
 ## What's New in v0.2.9.9
 
@@ -381,7 +442,7 @@ For detailed usage instructions, see the [📘 Usage Guide](docs/usage-guide.md)
 
 ### Built-in Profiles
 
-vLLM CLI includes 7 optimized profiles for different use cases:
+vLLM CLI includes 40+ optimized profiles for different use cases:
 
 **General Purpose:**
 - `standard` - Minimal configuration with smart defaults
@@ -429,11 +490,12 @@ vLLM CLI uses [hf-model-tool](https://github.com/Chen-zexi/hf-model-tool) for mo
 ```
 src/vllm_cli/
 ├── cli/           # CLI command handling
-├── config/        # Configuration management
+├── config/        # Configuration management (profiles, sync, import)
 ├── models/        # Model management
 ├── server/        # Server lifecycle
 ├── ui/            # Terminal interface
-└── schemas/       # JSON schemas
+├── schemas/       # JSON schemas
+└── validation/    # Configuration validation
 ```
 
 ### Contributing
