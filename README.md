@@ -28,6 +28,40 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.4.0.0
+
+### 🚀 vLLM 0.28.0 Full Support
+
+Updated to support vLLM v0.28.0 (584 commits from 270 contributors). **Major version bump** from 0.3.0.0 to 0.4.0.0.
+
+**vLLM 0.28 Highlights:**
+- **Kimi-K3 Performance Push**: DCP support, fused FlashKDA decode/prefill kernels, SiTU activation for MegaMoE, GEMM-RS sequence parallelism, adaptive speculative token budget (~60% better DSpark TTFT), optional shared-expert sharding (~17 GiB/GPU saved), ROCm V2 model runner
+- **DeepSeek V4**: Sparse MLA end-to-end for decode/MTP/DSpark, AMD Quark NVFP4, reasoning-effort prompts, ROCm gfx11/gfx950
+- **Speculative Decoding**: DFlash2 (local convolution + candidate selector), DSpark confidence-scheduled verification, async scheduling auto-enabled for draft models
+- **Model Runner V2**: E/P/D disaggregation, weight offloading, multi-layer MTP KV cache, encoder CUDA graphs, `thinking_token_budget`
+- **Tiered KV Offloading**: Disk offloading, out-of-tree secondary tier managers via `module_path`
+- **New Models**: Muse Glimmer, Ling 3.0 Flash (BF16/MTP/FP8/MXFP4), Dots3 NOTE (multimodal), Interns2mobius
+- **New Defaults**: `max_num_batched_tokens` 8192→16384, prefix caching on by default for Mamba
+- **Breaking**: bitsandbytes moved to out-of-tree plugin, `calculate_kv_scales` and `override_attention_dtype` removed
+
+**New Tool Call Parsers (3 additions, 47 total):**
+`dots` (Dots3 NOTE), `ling3` (Ling 3.0 Flash), `muse_glimmer` (Muse Glimmer)
+
+**New Reasoning Parsers (9 additions, 31 total):**
+`cohere_command3`, `cohere_command4`, `glm45`, `holo2`, `inkling`, `ling3`, `mimo`, `minimax_m2_append_think`, `muse_glimmer`
+
+**20 New CLI Arguments:**
+- **Kimi K3**: `--kda-prefill-backend` (auto/triton/flashkda)
+- **Mamba**: `--mamba-ssu-algorithm` (auto/simple/vertical/horizontal), `cpu` backend, `bfloat16` cache dtypes
+- **Speculative**: `mlp_speculator`, `draft_model`, `suffix`, `custom_class`, `extract_hidden_states` spec methods
+- **Fault Tolerance**: `--enable-fault-tolerance`, `--fault-tolerance-config`
+- **Frontend**: `--cohere-format`, `--cohere-is-reasoning-model`, `--fingerprint-mode`, `--uvicorn-log-level`
+- **Multimodal**: `--mm-device-do-normalize`, `--mm-hasher-algorithm`, `--mm-processor-device`, `--video-pruning-method`
+- **Scheduling/Memory**: `--max-num-scheduled-tokens`, `--prefix-match-unit`, `--replayssm-buffer-len`, `--use-replayssm`
+- **Expanded**: `--linear-backend` (21 backends), `--quantization` (30 methods)
+
+> See [Release Notes](RELEASE_NOTES_v0.4.0.0.md) for full details.
+
 ## What's New in v0.3.0.0
 
 ### 🚀 vLLM 0.27.x Full Support

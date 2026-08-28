@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.4.0.0] - 2026-08-28
+
+### Added
+- **vLLM 0.28.0 Full Support**: Updated to support vLLM v0.28.0 (584 commits from 270 contributors)
+- **Kimi-K3 Performance Stack**: DCP support, fused FlashKDA decode/prefill kernels (`--kda-prefill-backend flashkda`), SiTU activation for MegaMoE, GEMM-RS sequence parallelism, adaptive speculative token budget, optional shared-expert sharding, ROCm V2 model runner
+- **DeepSeek V4 Sparse MLA**: End-to-end for decode/MTP/DSpark, AMD Quark NVFP4, reasoning-effort prompts, ROCm gfx11/gfx950
+- **Speculative Decoding Advances**: DFlash2 (local convolution + candidate selector), DSpark confidence-scheduled verification, async scheduling auto-enabled for draft models
+- **New Tool Call Parsers (3)**: `dots` (Dots3 NOTE), `ling3` (Ling 3.0 Flash), `muse_glimmer` (Muse Glimmer) — 47 total
+- **New Reasoning Parsers (9)**: `cohere_command3`, `cohere_command4`, `glm45`, `holo2`, `inkling`, `ling3`, `mimo`, `minimax_m2_append_think`, `muse_glimmer` — 31 total
+- **New CLI Arguments (20)**:
+  - **Speculative**: `--mlp_speculator`/`--draft-model`/`--suffix`/`--custom-class`/`--extract-hidden-states` spec methods, `dots3_note_mtp`, `bailing_hybrid_v3_mtp` MTP types
+  - **Mamba**: `--mamba-config` (JSON), `--mamba-ssu-algorithm` (auto/simple/vertical/horizontal), `cpu` mamba backend, `bfloat16` SSM cache dtype
+  - **KV Offload**: `--prefix-match-unit` (partial-tail prefix reuse)
+  - **Fault Tolerance**: `--enable-fault-tolerance`, `--fault-tolerance-config`
+  - **Frontend**: `--cohere-format`, `--cohere-is-reasoning-model`, `--fingerprint-mode`, `--uvicorn-log-level`
+  - **Multimodal**: `--mm-device-do-normalize`, `--mm-hasher-algorithm`, `--mm-processor-device`, `--video-pruning-method`
+  - **Scheduling**: `--max-num-scheduled-tokens`, `--replayssm-buffer-len`, `--use-replayssm`
+  - **Other**: `--ec-manager-config`, `--enable-bf16x3-router-gemm`, `--enable-moe-shared-loras`, `--return-sampling-mask`
+- **Expanded `--linear-backend`**: 21 backends (added `b12x`, `deep_gemm`, `torch`, `machete`, `fbgemm`, `conch`, `exllama`, `emulation`, `xpu`, `xpu_woq`)
+- **Expanded `--quantization`**: 30 methods (added online shorthands `fp8_per_tensor`/`fp8_per_block`/`mxfp8`/`nvfp4_per_token`, `quark`, `torchao`, `inc`, `mxfp4`, `gpt_oss_mxfp4`, `deepseek_v4_fp8`, `modelopt_mixed`, `auto_*` variants)
+- **New Models**: Muse Glimmer, Ling 3.0 Flash (BF16/MTP/FP8/MXFP4), Dots3 NOTE (multimodal), Interns2mobius, Qwen3.8 (ROCm)
+- **Model Runner V2 Maturation**: E/P/D disaggregation, weight offloading, multi-layer MTP KV cache, encoder CUDA graphs, decoder token-wise pooling, `thinking_token_budget`
+- **Tiered KV Cache Offloading**: Disk offloading, out-of-tree secondary tier managers via `module_path`, tiering metrics
+- **New Defaults**: `max_num_batched_tokens` raised 8192→16384, prefix caching enabled by default for Mamba models
+
+### Changed
+- **Schema version**: 2.4.0 → 2.5.0 (312 arguments, 47 tool parsers, 31 reasoning parsers)
+- **`--spec-method` choices**: Expanded to 37 values (added `mlp_speculator`, `draft_model`, `suffix`, `custom_class`, `extract_hidden_states`, all MTP types, `dots3_note_mtp`, `bailing_hybrid_v3_mtp`)
+- **vLLM version range**: 0.20.0 - 0.27.0 → 0.20.0 - 0.28.0
+
+### Removed
+- **`--calculate-kv-scales`**: Runtime KV scale calculation removed upstream in v0.28.0
+- **`--override-attention-dtype`**: Removed upstream in v0.28.0
+- **`bitsandbytes` quantization**: Migrated to out-of-tree plugin in v0.28.0
+- **Reasoning parsers**: `cohere_command` (split into `cohere_command3`/`cohere_command4`), `identity` (no longer registered)
+
+### Deprecated
+- **`--enable-stochastic-rounding`** → `--enable-mamba-cache-stochastic-rounding`
+- **`--stochastic-rounding-philox-rounds`** → `--mamba-cache-philox-rounds`
+- **`--policy`** → `--scheduling-policy`
+- **`--target-modules`** → `--lora-target-modules`
+- **`--cache-dtype`** → `--kv-cache-dtype`
+- **`--backend`** → `--distributed-executor-backend`
+- **`--method`**: Removed in v0.28.0
+
 ## [v0.3.0.0] - 2025-08-12
 
 ### Added

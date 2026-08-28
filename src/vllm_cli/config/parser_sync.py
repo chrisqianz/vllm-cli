@@ -43,6 +43,10 @@ TOOL_PARSER_NAME_MAP = {
     "nemotron_v3_engine": "nemotron_v3",
     "phi4mini": "phi4_mini_json",
     "minicpm5xml": "minicpm5",
+    # v0.28.0 additions
+    "dots": "dots",
+    "ling3": "ling3",
+    "muse_glimmer": "muse_glimmer",
     "internlm2": "internlm",
     # v0.26.0 additions
     "inkling": "inkling",
@@ -86,6 +90,15 @@ REASONING_PARSER_NAME_MAP = {
     "poolside_v1": "poolside_v1",
     # v0.27.0 additions
     "kimi_k3": "kimi_k3",
+    # v0.28.0 additions
+    "cohere_command3": "cohere_command3",
+    "cohere_command4": "cohere_command4",
+    "glm45": "glm45",
+    "holo2": "holo2",
+    "ling3": "ling3",
+    "mimo": "mimo",
+    "minimax_m2_append_think": "minimax_m2_append_think",
+    "muse_glimmer": "muse_glimmer",
 }
 
 

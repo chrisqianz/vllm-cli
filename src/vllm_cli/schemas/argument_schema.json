@@ -1,6 +1,6 @@
 {
-  "version": "2.4.0",
-  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.27.0)",
+  "version": "2.5.0",
+  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.28.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -55,24 +55,38 @@
       "choices": [
         null,
         "awq",
-        "awq_marlin",
-        "auto-round",
-        "bitsandbytes",
-        "bitblas",
-        "gguf",
-        "gptq",
-        "gptq_marlin",
+        "auto_awq",
         "fp8",
         "fbgemm_fp8",
-        "compressed-tensors",
-        "experts_int8",
+        "fp_quant",
+        "modelopt",
         "modelopt_fp4",
         "modelopt_mxfp8",
+        "modelopt_mixed",
+        "auto_gptq",
+        "gptq",
+        "gptq_marlin",
+        "awq_marlin",
         "humming",
-        "nvfp4"
+        "compressed-tensors",
+        "experts_int8",
+        "quark",
+        "moe_wna16",
+        "torchao",
+        "inc",
+        "mxfp4",
+        "gpt_oss_mxfp4",
+        "deepseek_v4_fp8",
+        "online",
+        "fp8_per_tensor",
+        "fp8_per_block",
+        "fp8_per_channel",
+        "int8_per_channel_weight_only",
+        "nvfp4_per_token",
+        "mxfp8"
       ],
       "importance": "high",
-      "hint": "Reduces memory usage but may impact quality. New in v0.27.0: nvfp4 (NVFP4 via compressed-tensors)"
+      "hint": "v0.28.0: bitsandbytes moved to out-of-tree plugin. New: online shorthands (fp8_per_tensor, fp8_per_block, mxfp8, nvfp4_per_token), quark, torchao, inc, mxfp4"
     },
     "max_model_len": {
       "type": "integer",
@@ -777,22 +791,29 @@
       "default": null,
       "cli_flag": "--reasoning-parser",
       "choices": [
-        "cohere_command",
+        "cohere_command3",
+        "cohere_command4",
         "deepseek_r1",
         "deepseek_v3",
         "deepseek_v4",
         "ernie45",
         "gemma4",
+        "glm45",
         "glm47",
         "granite",
+        "holo2",
         "hunyuan_a13b",
         "hy_v3",
-        "identity",
+        "inkling",
         "kimi_k2",
         "kimi_k3",
+        "ling3",
+        "mimo",
         "minimax_m2",
+        "minimax_m2_append_think",
         "minimax_m3",
         "mistral",
+        "muse_glimmer",
         "nemotron_v3",
         "olmo3",
         "openai_gptoss",
@@ -804,7 +825,7 @@
         null
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Built-in reasoning parsers. No plugin file needed - parsers are integrated into vLLM core. New in v0.25.0: cohere_command, identity, minimax_m3. New in v0.27.0: kimi_k3. Parsers: deepseek_r1, deepseek_v3/v4, gemma4, glm47, granite, hunyuan_a13b, hy_v3, kimi_k2/k3, minimax_m2/m3, mistral, nemotron_v3, olmo3, openai_gptoss, poolside_v1, qwen3, seed_oss, step3/3p5, ernie45",
+      "hint": "v0.28.0: 31 parsers. Removed: cohere_command (split into cohere_command3/4), identity",
       "deprecated": false,
       "deprecation_note": null,
       "removed_from_cli_in": null
@@ -1021,6 +1042,7 @@
         "deepseek_v31",
         "deepseek_v32",
         "deepseek_v4",
+        "dots",
         "ernie45",
         "functiongemma",
         "gemma4",
@@ -1038,6 +1060,7 @@
         "kimi_k2",
         "kimi_k3",
         "lfm2",
+        "ling3",
         "llama3_json",
         "llama4_json",
         "llama4_pythonic",
@@ -1047,6 +1070,7 @@
         "minimax_m2",
         "minimax_m3",
         "mistral",
+        "muse_glimmer",
         "olmo3",
         "openai",
         "phi4_mini_json",
@@ -1061,7 +1085,7 @@
         null
       ],
       "importance": "high",
-      "hint": "Streaming Parser Engine (v0.24.0+): Unified tool-call parsing. v0.27.0: qwen3 replaced by qwen3_coder/qwen3_xml, added kimi_k3, glm45, mimo, llama4_json, llama4_pythonic, cohere_command3/4. Removed: rust, granite-20b-fc. Use qwen3_coder for Qwen3 coding models, qwen3_xml for XML output."
+      "hint": "v0.28.0: 47 parsers. New: dots (Dots3 NOTE), ling3 (Ling 3.0 Flash), muse_glimmer (Muse Glimmer)"
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -1686,10 +1710,11 @@
       "cli_flag": "--mamba-backend",
       "choices": [
         "triton",
-        "flashinfer"
+        "flashinfer",
+        "cpu"
       ],
       "importance": "low",
-      "hint": "Backend for Mamba state space models"
+      "hint": "v0.28.0: added cpu backend"
     },
     "enable_mamba_cache_stochastic_rounding": {
       "type": "boolean",
@@ -1726,10 +1751,7 @@
         "align"
       ],
       "importance": "low",
-      "hint": "'align' recommended for speculative decoding with Mamba models",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "hint": "'align' recommended for speculative decoding with Mamba models"
     },
     "mamba_cache_dtype": {
       "type": "choice",
@@ -1740,12 +1762,10 @@
       "choices": [
         "auto",
         "float32",
-        "float16"
+        "float16",
+        "bfloat16"
       ],
-      "importance": "low",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "importance": "low"
     },
     "mamba_ssm_cache_dtype": {
       "type": "choice",
@@ -1756,7 +1776,8 @@
       "choices": [
         "auto",
         "float32",
-        "float16"
+        "float16",
+        "bfloat16"
       ],
       "importance": "low",
       "deprecated": true,
@@ -2351,13 +2372,30 @@
       "cli_flag": "--linear-backend",
       "choices": [
         "auto",
-        "flashinfer",
         "cutlass",
+        "flashinfer_cutlass",
+        "flashinfer_cutedsl",
+        "flashinfer_trtllm",
+        "flashinfer_cudnn",
+        "flashinfer_b12x",
+        "b12x",
+        "marlin",
+        "humming",
         "triton",
-        "native"
+        "deep_gemm",
+        "torch",
+        "aiter",
+        "machete",
+        "fbgemm",
+        "conch",
+        "exllama",
+        "emulation",
+        "xpu",
+        "xpu_woq"
       ],
       "importance": "high",
-      "added_in": "v0.22.0"
+      "added_in": "v0.22.0",
+      "hint": "v0.28.0: added b12x, deep_gemm, torch, machete, fbgemm, conch, exllama, emulation, xpu, xpu_woq"
     },
     "load_format": {
       "type": "choice",
@@ -2472,15 +2510,43 @@
         "ngram",
         "ngram_gpu",
         "medusa",
+        "mlp_speculator",
+        "draft_model",
+        "suffix",
+        "custom_class",
         "eagle",
         "eagle3",
+        "extract_hidden_states",
         "mtp",
+        "deepseek_mtp",
+        "dots3_note_mtp",
+        "mimo_mtp",
+        "mimo_v2_mtp",
+        "glm4_moe_mtp",
+        "glm4_moe_lite_mtp",
+        "glm_ocr_mtp",
+        "ernie_mtp",
+        "nemotron_h_mtp",
+        "exaone_moe_mtp",
+        "exaone4_5_mtp",
+        "qwen3_next_mtp",
+        "qwen3_5_mtp",
+        "longcat_flash_mtp",
+        "bailing_hybrid_v3_mtp",
+        "minimax_m3_mtp",
+        "bailing_hybrid_mtp",
+        "kimi_k3_mtp",
+        "pangu_ultra_moe_mtp",
+        "step3p5_mtp",
+        "hy_v3_mtp",
+        "gemma4_mtp",
+        "inkling_mtp",
         "dflash",
         "dspark",
         "none"
       ],
       "importance": "medium",
-      "hint": "Mutually exclusive with --speculative-config['method']. Use --speculative-config for advanced options. Methods: mtp (Multi-Token Prediction), dspark (DSpark AR fusion), dflash (DFlash), eagle/eagle3 (EAGLE draft), medusa, ngram/ngram_gpu. Model-specific MTP types (e.g., qwen3_next_mtp) are auto-detected via --speculative-config.",
+      "hint": "v0.28.0: new mlp_speculator, draft_model, suffix, custom_class, extract_hidden_states, dots3_note_mtp, bailing_hybrid_v3_mtp. 'none' disables speculative decoding.",
       "added_in": "v0.22.0"
     },
     "spec_model": {
@@ -3231,7 +3297,9 @@
       "cli_flag": "--backend",
       "importance": "medium",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.28.0 - use --distributed-executor-backend"
     },
     "cache_dtype": {
       "type": "string",
@@ -3240,7 +3308,9 @@
       "cli_flag": "--cache-dtype",
       "importance": "medium",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM v0.28.0 - use --kv-cache-dtype"
     },
     "enable_per_request_metrics": {
       "type": "boolean",
@@ -3258,7 +3328,9 @@
       "cli_flag": "--enable-stochastic-rounding",
       "importance": "low",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM v0.28.0 - use --enable-mamba-cache-stochastic-rounding"
     },
     "jit_monitor_mode": {
       "type": "choice",
@@ -3277,7 +3349,9 @@
       "importance": "low",
       "ui_hidden": true,
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Removed in vLLM v0.28.0"
     },
     "mm_ipc_gpu_memory_gb": {
       "type": "number",
@@ -3305,7 +3379,9 @@
       "cli_flag": "--policy",
       "importance": "low",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM v0.28.0 - use --scheduling-policy"
     },
     "quantization_config": {
       "type": "string",
@@ -3332,7 +3408,9 @@
       "cli_flag": "--stochastic-rounding-philox-rounds",
       "importance": "low",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM v0.28.0 - use --mamba-cache-philox-rounds"
     },
     "target_modules": {
       "type": "list",
@@ -3341,7 +3419,9 @@
       "cli_flag": "--target-modules",
       "importance": "medium",
       "new_in": "v0.25.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM v0.28.0 - use --lora-target-modules"
     },
     "ubatch_size": {
       "type": "number",
@@ -3351,20 +3431,240 @@
       "importance": "medium",
       "new_in": "v0.25.0",
       "synced": true
+    },
+    "cohere_format": {
+      "type": "string",
+      "category": "api",
+      "description": "Cohere API format (vLLM 0.28.0+)",
+      "default": "cmd4",
+      "cli_flag": "--cohere-format",
+      "importance": "low",
+      "new_in": "v0.28.0",
+      "hint": "Cohere chat format: cmd3 or cmd4"
+    },
+    "cohere_is_reasoning_model": {
+      "type": "boolean",
+      "category": "api",
+      "description": "Whether the model is a Cohere reasoning model (vLLM 0.28.0+)",
+      "default": true,
+      "cli_flag": "--cohere-is-reasoning-model",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "ec_manager_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Encoder cache manager configuration (JSON format, vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--ec-manager-config",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "enable_bf16x3_router_gemm": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable BF16x3 router GEMM (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--enable-bf16x3-router-gemm",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "enable_fault_tolerance": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Enable fault tolerance (vLLM 0.28.0+)",
+      "default": false,
+      "cli_flag": "--enable-fault-tolerance",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "enable_moe_shared_loras": {
+      "type": "boolean",
+      "category": "lora",
+      "description": "Enable MoE shared LoRAs (vLLM 0.28.0+)",
+      "default": false,
+      "cli_flag": "--enable-moe-shared-loras",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "fault_tolerance_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Fault tolerance configuration (JSON format, vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--fault-tolerance-config",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "fingerprint_mode": {
+      "type": "choice",
+      "category": "api",
+      "description": "Request fingerprinting mode (vLLM 0.28.0+)",
+      "default": "full",
+      "cli_flag": "--fingerprint-mode",
+      "choices": [
+        "full",
+        "hash",
+        "custom",
+        "none"
+      ],
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "kda_prefill_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "KDA (Kimi K3) prefill backend (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--kda-prefill-backend",
+      "choices": [
+        "auto",
+        "triton",
+        "flashkda"
+      ],
+      "importance": "low",
+      "new_in": "v0.28.0",
+      "hint": "flashkda: fused FlashKDA kernels for Kimi K3"
+    },
+    "mamba_ssu_algorithm": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Mamba selective state update algorithm (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--mamba-ssu-algorithm",
+      "choices": [
+        "auto",
+        "simple",
+        "vertical",
+        "horizontal"
+      ],
+      "importance": "low",
+      "new_in": "v0.28.0",
+      "hint": "SSU algorithm for FlashInfer Mamba backend"
+    },
+    "max_num_scheduled_tokens": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Maximum number of tokens scheduled per step (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--max-num-scheduled-tokens",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "mm_device_do_normalize": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Normalize multimodal inputs on-device (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--mm-device-do-normalize",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "mm_hasher_algorithm": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Multimodal cache hashing algorithm (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--mm-hasher-algorithm",
+      "choices": [
+        "blake3",
+        "sha256",
+        "sha512"
+      ],
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "mm_processor_device": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Device for multimodal processor (vLLM 0.28.0+)",
+      "default": "auto",
+      "cli_flag": "--mm-processor-device",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "prefix_match_unit": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Prefix match unit size for partial-tail prefix reuse (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--prefix-match-unit",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "replayssm_buffer_len": {
+      "type": "integer",
+      "category": "memory",
+      "description": "ReplaySSM buffer length (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--replayssm-buffer-len",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "return_sampling_mask": {
+      "type": "boolean",
+      "category": "advanced",
+      "description": "Return sampling mask with outputs (vLLM 0.28.0+)",
+      "default": false,
+      "cli_flag": "--return-sampling-mask",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "uvicorn_log_level": {
+      "type": "choice",
+      "category": "api",
+      "description": "Uvicorn log level (vLLM 0.28.0+)",
+      "default": "info",
+      "cli_flag": "--uvicorn-log-level",
+      "choices": [
+        "critical",
+        "error",
+        "warning",
+        "info",
+        "debug",
+        "trace"
+      ],
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "use_replayssm": {
+      "type": "boolean",
+      "category": "memory",
+      "description": "Enable ReplaySSM (vLLM 0.28.0+)",
+      "default": false,
+      "cli_flag": "--use-replayssm",
+      "importance": "low",
+      "new_in": "v0.28.0"
+    },
+    "video_pruning_method": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Video frame pruning method (vLLM 0.28.0+)",
+      "default": null,
+      "cli_flag": "--video-pruning-method",
+      "importance": "low",
+      "new_in": "v0.28.0"
     }
   },
   "vllm_versions_supported": [
     "0.20.0",
+    "0.20.1",
+    "0.20.2",
     "0.21.0",
     "0.22.0",
     "0.22.1",
     "0.23.0",
     "0.24.0",
-    "0.25.0"
+    "0.25.0",
+    "0.26.0",
+    "0.27.0",
+    "0.27.1",
+    "0.28.0"
   ],
-  "last_synced_version": "v0.25.0",
-  "deprecated_count": 113,
+  "last_synced_version": "v0.28.0",
+  "deprecated_count": 117,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
-  "new_in_v025_count": 14
+  "new_in_v025_count": 14,
+  "new_in_v028_count": 20
 }
