@@ -47,6 +47,8 @@ TOOL_PARSER_NAME_MAP = {
     "dots": "dots",
     "ling3": "ling3",
     "muse_glimmer": "muse_glimmer",
+    # v0.29.0 additions
+    "hy_v4": "hy_v4",
     "internlm2": "internlm",
     # v0.26.0 additions
     "inkling": "inkling",
@@ -99,6 +101,8 @@ REASONING_PARSER_NAME_MAP = {
     "mimo": "mimo",
     "minimax_m2_append_think": "minimax_m2_append_think",
     "muse_glimmer": "muse_glimmer",
+    # v0.29.0 additions
+    "hy_v4": "hy_v4",
 }
 
 

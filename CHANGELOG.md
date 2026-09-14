@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.0.0] - 2026-09-10
+
+### Added
+- **vLLM 0.29.0 Full Support**: Updated to support vLLM v0.29.0 (594 commits from 277 contributors)
+- **Model Runner V2 Default**: MRV2 now default for all models; MRV1 deprecated (removal targeted v0.32)
+- **Hy4-preview**: Tencent 770B/49B-active MoE with Gated DeepSeek Sparse Attention and native MTP (`hy_v4_mtp`, `hy_v4` parsers)
+- **Qwen3.8-Flash-Next**: BF16/FP8/NVFP4 with MTP (`qwen4_exp_mtp`)
+- **New CLI Arguments (8)**:
+  - `--per-request-spec-decode-metrics` (none/summary/detailed): acceptance stats in OpenAI API responses
+  - `--max-num-queued-reqs` / `--max-num-queued-tokens`: queue admission control
+  - `--prefix-cache-retention-interval` (default 0): Mamba/SWA prefix cache retention; env var deprecated
+  - `--dcp-q-replicate`: DCP query replication (default-on for GLM sparse attention)
+  - `--enable-batch-sharded-sampling`: MRV2 batch-sharded sampling, logits memory cut by 1/TP
+  - `--enable-trace-replay`: deterministic decode replay (`trace_decode_token_ids`)
+  - `--sse-keep-alive-interval`: SSE keep-alive comments for idle streams
+- **New Models**: GraniteSWA, GraniteMoeSWA, NemotronH_Omni_Reasoning_V3 (with MTP), Kimi K3 NVFP4 checkpoints
+- **New Tool Call Parsers**: `hy_v4`, `granite-20b-fc` (back in registry) — 49 total
+- **New Reasoning Parser**: `hy_v4` — 32 total
+- **Mamba Prefix Caching**: internal prefill checkpoints, 9%-25% TTFT improvement
+- **RL Weight Sync**: `sharded_rdt` P2P backend (NIXL/RDT slice pulls), rank-local IPC updates
+- **New Quantization Backends**: FlashInfer TRT-LLM MXFP8 linear, b12x FP4 MoE (SM120/SM121), AutoRound block FP8, Humming MXFP4+blockFP8, Humming WNA16 MoE
+- **API**: `/v1/messages/render` (Anthropic), `/cohere/v2/chat/render`, video embeds in Python frontend
+- **Security**: `cache_salt` bounded to 1024; oversized media rejected pre-download; `api_key`/`hf_token` redacted from logs
+- **New Defaults**: FlashInfer all-reduce on by default for TP CUDA groups; deterministic `NONE_HASH` for prefix caching
+
+### Changed
+- **Schema version**: 2.5.0 → 2.6.0 (320 arguments)
+- **`--spec-method` choices**: 37 → 39 (added `hy_v4_mtp`, `qwen4_exp_mtp`)
+- **`--moe-backend` choices**: 17 → 20 (added `b12x`, `flashinfer_moe_ep_mega_deep_gemm`, `flashinfer_moe_ep_mega_cutedsl`)
+- **vLLM version range**: 0.20.0 - 0.28.0 → 0.20.0 - 0.29.0
+
+### Removed (upstream vLLM 0.29.0)
+- Ten deprecated architectures (Arctic, Chameleon, Cheers, Fairseq2Llama, FireRedLID, GritLM, HCXVision, MPT, RWForCausalLM/StableLMEpoch aliases, PrithviGeoSpatialMAE)
+- PyAV video decoder backend (use OpenCV or Torchcodec)
+- `VLLM_TEST_FORCE_FP8_MARLIN` (use `--linear-backend`/`--moe-backend`)
+- `--attention-config.use_prefill_decode_attention` (dead)
+
 ## [v0.4.0.0] - 2026-08-28
 
 ### Added

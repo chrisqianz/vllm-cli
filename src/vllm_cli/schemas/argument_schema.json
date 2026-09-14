@@ -1,6 +1,6 @@
 {
-  "version": "2.5.0",
-  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.28.0)",
+  "version": "2.6.0",
+  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.29.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -804,6 +804,7 @@
         "holo2",
         "hunyuan_a13b",
         "hy_v3",
+        "hy_v4",
         "inkling",
         "kimi_k2",
         "kimi_k3",
@@ -825,7 +826,7 @@
         null
       ],
       "importance": "high",
-      "hint": "v0.28.0: 31 parsers. Removed: cohere_command (split into cohere_command3/4), identity",
+      "hint": "v0.29.0: 32 parsers. New: hy_v4",
       "deprecated": false,
       "deprecation_note": null,
       "removed_from_cli_in": null
@@ -1050,10 +1051,12 @@
         "glm45",
         "glm47",
         "granite",
+        "granite-20b-fc",
         "granite4",
         "hermes",
         "hunyuan_a13b",
         "hy_v3",
+        "hy_v4",
         "inkling",
         "internlm",
         "jamba",
@@ -1085,7 +1088,7 @@
         null
       ],
       "importance": "high",
-      "hint": "v0.28.0: 47 parsers. New: dots (Dots3 NOTE), ling3 (Ling 3.0 Flash), muse_glimmer (Muse Glimmer)"
+      "hint": "v0.29.0: 49 parsers. New: granite-20b-fc, hy_v4"
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -1567,6 +1570,9 @@
         "flashinfer_cutlass",
         "flashinfer_cutedsl",
         "flashinfer_b12x",
+        "b12x",
+        "flashinfer_moe_ep_mega_deep_gemm",
+        "flashinfer_moe_ep_mega_cutedsl",
         "marlin",
         "humming",
         "triton_unfused",
@@ -1577,7 +1583,7 @@
         null
       ],
       "importance": "medium",
-      "hint": "Controls which backend is used for MoE fused kernel. v0.27.0: added deep_gemm, deep_gemm_mega_moe, flashinfer_trtllm, flashinfer_cutlass, flashinfer_cutedsl, flashinfer_b12x, marlin, humming, triton_unfused, flydsl, hpc, emulation, batched_triton"
+      "hint": "v0.29.0: added b12x, flashinfer_moe_ep_mega_deep_gemm, flashinfer_moe_ep_mega_cutedsl (FlashInfer moe_ep expert backend)"
     },
     "ir_op_priority": {
       "type": "string",
@@ -2507,46 +2513,48 @@
       "description": "Speculative decoding method. Convenience flag for --speculative-config['method'].",
       "cli_flag": "--spec-method",
       "choices": [
-        "ngram",
-        "ngram_gpu",
-        "medusa",
-        "mlp_speculator",
-        "draft_model",
-        "suffix",
+        "bailing_hybrid_mtp",
+        "bailing_hybrid_v3_mtp",
         "custom_class",
+        "deepseek_mtp",
+        "dflash",
+        "dots3_note_mtp",
+        "draft_model",
+        "dspark",
         "eagle",
         "eagle3",
+        "ernie_mtp",
+        "exaone4_5_mtp",
+        "exaone_moe_mtp",
         "extract_hidden_states",
-        "mtp",
-        "deepseek_mtp",
-        "dots3_note_mtp",
+        "gemma4_mtp",
+        "glm4_moe_lite_mtp",
+        "glm4_moe_mtp",
+        "glm_ocr_mtp",
+        "hy_v3_mtp",
+        "hy_v4_mtp",
+        "inkling_mtp",
+        "kimi_k3_mtp",
+        "longcat_flash_mtp",
+        "medusa",
         "mimo_mtp",
         "mimo_v2_mtp",
-        "glm4_moe_mtp",
-        "glm4_moe_lite_mtp",
-        "glm_ocr_mtp",
-        "ernie_mtp",
-        "nemotron_h_mtp",
-        "exaone_moe_mtp",
-        "exaone4_5_mtp",
-        "qwen3_next_mtp",
-        "qwen3_5_mtp",
-        "longcat_flash_mtp",
-        "bailing_hybrid_v3_mtp",
         "minimax_m3_mtp",
-        "bailing_hybrid_mtp",
-        "kimi_k3_mtp",
+        "mlp_speculator",
+        "mtp",
+        "nemotron_h_mtp",
+        "ngram",
+        "ngram_gpu",
         "pangu_ultra_moe_mtp",
+        "qwen3_5_mtp",
+        "qwen3_next_mtp",
+        "qwen4_exp_mtp",
         "step3p5_mtp",
-        "hy_v3_mtp",
-        "gemma4_mtp",
-        "inkling_mtp",
-        "dflash",
-        "dspark",
+        "suffix",
         "none"
       ],
       "importance": "medium",
-      "hint": "v0.28.0: new mlp_speculator, draft_model, suffix, custom_class, extract_hidden_states, dots3_note_mtp, bailing_hybrid_v3_mtp. 'none' disables speculative decoding.",
+      "hint": "v0.29.0: added hy_v4_mtp, qwen4_exp_mtp. DFlash/DSpark via dflash/dspark; DFlash2 loads from speculators format",
       "added_in": "v0.22.0"
     },
     "spec_model": {
@@ -3644,6 +3652,88 @@
       "cli_flag": "--video-pruning-method",
       "importance": "low",
       "new_in": "v0.28.0"
+    },
+    "dcp_q_replicate": {
+      "type": "boolean",
+      "category": "parallelism",
+      "description": "Enable DCP query replication (vLLM 0.29.0+); default-on for GLM sparse attention",
+      "default": null,
+      "cli_flag": "--dcp-q-replicate",
+      "importance": "low",
+      "new_in": "v0.29.0",
+      "hint": "Query replication across DCP ranks; ~on by default for GLM sparse attention"
+    },
+    "enable_batch_sharded_sampling": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable batch-sharded sampling in Model Runner V2 (vLLM 0.29.0+)",
+      "default": null,
+      "cli_flag": "--enable-batch-sharded-sampling",
+      "importance": "low",
+      "new_in": "v0.29.0",
+      "hint": "Cuts per-step logits memory by 1/TP under tensor parallel"
+    },
+    "enable_trace_replay": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Enable trace capture/replay (trace_decode_token_ids, vLLM 0.29.0+)",
+      "default": null,
+      "cli_flag": "--enable-trace-replay",
+      "importance": "low",
+      "new_in": "v0.29.0",
+      "hint": "Deterministic decode replay for debugging"
+    },
+    "max_num_queued_reqs": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Maximum number of queued requests (admission control, vLLM 0.29.0+)",
+      "default": null,
+      "cli_flag": "--max-num-queued-reqs",
+      "importance": "medium",
+      "new_in": "v0.29.0"
+    },
+    "max_num_queued_tokens": {
+      "type": "integer",
+      "category": "scheduling",
+      "description": "Maximum number of queued tokens (admission control, vLLM 0.29.0+)",
+      "default": null,
+      "cli_flag": "--max-num-queued-tokens",
+      "importance": "medium",
+      "new_in": "v0.29.0"
+    },
+    "per_request_spec_decode_metrics": {
+      "type": "choice",
+      "category": "monitoring",
+      "description": "Per-request speculative decoding acceptance metrics (vLLM 0.29.0+)",
+      "default": "none",
+      "cli_flag": "--per-request-spec-decode-metrics",
+      "choices": [
+        "none",
+        "summary",
+        "detailed"
+      ],
+      "importance": "low",
+      "new_in": "v0.29.0",
+      "hint": "Reports acceptance rates in OpenAI API responses"
+    },
+    "prefix_cache_retention_interval": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Prefix cache retention interval for SWA/SSM models (vLLM 0.29.0+)",
+      "default": 0,
+      "cli_flag": "--prefix-cache-retention-interval",
+      "importance": "medium",
+      "new_in": "v0.29.0",
+      "hint": "Default 0; dense retention auto-restored for hybrid models with EAGLE/MTP. Mamba internal prefill checkpoints: 9-25% TTFT gain"
+    },
+    "sse_keep_alive_interval": {
+      "type": "integer",
+      "category": "api",
+      "description": "SSE keep-alive comment interval in seconds for idle streams (vLLM 0.29.0+)",
+      "default": 0,
+      "cli_flag": "--sse-keep-alive-interval",
+      "importance": "low",
+      "new_in": "v0.29.0"
     }
   },
   "vllm_versions_supported": [
@@ -3659,12 +3749,14 @@
     "0.26.0",
     "0.27.0",
     "0.27.1",
-    "0.28.0"
+    "0.28.0",
+    "0.29.0"
   ],
-  "last_synced_version": "v0.28.0",
+  "last_synced_version": "v0.29.0",
   "deprecated_count": 117,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
-  "new_in_v028_count": 20
+  "new_in_v028_count": 20,
+  "new_in_v029_count": 8
 }

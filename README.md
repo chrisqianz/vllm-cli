@@ -28,6 +28,27 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.5.0.0
+
+### 🚀 vLLM 0.29.0 Full Support
+
+Updated to support vLLM v0.29.0 (594 commits from 277 contributors). **Major version bump** from 0.4.0.0 to 0.5.0.0.
+
+**vLLM 0.29 Highlights:**
+- **Model Runner V2 default for all models** — MRV1 deprecated, removal targeted v0.32; CUDA graph memory profiling, batch-sharded sampling (logits memory ÷ TP)
+- **New models**: Hy4-preview (Tencent 770B/49B MoE, Gated DSA + native MTP), Qwen3.8-Flash-Next (BF16/FP8/NVFP4 + MTP), GraniteSWA/GraniteMoeSWA, NemotronH_Omni_Reasoning_V3, Kimi K3 NVFP4 checkpoints
+- **Spec decode**: `--per-request-spec-decode-metrics` acceptance stats, DFlash2 from speculators format, adaptive verification with logprobs
+- **Mamba prefix caching**: internal prefill checkpoints → 9%-25% TTFT gain; `--prefix-cache-retention-interval` (default 0)
+- **Admission control**: `--max-num-queued-reqs` / `--max-num-queued-tokens`
+- **Kimi K3 / DSv4 perf**: fused MXFP4 top-k finalization, 6.6-7.6x K3 Mamba metadata kernel, GEMM-AR, DCP+DSpark, `--dcp-q-replicate`
+- **Quantization**: b12x FP4 MoE (SM120/121), FlashInfer TRT-LLM MXFP8 linear, AutoRound block FP8, Humming MXFP4/WNA16
+- **API**: `/v1/messages/render`, `/cohere/v2/chat/render`, `--sse-keep-alive-interval`
+- **Breaking**: 10 legacy architectures removed, PyAV decoder removed, `VLLM_TEST_FORCE_FP8_MARLIN` removed
+
+**Schema v2.6.0:** 320 arguments (8 new), `--spec-method` 39 choices (+`hy_v4_mtp`, `qwen4_exp_mtp`), `--moe-backend` 20 choices (+`b12x`, +FlashInfer `moe_ep` mega backends), 49 tool parsers (+`hy_v4`, `granite-20b-fc`), 32 reasoning parsers (+`hy_v4`)
+
+> See [Release Notes](RELEASE_NOTES_v0.5.0.0.md) for full details.
+
 ## What's New in v0.4.0.0
 
 ### 🚀 vLLM 0.28.0 Full Support
