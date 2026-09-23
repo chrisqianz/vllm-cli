@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.7.0.1] - 2026-09-23
+
+### Fixed
+- **"Back" menu option now follows the language**: `unified_prompt` appended a hard-coded `← Back` to every menu; it renders `← 返回` in Chinese while still returning the internal `BACK` sentinel.
+- **Model Management submenu was still fully English**: its options are translated through a legacy local `t()` closure bound to `menu.model_management.*` keys that never existed in the translation files (the v0.7.0.0 rollout only audited `tr()` call sites). Added the 6 missing keys plus `menu.profiles.title` and `settings.env_vars` to en/zh.
+
+### Added
+- Repo-wide AST audit (every `t()`/`tr()` call site vs translation keys, both locales) as a permanent release check — currently 0 missing keys; closes the "silently untranslated menu" blind spot.
+
 ## [v0.7.0.0] - 2026-09-23
 
 ### Added

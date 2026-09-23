@@ -46,6 +46,17 @@
     "shortcuts": {
       "title": "快捷方式管理",
       "subtitle": "快捷方式是模型+配置文件的组合，用于快速启动服务"
+    },
+    "model_management": {
+      "title": "模型管理",
+      "open_tool": "打开模型管理工具",
+      "list_models": "列出所有模型",
+      "manage_assets": "管理模型资产",
+      "view_details": "查看模型详情",
+      "refresh_cache": "刷新模型缓存"
+    },
+    "profiles": {
+      "title": "配置文件"
     }
   },
   "welcome": {
@@ -414,7 +425,8 @@
     "organizations": "组织",
     "email": "邮箱",
     "token_length_chars": "字符",
-    "use_test_option": "使用'测试令牌'选项获取更多信息"
+    "use_test_option": "使用'测试令牌'选项获取更多信息",
+    "env_vars": "个环境变量"
   },
   "model_manager": {
     "title": "模型管理",

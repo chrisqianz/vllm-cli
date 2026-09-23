@@ -28,6 +28,13 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.7.0.1
+
+### 🩹 Two localization gaps from field testing
+
+- Menu **Back** options now render `← 返回` in Chinese (was hard-coded `← Back`).
+- **Model Management submenu** is now in Chinese — its options used legacy translation keys that never existed in the language files; a new repo-wide key audit guarantees no other menu has the same blind spot.
+
 ## What's New in v0.7.0.0
 
 ### 🀄 Full Chinese Localization (i18n everywhere)

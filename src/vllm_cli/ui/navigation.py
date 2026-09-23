@@ -32,8 +32,14 @@ def unified_prompt(
     try:
         # Add navigation options
         prompt_choices = choices.copy()
+        back_label = "← Back"
+        try:
+            from ..i18n import tr as _tr
+            back_label = _tr("messages.back", "← Back")
+        except Exception:
+            pass
         if allow_back:
-            prompt_choices.append("← Back")
+            prompt_choices.append(back_label)
 
         # Create inquirer prompt
         questions = [
@@ -53,7 +59,7 @@ def unified_prompt(
         answer = answers[key]
 
         # Handle navigation
-        if answer == "← Back":
+        if answer == back_label:
             return "BACK"
 
         return answer

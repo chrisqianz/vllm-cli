@@ -46,6 +46,17 @@
     "shortcuts": {
       "title": "Shortcut Management",
       "subtitle": "Shortcuts are saved combinations of model + profile for quick launching"
+    },
+    "model_management": {
+      "title": "Model Management",
+      "open_tool": "Open Model Management Tool",
+      "list_models": "List All Models",
+      "manage_assets": "Manage Assets",
+      "view_details": "View Model Details",
+      "refresh_cache": "Refresh Model Cache"
+    },
+    "profiles": {
+      "title": "Configuration Profiles"
     }
   },
   "welcome": {
@@ -412,7 +423,8 @@
     "organizations": "Organizations",
     "email": "Email",
     "token_length_chars": "Characters",
-    "use_test_option": "Use 'Test Token' Option to Get More Information"
+    "use_test_option": "Use 'Test Token' Option to Get More Information",
+    "env_vars": "environment variable(s)"
   },
   "model_manager": {
     "title": "Model Management",
