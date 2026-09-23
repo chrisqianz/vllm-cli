@@ -28,6 +28,14 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.6.0.1
+
+### 🐛 Multi-Model Proxy Fixed (no longer experimental)
+
+- **Proxy menu fully working again**: translated menu options were compared against hard-coded English strings, so "配置新代理 / Configure new proxy" and all running-proxy management options silently did nothing (broken since i18n was introduced in v0.2.9.4). All handlers now match the translated labels.
+- **Settings → Manage Proxy Configurations** no longer crashes (stale `ui.proxy_control` import fixed; broken since before v0.2.6).
+- **Promoted from experimental**: menu label is now "多模型代理" / "Multi-Model Proxy" without the "(实验性)/(Exp)" marker.
+
 ## What's New in v0.6.0.0
 
 ### 🚀 vLLM 0.30.0 Full Support

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.6.0.1] - 2026-09-23
+
+### Fixed
+- **Multi-Model Proxy menu was non-functional in every locale**: menu options are rendered through i18n, but the handlers compared the selection against hard-coded English strings. Selecting "Configure new proxy / 配置新代理" silently did nothing (the English label in `en.json`, "Configure New Proxy", did not match either), and every option of the running-proxy screen (Monitor proxy logs / Monitor model logs / Manage Models / Refresh Model Registry / Stop all servers) was likewise dead in non-English locales. All comparisons now use the exact translated labels. Regression introduced when i18n was added in v0.2.9.4 and present in every release since.
+- **Settings → Manage Proxy Configurations crashed** with `ModuleNotFoundError: No module named 'vllm_cli.ui.proxy_control'`; the proxy UI moved to `ui/proxy/control.py` long ago but the import was never updated (broken since before v0.2.6).
+- "Return to Proxy Monitoring" from the main menu now passes the i18n context, so the proxy management screen stays in the selected language.
+
+### Changed
+- Multi-Model Proxy is no longer marked experimental: menu label simplified to "多模型代理" / "Multi-Model Proxy" (removed "(实验性)" / "(Exp)").
+
 ## [v0.6.0.0] - 2026-09-23
 
 ### Added

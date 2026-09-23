@@ -49,7 +49,7 @@ def show_main_menu(i18n_manager=None) -> str:
             "menu.main.quick_serve": "Quick Serve",
             "menu.main.serve_with_profile": "Serve with Profile",
             "menu.main.serve_custom": "Serve with Custom Config",
-            "menu.main.multi_model_proxy": "Multi-Model Proxy (Exp)",
+            "menu.main.multi_model_proxy": "Multi-Model Proxy",
             "menu.main.model_management": "Model Management",
             "menu.main.system_info": "System Information",
             "menu.main.settings": "Settings",
@@ -118,7 +118,7 @@ def show_main_menu(i18n_manager=None) -> str:
     if action_key == "return_to_proxy":
         # Return to proxy monitoring
         if active_proxy_manager and active_proxy_config:
-            manage_running_proxy(active_proxy_manager, active_proxy_config)
+            manage_running_proxy(active_proxy_manager, active_proxy_config, i18n_manager)
         return "continue"
     elif action_key == "quick_serve":
         return handle_quick_serve(i18n_manager)

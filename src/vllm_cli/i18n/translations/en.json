@@ -16,7 +16,7 @@
       "quick_serve": "Quick Serve",
       "serve_with_profile": "Serve with Profile",
       "serve_custom": "Serve with Custom Config",
-      "multi_model_proxy": "Multi-Model Proxy (Exp)",
+      "multi_model_proxy": "Multi-Model Proxy",
       "model_management": "Model Management",
       "system_info": "System Information",
       "settings": "Settings",

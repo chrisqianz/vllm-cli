@@ -479,12 +479,18 @@ def manage_running_proxy(proxy_manager, proxy_config, i18n_manager=None) -> None
         console.print(f"Access at: http://{proxy_config.host}:{proxy_config.port}")
         console.print("[dim]Use Ctrl+C in monitoring views to return here[/dim]\n")
 
+        opt_proxy_logs = t("proxy.monitor_proxy_logs", "Monitor proxy logs")
+        opt_model_logs = t("proxy.monitor_model_logs", "Monitor model logs")
+        opt_manage_models = t("proxy.manage_models", "Manage Models")
+        opt_refresh_registry = t("proxy.refresh_registry", "Refresh Model Registry")
+        opt_stop_all = t("proxy.stop_all_servers", "Stop all servers")
+
         management_options = [
-            t("proxy.monitor_proxy_logs", "Monitor proxy logs"),
-            t("proxy.monitor_model_logs", "Monitor model logs"),
-            t("proxy.manage_models", "Manage Models"),
-            t("proxy.refresh_registry", "Refresh Model Registry"),
-            t("proxy.stop_all_servers", "Stop all servers"),
+            opt_proxy_logs,
+            opt_model_logs,
+            opt_manage_models,
+            opt_refresh_registry,
+            opt_stop_all,
         ]
 
         mgmt_choice = unified_prompt(
@@ -504,7 +510,7 @@ def manage_running_proxy(proxy_manager, proxy_config, i18n_manager=None) -> None
             time.sleep(2)
             break
 
-        if mgmt_choice == "Monitor proxy logs":
+        if mgmt_choice == opt_proxy_logs:
             result = monitor_proxy_logs(proxy_manager)
             if result == "stop":
                 # User requested to stop proxy
@@ -519,7 +525,7 @@ def manage_running_proxy(proxy_manager, proxy_config, i18n_manager=None) -> None
                 _active_proxy_config = None
                 time.sleep(1)
                 break
-        elif mgmt_choice == "Monitor model logs":
+        elif mgmt_choice == opt_model_logs:
             result = monitor_model_logs_menu(proxy_manager)
             if result == "stop":
                 # User requested to stop proxy
@@ -534,13 +540,13 @@ def manage_running_proxy(proxy_manager, proxy_config, i18n_manager=None) -> None
                 _active_proxy_config = None
                 time.sleep(1)
                 break
-        elif mgmt_choice == "Manage Models":
-            manage_models_menu(proxy_manager, proxy_config)
+        elif mgmt_choice == opt_manage_models:
+            manage_models_menu(proxy_manager, proxy_config, i18n_manager)
             # Continue to show menu after managing models
-        elif mgmt_choice == "Refresh Model Registry":
+        elif mgmt_choice == opt_refresh_registry:
             refresh_model_registry(proxy_manager)
             # Continue to show menu after refresh
-        elif mgmt_choice == "Stop all servers":
+        elif mgmt_choice == opt_stop_all:
             # Confirm before stopping
             if (
                 unified_prompt(
@@ -759,7 +765,7 @@ def handle_multi_model_proxy(i18n_manager=None) -> str:
                     # Enter simplified proxy management
                     manage_running_proxy(proxy_manager, proxy_config)
 
-    elif choice == "Configure new proxy":
+    elif choice == t("proxy.configure_new_proxy", "Configure new proxy"):
         proxy_config = configure_proxy_interactively()
         if not proxy_config:
             return "continue"

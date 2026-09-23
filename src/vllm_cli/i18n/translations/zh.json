@@ -16,7 +16,7 @@
       "quick_serve": "快速启动",
       "serve_with_profile": "使用配置文件启动",
       "serve_custom": "使用自定义配置启动",
-      "multi_model_proxy": "多模型代理 (实验性)",
+      "multi_model_proxy": "多模型代理",
       "model_management": "模型管理",
       "system_info": "系统信息",
       "settings": "设置",

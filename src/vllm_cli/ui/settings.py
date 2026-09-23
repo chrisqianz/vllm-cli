@@ -209,7 +209,7 @@ def manage_proxy_configurations(i18n_manager=None) -> str:
         return default if default else key
 
     from ..proxy.config import ProxyConfigManager
-    from .proxy_control import display_proxy_config, edit_proxy_config_interactive
+    from .proxy.control import display_proxy_config, edit_proxy_config_interactive
 
     config_manager = ProxyConfigManager()
 
