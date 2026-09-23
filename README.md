@@ -28,6 +28,26 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.6.0.0
+
+### 🚀 vLLM 0.30.0 Full Support
+
+Updated to support vLLM v0.30.0 (762 commits from 315 contributors). **Major version bump** from 0.5.0.0 to 0.6.0.0.
+
+**vLLM 0.30 Highlights:**
+- **New models**: DeepSeek-V4.1-Flash (KV entirely in MXFP8 via FlashMLA V4.1 on SM100, Mega-mHC, async Engram prefetch + DP sharding), DeepSeek-V4-Flash-Vision-Exp (ROCm + LoRA), GLM-5.3-Flash (EPLB, FlashKDA), K2-Horizon, Cohere Compass, Bailing V3 VL, Nanbeige4.2, DeepSeek-V4 CPU backend
+- **Fast Start**: persistent per-GPU weight-cache daemon — engine restarts map weights over CUDA IPC with `--load-format ipc_cache` (FP4 checkpoints & multi-node TP supported)
+- **Watermarking**: Gumbel-max watermarked generation/detection (keyed PRF, per-request opt-out, spec-decode compatible) via `--watermark-config`
+- **HiSparse**: host-resident KV tier for sparse-MLA decode (`HiSparseConnector`) — spills KV to pinned host memory with a per-request GPU hot buffer
+- **Model Runner V2**: dual-batch overlap (eager + FULL CUDA graphs), MTP/EAGLE3/DFlash/DSpark under pipeline parallelism, adaptive verification (online acceptance estimator), graph capture 12s→2s
+- **New args**: `--engram-config`, `--watermark-config`, `--kda-decode-backend`, `--sparse-indexer-topk-backend`, `--dp-sync-interval`, `--elastic-ep-max-dp-size`, `--enable-mamba-fine-grained-prefix-cache`, `--enable-nccl-comm-suspend`, `--enable-scale-out`
+- **Kimi K3 / Qwen3.8 perf**: KDA mixed-batch without gather/scatter (+5.2-7.7% E2E), FlashInfer KDA kernels, QSA prefill/decode indexer split, fused PLE kernels, FP8 indexer cache
+- **Breaking**: scale-out endpoints now gated behind `--enable-scale-out`; GPTQ `g_idx` ordering removed; `all` Mamba cache mode deprecated (falls back to MRV1); YaRN alignment shrinks some `max_model_len` values; default audio resampler PyAV→torchaudio
+
+**Schema v2.7.0:** 329 arguments (9 new), `--spec-method` 40 choices (+`glm5_next_mtp`), `--moe-backend` 22 choices (+`aiter_triton_mxfp4_bf16`, `rdna3`), 51 tool parsers (+`deepseek_v41`, `k2_horizon`), 34 reasoning parsers (+`deepseek_v41`, `k2_horizon`)
+
+> See [Release Notes](RELEASE_NOTES_v0.6.0.0.md) for full details.
+
 ## What's New in v0.5.0.0
 
 ### 🚀 vLLM 0.29.0 Full Support

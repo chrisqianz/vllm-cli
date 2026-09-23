@@ -50,6 +50,9 @@ TOOL_PARSER_NAME_MAP = {
     # v0.29.0 additions
     "hy_v4": "hy_v4",
     "internlm2": "internlm",
+    # v0.30.0 additions
+    "deepseek_v41": "deepseek_v41",
+    "k2_horizon": "k2_horizon",
     # v0.26.0 additions
     "inkling": "inkling",
     "apertus": "apertus",
@@ -103,6 +106,9 @@ REASONING_PARSER_NAME_MAP = {
     "muse_glimmer": "muse_glimmer",
     # v0.29.0 additions
     "hy_v4": "hy_v4",
+    # v0.30.0 additions
+    "deepseek_v41": "deepseek_v41",
+    "k2_horizon": "k2_horizon",
 }
 
 

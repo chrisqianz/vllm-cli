@@ -24,6 +24,7 @@ VLLM_DEFAULT_BRANCH = "main"
 
 # Supported vLLM versions for targeted sync
 SUPPORTED_VLLM_VERSIONS = [
+    "v0.30.0",
     "v0.29.0",
     "v0.28.0",
     "v0.27.1",

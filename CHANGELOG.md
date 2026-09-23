@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.6.0.0] - 2026-09-23
+
+### Added
+- **vLLM 0.30.0 Full Support**: Updated to support vLLM v0.30.0 (762 commits from 315 contributors)
+- **DeepSeek-V4.1-Flash**: whole KV in MXFP8 (FlashMLA V4.1 on SM100), DeepGEMM Mega-mHC, async Engram prefetch + Engram DP sharding; Vision-Exp variant with ROCm & LoRA; DeepSeek-V4 CPU backend (AVX512/AMX)
+- **New models**: GLM-5.3-Flash (EPLB, FlashKDA), K2-Horizon, Cohere Compass, Bailing V3 VL (MTP), Nanbeige4.2 (Transformers backend)
+- **Fast Start**: persistent per-GPU weight-cache daemon; restart engines via `--load-format ipc_cache` instead of reloading from disk (FP4 & multi-node TP covered)
+- **Watermarking**: Gumbel-max watermarked generation/detection with keyed PRF, per-request opt-out, speculative-decoding compatible (dual-key) — configured via `--watermark-config`
+- **HiSparse**: host-resident KV tier for sparse-MLA decode via `HiSparseConnector` (pinned host pages + per-request GPU hot buffer, Prometheus counters)
+- **Model Runner V2**: dual-batch overlap (eager + FULL CUDA graphs), MTP/EAGLE3/DFlash/DSpark under pipeline parallelism, adaptive verification via online acceptance estimator, graph capture 12s→2s (engine init 28.9s→8.2s on H200)
+- **New CLI Arguments (9)**:
+  - `--engram-config` (JSON): Engram N-gram lookup with UVA offload / tensor & DP sharding
+  - `--watermark-config` (JSON): Gumbel-max watermarking policy
+  - `--kda-decode-backend` (auto/native/flashinfer/triton): KDA decode kernel backend
+  - `--sparse-indexer-topk-backend` (auto/deep_select/cooperative/persistent/per_row/flashinfer/torch): DSA/NSA indexer top-k kernel
+  - `--dp-sync-interval` (default 16): data-parallel step sync interval
+  - `--elastic-ep-max-dp-size`: max DP size for elastic EP scaling
+  - `--enable-mamba-fine-grained-prefix-cache`: fine-grained prefix caching for hybrid SSM models
+  - `--enable-nccl-comm-suspend`: suspend NCCL communicators to free GPU memory when idle
+  - `--enable-scale-out`: register scale-out endpoints (`/render`, `/derender`, `/inference/v1/generate`) on `vllm serve`
+- **New Tool Call Parsers**: `deepseek_v41`, `k2_horizon` — 51 total
+- **New Reasoning Parsers**: `deepseek_v41`, `k2_horizon` — 34 total
+- **Kimi K3 perf**: KDA mixed-batch without gather/scatter (+5.2-7.7% E2E), grouped FP8 MLA cache insertion (4-6x), FlashInfer KDA kernels, overlapped TP8 KDA projections
+- **Qwen3.8-Flash-Next perf**: separate prefill/decode QSA indexer kernels, fused PLE kernels, FP8 indexer cache, Engram TP via `--engram-config`
+
+### Changed
+- **Schema version**: 2.6.0 → 2.7.0 (329 arguments)
+- **`--spec-method` choices**: 39 → 40 (added `glm5_next_mtp`)
+- **`--moe-backend` choices**: 20 → 22 (added `aiter_triton_mxfp4_bf16`, `rdna3`)
+- **vLLM version range**: 0.20.0 - 0.29.0 → 0.20.0 - 0.30.0
+- **New Defaults (upstream)**: FlashInfer CuTeDSL NVFP4 W4A16 over Marlin on SM100/103; W4A4 NVFP4 on SM120/121; BF16x3 router GEMM on SM100; DeepEP v2 combine overlap on; AITER custom AG/RS on (ROCm DP-attn + TP experts)
+
+### Removed (upstream vLLM 0.30.0)
+- `--default-max-num-batched-tokens` (marked deprecated in schema)
+- `--enable-bf16x3-router-gemm` (now default-on for SM100; marked deprecated in schema)
+- GPTQ `g_idx` group/dynamic activation ordering (Marlin/GPTQ/CPU/RDNA3 kernels)
+- `VLLM_ENABLE_SCALE_OUT_ENDPOINTS` env var (use `--enable-scale-out`); `VLLM_PREFIX_CACHE_RETENTION_INTERVAL` and `VLLM_MM_HASHER_ALGORITHM` env vars
+- `python -m vllm.entrypoints.grpc_server` (use `vllm serve --grpc`)
+
 ## [v0.5.0.0] - 2026-09-10
 
 ### Added

@@ -1,6 +1,6 @@
 {
-  "version": "2.6.0",
-  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.29.0)",
+  "version": "2.7.0",
+  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.30.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -1560,30 +1560,32 @@
       "default": null,
       "cli_flag": "--moe-backend",
       "choices": [
+        "aiter",
+        "aiter_triton_mxfp4_bf16",
         "auto",
-        "triton",
+        "b12x",
         "batched_triton",
+        "cutlass",
         "deep_gemm",
         "deep_gemm_mega_moe",
-        "cutlass",
-        "flashinfer_trtllm",
-        "flashinfer_cutlass",
-        "flashinfer_cutedsl",
+        "emulation",
         "flashinfer_b12x",
-        "b12x",
-        "flashinfer_moe_ep_mega_deep_gemm",
+        "flashinfer_cutedsl",
+        "flashinfer_cutlass",
         "flashinfer_moe_ep_mega_cutedsl",
-        "marlin",
-        "humming",
-        "triton_unfused",
-        "aiter",
+        "flashinfer_moe_ep_mega_deep_gemm",
+        "flashinfer_trtllm",
         "flydsl",
         "hpc",
-        "emulation",
+        "humming",
+        "marlin",
+        "rdna3",
+        "triton",
+        "triton_unfused",
         null
       ],
       "importance": "medium",
-      "hint": "v0.29.0: added b12x, flashinfer_moe_ep_mega_deep_gemm, flashinfer_moe_ep_mega_cutedsl (FlashInfer moe_ep expert backend)"
+      "hint": "v0.30.0: added aiter_triton_mxfp4_bf16, rdna3. v0.29.0: added b12x, flashinfer_moe_ep_mega_*"
     },
     "ir_op_priority": {
       "type": "string",
@@ -2510,7 +2512,7 @@
     "spec_method": {
       "type": "choice",
       "category": "performance",
-      "description": "Speculative decoding method. Convenience flag for --speculative-config['method'].",
+      "description": "Speculative decoding method. Convenience flag for --speculative-config['method']. Includes v0.30.0 glm5_next_mtp.",
       "cli_flag": "--spec-method",
       "choices": [
         "bailing_hybrid_mtp",
@@ -2530,6 +2532,7 @@
         "gemma4_mtp",
         "glm4_moe_lite_mtp",
         "glm4_moe_mtp",
+        "glm5_next_mtp",
         "glm_ocr_mtp",
         "hy_v3_mtp",
         "hy_v4_mtp",
@@ -2545,13 +2548,13 @@
         "nemotron_h_mtp",
         "ngram",
         "ngram_gpu",
+        "none",
         "pangu_ultra_moe_mtp",
         "qwen3_5_mtp",
         "qwen3_next_mtp",
         "qwen4_exp_mtp",
         "step3p5_mtp",
-        "suffix",
-        "none"
+        "suffix"
       ],
       "importance": "medium",
       "hint": "v0.29.0: added hy_v4_mtp, qwen4_exp_mtp. DFlash/DSpark via dflash/dspark; DFlash2 loads from speculators format",
@@ -3296,7 +3299,10 @@
       "cli_flag": "--default-max-num-batched-tokens",
       "importance": "low",
       "new_in": "v0.24.0",
-      "synced": true
+      "synced": true,
+      "deprecated": true,
+      "deprecated_in": "v0.30.0",
+      "deprecation_reason": "Removed in vLLM v0.30.0; use --max-num-batched-tokens or scheduler config overrides instead."
     },
     "backend": {
       "type": "choice",
@@ -3475,7 +3481,10 @@
       "default": null,
       "cli_flag": "--enable-bf16x3-router-gemm",
       "importance": "low",
-      "new_in": "v0.28.0"
+      "new_in": "v0.28.0",
+      "deprecated": true,
+      "deprecated_in": "v0.30.0",
+      "deprecation_reason": "Removed in vLLM v0.30.0; BF16x3 router GEMM is now default-on for SM100."
     },
     "enable_fault_tolerance": {
       "type": "boolean",
@@ -3734,6 +3743,109 @@
       "cli_flag": "--sse-keep-alive-interval",
       "importance": "low",
       "new_in": "v0.29.0"
+    },
+    "engram_config": {
+      "type": "string",
+      "category": "model",
+      "description": "Engram N-gram lookup configuration (JSON string)",
+      "cli_flag": "--engram-config",
+      "importance": "low",
+      "added_in": "v0.30.0"
+    },
+    "watermark_config": {
+      "type": "string",
+      "category": "model",
+      "description": "KV cache watermark policy configuration (JSON string)",
+      "cli_flag": "--watermark-config",
+      "importance": "low",
+      "added_in": "v0.30.0"
+    },
+    "dp_sync_interval": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Data parallel step sync interval (vLLM 0.30.0+)",
+      "default": 16,
+      "cli_flag": "--dp-sync-interval",
+      "importance": "medium",
+      "hint": "Steps between DP rank syncs (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "elastic_ep_max_dp_size": {
+      "type": "integer",
+      "category": "optimization",
+      "description": "Maximum data-parallel size for elastic EP scaling (vLLM 0.30.0+)",
+      "default": null,
+      "cli_flag": "--elastic-ep-max-dp-size",
+      "importance": "medium",
+      "hint": "Used with elastic EP scaling (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "enable_mamba_fine_grained_prefix_cache": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable fine-grained prefix caching for Mamba/hybrid models (vLLM 0.30.0+)",
+      "default": false,
+      "cli_flag": "--enable-mamba-fine-grained-prefix-cache",
+      "importance": "low",
+      "hint": "Fine-grained prefix cache for hybrid SSM models (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "enable_nccl_comm_suspend": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable NCCL communicator suspend/resume support (vLLM 0.30.0+)",
+      "default": false,
+      "cli_flag": "--enable-nccl-comm-suspend",
+      "importance": "low",
+      "hint": "Suspend NCCL comms to save GPU memory when idle (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "enable_scale_out": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable scale-out serving mode (vLLM 0.30.0+)",
+      "default": false,
+      "cli_flag": "--enable-scale-out",
+      "importance": "low",
+      "hint": "Large-scale serving expansion mode (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "kda_decode_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "KDA decode kernel backend (vLLM 0.30.0+)",
+      "default": null,
+      "cli_flag": "--kda-decode-backend",
+      "choices": [
+        "auto",
+        "native",
+        "flashinfer",
+        "triton",
+        null
+      ],
+      "importance": "low",
+      "hint": "KDA (Kimi Delta Attention) decode backend (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
+    },
+    "sparse_indexer_topk_backend": {
+      "type": "choice",
+      "category": "advanced",
+      "description": "Sparse indexer top-k backend (vLLM 0.30.0+)",
+      "default": null,
+      "cli_flag": "--sparse-indexer-topk-backend",
+      "choices": [
+        "auto",
+        "deep_select",
+        "cooperative",
+        "persistent",
+        "per_row",
+        "flashinfer",
+        "torch",
+        null
+      ],
+      "importance": "low",
+      "hint": "DSA/NSA indexer top-k kernel backend (vLLM 0.30.0+)",
+      "new_in": "v0.30.0"
     }
   },
   "vllm_versions_supported": [
@@ -3750,13 +3862,15 @@
     "0.27.0",
     "0.27.1",
     "0.28.0",
-    "0.29.0"
+    "0.29.0",
+    "0.30.0"
   ],
-  "last_synced_version": "v0.29.0",
-  "deprecated_count": 117,
+  "last_synced_version": "v0.30.0",
+  "deprecated_count": 119,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
   "new_in_v028_count": 20,
-  "new_in_v029_count": 8
+  "new_in_v029_count": 8,
+  "new_in_v030_count": 9
 }
