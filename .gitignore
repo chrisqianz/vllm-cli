@@ -17,3 +17,6 @@ build/
 
 # Zip archives
 *-src.zip
+
+# vLLM source check dirs (temp analysis)
+.v0*-check/
