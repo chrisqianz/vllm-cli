@@ -11,7 +11,9 @@ from typing import Any, Dict, List, Optional
 import inquirer
 
 from ..config import ConfigManager
+from ..i18n import tr
 from .common import console
+from .navigation import prompt_choice
 
 logger = logging.getLogger(__name__)
 
@@ -25,21 +27,33 @@ def sync_recipes() -> str:
     """
     from ..config.recipes_parser import RecipesParser
 
-    console.print("\n[bold cyan]Sync Official vLLM Recipes[/bold cyan]")
-    console.print("[dim]Import official vLLM recipe configurations as profiles[/dim]\n")
+    console.print(
+        f"\n[bold cyan]{tr('recipes_ui.sync_title', 'Sync Official vLLM Recipes')}[/bold cyan]"
+    )
+    console.print(
+        f"[dim]{tr('recipes_ui.sync_subtitle', 'Import official vLLM recipe configurations as profiles')}[/dim]\n"
+    )
 
     parser = RecipesParser()
 
     try:
         recipes = parser.fetch_recipes_list()
     except Exception as e:
-        console.print(f"[red]Failed to fetch recipes: {e}[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "recipes_ui.fetch_failed",
+                "[red]Failed to fetch recipes: {error}[/red]",
+                error=e,
+            )
+        )
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
         return "continue"
 
     if not recipes:
-        console.print("[yellow]No recipes found.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            f"[yellow]{tr('recipes_ui.no_recipes_found', 'No recipes found.')}[/yellow]"
+        )
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
         return "continue"
 
     # Group recipes by category
@@ -64,22 +78,31 @@ def sync_recipes() -> str:
             recipe_map[f"[{category}] {display_name}"] = recipe_id
 
     if not choices:
-        console.print("[yellow]No recipes available for import.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            f"[yellow]{tr('recipes_ui.no_recipes_available', 'No recipes available for import.')}[/yellow]"
+        )
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
         return "continue"
 
     # Let user select recipes
+    # Recipe labels come from the remote recipe catalogue (dynamic data) and are
+    # matched by the same expression via recipe_map, so they stay untranslated.
     questions = [
         inquirer.Checkbox(
             "recipes",
-            message="Select recipes to import (press Space to select, Enter to confirm):",
+            message=tr(
+                "recipes_ui.select_recipes",
+                "Select recipes to import (press Space to select, Enter to confirm):",
+            ),
             choices=choices,
         )
     ]
 
     answers = inquirer.prompt(questions)
     if not answers or not answers.get("recipes"):
-        console.print("[dim]No recipes selected.[/dim]")
+        console.print(
+            f"[dim]{tr('recipes_ui.no_recipes_selected', 'No recipes selected.')}[/dim]"
+        )
         return "continue"
 
     selected_ids = [recipe_map[r] for r in answers["recipes"]]
@@ -122,7 +145,13 @@ def sync_recipes() -> str:
 
             if success:
                 imported.append(profile_name)
-                console.print(f"[green]✓[/green] Imported: {profile_name}")
+                console.print(
+                    tr(
+                        "recipes_ui.imported_profile",
+                        "[green]✓[/green] Imported: {name}",
+                        name=profile_name,
+                    )
+                )
             else:
                 failed.append((recipe_id, "Failed to save"))
 
@@ -131,12 +160,26 @@ def sync_recipes() -> str:
             failed.append((recipe_id, str(e)))
 
     # Summary
-    console.print("\n[bold]Import Summary:[/bold]")
-    console.print(f"  [green]Imported: {len(imported)}[/green]")
+    console.print(
+        f"\n[bold]{tr('recipes_ui.import_summary', 'Import Summary:')}[/bold]"
+    )
+    console.print(
+        tr(
+            "recipes_ui.imported_count",
+            "  [green]Imported: {count}[/green]",
+            count=len(imported),
+        )
+    )
     if failed:
-        console.print(f"  [red]Failed: {len(failed)}[/red]")
+        console.print(
+            tr(
+                "recipes_ui.failed_count",
+                "  [red]Failed: {count}[/red]",
+                count=len(failed),
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "continue"
 
 
@@ -158,40 +201,46 @@ def prompt_save_as_official(
     if not is_official_profile(profile_name):
         return None
 
-    console.print(
-        f"\n[yellow]Warning: You are modifying an official profile: {profile_name}[/yellow]"
+    warning = tr(
+        "recipes_ui.modifying_official_warning",
+        "Warning: You are modifying an official profile: {name}",
+        name=profile_name,
+    )
+    console.print(f"\n[yellow]{warning}[/yellow]")
+
+    action = prompt_choice(
+        "recipe_action",
+        tr("recipes_ui.what_would_you_like", "What would you like to do?"),
+        [
+            ("save_new", tr("recipes_ui.save_as_new_profile", "Save as new profile")),
+            (
+                "save_current",
+                tr("recipes_ui.save_to_current_profile", "Save to current profile"),
+            ),
+            ("cancel_changes", tr("recipes_ui.cancel_changes", "Cancel changes")),
+        ],
+        allow_back=False,
     )
 
-    questions = [
-        inquirer.List(
-            "action",
-            message="What would you like to do?",
-            choices=[
-                "Save as new profile",
-                "Save to current profile",
-                "Cancel changes",
-            ],
+    if not action:
+        return None
+
+    if action == "cancel_changes":
+        console.print(
+            f"[dim]{tr('recipes_ui.changes_discarded', 'Changes discarded.')}[/dim]"
         )
-    ]
-
-    answers = inquirer.prompt(questions)
-    if not answers:
         return None
 
-    action = answers["action"]
-
-    if action == "Cancel changes":
-        console.print("[dim]Changes discarded.[/dim]")
-        return None
-
-    if action == "Save to current profile":
+    if action == "save_current":
         return profile_name
 
     # Save as new profile
     new_name_question = [
         inquirer.Text(
             "new_name",
-            message="Enter new profile name:",
+            message=tr(
+                "recipes_ui.enter_new_profile_name", "Enter new profile name:"
+            ),
             default=profile_name.replace("official_", "custom_"),
         )
     ]

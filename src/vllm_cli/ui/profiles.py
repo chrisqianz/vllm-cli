@@ -12,9 +12,10 @@ from .custom_config import parse_model_length
 import inquirer
 
 from ..config import ConfigManager
+from ..i18n import tr
 from .common import console
 from .display import display_config
-from .navigation import unified_prompt
+from .navigation import prompt_choice, unified_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +58,16 @@ def manage_profiles(i18n_manager=None) -> str:
     user_profiles = config_manager.user_profiles
 
     # Built-in profiles
-    console.print("\n[bold]Built-in Profiles:[/bold]")
+    console.print(
+        tr("profiles_ui.builtin_profiles_header", "\n[bold]Built-in Profiles:[/bold]")
+    )
+    customized_tag = tr("profiles_ui.customized_suffix", "(customized)")
     for name, profile in default_profiles.items():
         icon = profile.get("icon", "")
         desc = profile.get("description", "")
         # Check if this built-in profile has been customized
         if config_manager.profile_manager.has_user_override(name):
-            console.print(f"  {icon} {name} - {desc} [yellow](customized)[/yellow]")
+            console.print(f"  {icon} {name} - {desc} [yellow]{customized_tag}[/yellow]")
         else:
             console.print(f"  {icon} {name} - {desc}")
 
@@ -75,53 +79,78 @@ def manage_profiles(i18n_manager=None) -> str:
     }
 
     if user_only_profiles:
-        console.print("\n[bold]User Profiles:[/bold]")
+        console.print(
+            tr("profiles_ui.user_profiles_header", "\n[bold]User Profiles:[/bold]")
+        )
         for name, profile in user_only_profiles.items():
             icon = profile.get("icon", "")
             desc = profile.get("description", "Custom profile")
             console.print(f"  {icon} {name} - {desc}")
     else:
-        console.print("\n[dim]No user-created profiles[/dim]")
+        console.print(
+            tr("profiles_ui.no_user_profiles", "\n[dim]No user-created profiles[/dim]")
+        )
 
     # Profile actions - streamlined menu
     actions = [
-        "Manage Profiles",
-        "Create New Profile",
-        "Import Profile",
-        "Sync Recipes",
-        "Sync CLI Args",
+        ("manage", tr("profiles_ui.action_manage", "Manage Profiles")),
+        ("create", tr("profiles_ui.action_create", "Create New Profile")),
+        ("import", tr("profiles_ui.action_import", "Import Profile")),
+        ("sync_recipes", tr("profiles_ui.action_sync_recipes", "Sync Recipes")),
+        ("sync_cli_args", tr("profiles_ui.action_sync_cli_args", "Sync CLI Args")),
     ]
-    action = unified_prompt(
-        "profile_action", "Profile Management", actions, allow_back=True
+    action = prompt_choice(
+        "profile_action",
+        tr("profiles_ui.profile_management", "Profile Management"),
+        actions,
+        allow_back=True,
     )
 
-    if action == "Manage Profiles":
+    if action == "manage":
         manage_selected_profile()
-    elif action == "Create New Profile":
+    elif action == "create":
         create_custom_profile()
-    elif action == "Import Profile":
+    elif action == "import":
         import_profile()
-    elif action == "Sync Recipes":
+    elif action == "sync_recipes":
         from .recipes_sync import sync_recipes
 
         sync_recipes()
-    elif action == "Sync CLI Args":
+    elif action == "sync_cli_args":
         from ..config.cli_args_sync import sync_cli_args as do_sync_args
 
-        console.print("\n[bold cyan]Sync vLLM CLI Arguments[/bold cyan]")
-        console.print("[dim]Fetching latest arguments from vLLM GitHub...[/dim]\n")
+        console.print(
+            tr(
+                "profiles_ui.sync_args_title",
+                "\n[bold cyan]Sync vLLM CLI Arguments[/bold cyan]",
+            )
+        )
+        console.print(
+            tr(
+                "profiles_ui.fetching_args",
+                "[dim]Fetching latest arguments from vLLM GitHub...[/dim]\n",
+            )
+        )
 
         result = do_sync_args(dry_run=True, verbose=True)
 
         if result["new_count"] > 0 or result["removed_count"] > 0:
             console.print(
-                "\n[yellow]Run with --apply-args to update the schema, or use CLI:[/yellow]"
+                tr(
+                    "profiles_ui.apply_args_hint",
+                    "\n[yellow]Run with --apply-args to update the schema, or use CLI:[/yellow]",
+                )
             )
             console.print("  [cyan]vllm-cli recipes --sync-args --apply-args[/cyan]")
         else:
-            console.print("\n[green]✓ CLI args are up to date.[/green]")
+            console.print(
+                tr(
+                    "profiles_ui.cli_args_up_to_date",
+                    "\n[green]✓ CLI args are up to date.[/green]",
+                )
+            )
 
-        input("\nPress Enter to continue...")
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
     return "continue"
 
@@ -134,8 +163,13 @@ def manage_selected_profile() -> None:
     all_profiles = config_manager.get_all_profiles()
 
     if not all_profiles:
-        console.print("[yellow]No profiles available to view.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "profiles_ui.no_profiles_available",
+                "[yellow]No profiles available to view.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Prepare profile list with type indicators (plain text for menu)
@@ -159,10 +193,15 @@ def manage_selected_profile() -> None:
             profile_map[display_name] = name
 
     # Select profile to manage
-    console.print("\n[bold cyan]Manage Profiles[/bold cyan]")
+    console.print(
+        tr(
+            "profiles_ui.manage_profiles_title",
+            "\n[bold cyan]Manage Profiles[/bold cyan]",
+        )
+    )
     selected = unified_prompt(
         "profile",
-        "Select a profile to manage",
+        tr("profiles_ui.select_profile_to_manage", "Select a profile to manage"),
         profile_choices,
         allow_back=True,
     )
@@ -177,35 +216,84 @@ def manage_selected_profile() -> None:
     console.print("\n" * 2)
 
     # Display profile header
-    console.rule(f"[bold cyan]Profile: {profile_name}[/bold cyan]")
+    console.rule(
+        tr(
+            "profiles_ui.profile_header",
+            "[bold cyan]Profile: {name}[/bold cyan]",
+            name=profile_name,
+        )
+    )
 
     # Get profile data
     profile = config_manager.get_profile(profile_name)
     if not profile:
-        console.print(f"[red]Profile '{profile_name}' not found.[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "profiles_ui.profile_not_found",
+                "[red]Profile '{name}' not found.[/red]",
+                name=profile_name,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Display profile metadata
-    console.print("\n[bold]Profile Information:[/bold]")
-    console.print(f"  Name: {profile_name}")
-    console.print(f"  Description: {profile.get('description', 'No description')}")
+    console.print(
+        tr("profiles_ui.profile_information", "\n[bold]Profile Information:[/bold]")
+    )
+    console.print(tr("profiles_ui.field_name", "  Name: {name}", name=profile_name))
+    console.print(
+        tr(
+            "profiles_ui.field_description",
+            "  Description: {description}",
+            description=profile.get(
+                "description", tr("profiles_ui.no_description", "No description")
+            ),
+        )
+    )
     if profile.get("icon"):
-        console.print(f"  Icon: {profile.get('icon')}")
+        console.print(
+            tr("profiles_ui.field_icon", "  Icon: {icon}", icon=profile.get("icon"))
+        )
 
     # Determine and display profile type
     if config_manager.profile_manager.has_user_override(profile_name):
-        console.print("  Type: [yellow]Customized Built-in Profile[/yellow]")
+        console.print(
+            tr(
+                "profiles_ui.type_customized_builtin",
+                "  Type: [yellow]Customized Built-in Profile[/yellow]",
+            )
+        )
     elif config_manager.profile_manager.is_user_profile(profile_name):
         if profile_name in config_manager.default_profiles:
-            console.print("  Type: [yellow]User Override of Built-in[/yellow]")
+            console.print(
+                tr(
+                    "profiles_ui.type_user_override",
+                    "  Type: [yellow]User Override of Built-in[/yellow]",
+                )
+            )
         else:
-            console.print("  Type: [cyan]User-Created Profile[/cyan]")
+            console.print(
+                tr(
+                    "profiles_ui.type_user_created",
+                    "  Type: [cyan]User-Created Profile[/cyan]",
+                )
+            )
     else:
-        console.print("  Type: [green]Built-in Default Profile[/green]")
+        console.print(
+            tr(
+                "profiles_ui.type_builtin_default",
+                "  Type: [green]Built-in Default Profile[/green]",
+            )
+        )
 
     # Display current configuration
-    console.print("\n[bold]Configuration Settings:[/bold]")
+    console.print(
+        tr(
+            "profiles_ui.configuration_settings",
+            "\n[bold]Configuration Settings:[/bold]",
+        )
+    )
     config = profile.get("config", {})
 
     if config:
@@ -215,34 +303,73 @@ def manage_selected_profile() -> None:
         )
         display_config(config_with_defaults)
     else:
-        console.print("[dim]  No custom configuration (uses all vLLM defaults)[/dim]")
+        console.print(
+            tr(
+                "profiles_ui.no_custom_config",
+                "[dim]  No custom configuration (uses all vLLM defaults)[/dim]",
+            )
+        )
 
     # Display environment variables
     environment = profile.get("environment", {})
     if environment:
-        console.print("\n[bold]Environment Variables:[/bold]")
+        console.print(
+            tr(
+                "profiles_ui.environment_variables",
+                "\n[bold]Environment Variables:[/bold]",
+            )
+        )
         for key, value in environment.items():
             if "KEY" in key.upper() or "TOKEN" in key.upper():
-                console.print(f"  • {key}: <hidden>")
+                console.print(
+                    tr("profiles_ui.env_var_hidden", "  • {key}: <hidden>", key=key)
+                )
             else:
                 console.print(f"  • {key}: {value}")
     else:
-        console.print("\n[bold]Environment Variables:[/bold]")
-        console.print("[dim]  No environment variables configured[/dim]")
+        console.print(
+            tr(
+                "profiles_ui.environment_variables",
+                "\n[bold]Environment Variables:[/bold]",
+            )
+        )
+        console.print(
+            tr(
+                "profiles_ui.no_environment_configured",
+                "[dim]  No environment variables configured[/dim]",
+            )
+        )
 
     # If this is a customized built-in profile, offer to show original
     if config_manager.profile_manager.has_user_override(profile_name):
-        console.print("\n[yellow]This is a customized built-in profile.[/yellow]")
+        console.print(
+            tr(
+                "profiles_ui.customized_builtin_notice",
+                "\n[yellow]This is a customized built-in profile.[/yellow]",
+            )
+        )
 
         show_original = (
-            input("\nShow original default configuration? (y/N): ").strip().lower()
+            input(
+                tr(
+                    "profiles_ui.show_original_prompt",
+                    "\nShow original default configuration? (y/N): ",
+                )
+            )
+            .strip()
+            .lower()
         )
         if show_original in ["y", "yes"]:
             original = config_manager.profile_manager.get_original_default_profile(
                 profile_name
             )
             if original:
-                console.print("\n[bold]Original Default Configuration:[/bold]")
+                console.print(
+                    tr(
+                        "profiles_ui.original_default_configuration",
+                        "\n[bold]Original Default Configuration:[/bold]",
+                    )
+                )
                 original_config = original.get("config", {})
                 if original_config:
                     original_with_defaults = (
@@ -253,89 +380,153 @@ def manage_selected_profile() -> None:
                     display_config(original_with_defaults)
                 else:
                     console.print(
-                        "[dim]  No custom configuration (uses all vLLM defaults)[/dim]"
+                        tr(
+                            "profiles_ui.no_custom_config",
+                            "[dim]  No custom configuration (uses all vLLM defaults)[/dim]",
+                        )
                     )
 
     # Offer quick actions using unified navigation
-    actions = ["Edit this profile", "Export this profile", "Rename this profile"]
+    actions = [
+        ("edit", tr("profiles_ui.action_edit", "Edit this profile")),
+        ("export", tr("profiles_ui.action_export", "Export this profile")),
+        ("rename", tr("profiles_ui.action_rename", "Rename this profile")),
+    ]
 
     # Add delete option for user profiles (not for unmodified built-in)
     if config_manager.profile_manager.is_user_profile(profile_name):
         if profile_name not in config_manager.default_profiles:
             # Only user-created profiles can be deleted
-            actions.append("Delete this profile")
+            actions.append(
+                ("delete", tr("profiles_ui.action_delete", "Delete this profile"))
+            )
 
     # Add reset option if this is a customized built-in profile
     if config_manager.profile_manager.has_user_override(profile_name):
-        actions.append("Reset to default")
+        actions.append(("reset", tr("profiles_ui.action_reset", "Reset to default")))
 
     # Use unified prompt for consistent navigation
-    action = unified_prompt(
-        "profile_detail_action", "What would you like to do?", actions, allow_back=True
+    action = prompt_choice(
+        "profile_detail_action",
+        tr("profiles_ui.what_would_you_like_to_do", "What would you like to do?"),
+        actions,
+        allow_back=True,
     )
 
-    if action == "Edit this profile":
+    if action == "edit":
         # Edit the profile
         edit_specific_profile(profile_name)
         # After editing, ask if they want to view the updated profile
-        view_again = inquirer.confirm("View the updated profile?", default=True)
+        view_again = inquirer.confirm(
+            tr("profiles_ui.view_updated_profile", "View the updated profile?"),
+            default=True,
+        )
         if view_again:
             # Recursive call to view the updated profile
             manage_selected_profile()
-    elif action == "Export this profile":
+    elif action == "export":
         # Export the profile
         export_specific_profile(profile_name)
-    elif action == "Rename this profile":
+    elif action == "rename":
         new_name = inquirer.text(
-            message="Enter new profile name:",
+            message=tr("profiles_ui.enter_new_profile_name", "Enter new profile name:"),
             default=profile_name,
         ).strip()
         if new_name and new_name != profile_name:
             if config_manager.profile_manager.rename_user_profile(
                 profile_name, new_name
             ):
-                console.print(f"[green]✓ Profile renamed to '{new_name}'.[/green]")
-                input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "profiles_ui.profile_renamed",
+                        "[green]✓ Profile renamed to '{name}'.[/green]",
+                        name=new_name,
+                    )
+                )
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             else:
                 console.print(
-                    "[red]Failed to rename profile. Name may already exist.[/red]"
+                    tr(
+                        "profiles_ui.rename_failed",
+                        "[red]Failed to rename profile. Name may already exist.[/red]",
+                    )
                 )
-                input("\nPress Enter to continue...")
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         elif not new_name:
-            console.print("[yellow]Name cannot be empty.[/red]")
-            input("\nPress Enter to continue...")
-    elif action == "Delete this profile":
+            console.print(
+                tr(
+                    "profiles_ui.name_cannot_be_empty",
+                    "[yellow]Name cannot be empty.[/red]",
+                )
+            )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
+    elif action == "delete":
         # Delete the profile
         confirm = inquirer.confirm(
-            f"Delete profile '{profile_name}'? This cannot be undone.", default=False
+            tr(
+                "profiles_ui.delete_profile_confirm",
+                "Delete profile '{name}'? This cannot be undone.",
+                name=profile_name,
+            ),
+            default=False,
         )
         if confirm:
             if config_manager.delete_user_profile(profile_name):
-                console.print(f"[green]✓ Profile '{profile_name}' deleted.[/green]")
-                input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "profiles_ui.profile_deleted",
+                        "[green]✓ Profile '{name}' deleted.[/green]",
+                        name=profile_name,
+                    )
+                )
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
                 return  # Exit to main menu after deletion
             else:
-                console.print(f"[red]Failed to delete profile '{profile_name}'.[/red]")
-                input("\nPress Enter to continue...")
-    elif action == "Reset to default":
+                console.print(
+                    tr(
+                        "profiles_ui.profile_delete_failed",
+                        "[red]Failed to delete profile '{name}'.[/red]",
+                        name=profile_name,
+                    )
+                )
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
+    elif action == "reset":
         # Reset to default
         confirm = inquirer.confirm(
-            f"Reset '{profile_name}' to its default configuration?", default=False
+            tr(
+                "profiles_ui.reset_to_default_confirm",
+                "Reset '{name}' to its default configuration?",
+                name=profile_name,
+            ),
+            default=False,
         )
         if confirm:
             if config_manager.profile_manager.reset_to_default(profile_name):
                 console.print(
-                    f"[green]✓ Profile '{profile_name}' reset to default.[/green]"
+                    tr(
+                        "profiles_ui.profile_reset",
+                        "[green]✓ Profile '{name}' reset to default.[/green]",
+                        name=profile_name,
+                    )
                 )
                 # Ask if they want to view the reset profile
-                view_again = inquirer.confirm("View the reset profile?", default=True)
+                view_again = inquirer.confirm(
+                    tr("profiles_ui.view_reset_profile", "View the reset profile?"),
+                    default=True,
+                )
                 if view_again:
                     manage_selected_profile()
                 else:
-                    input("\nPress Enter to continue...")
+                    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             else:
-                console.print(f"[red]Failed to reset profile '{profile_name}'.[/red]")
-                input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "profiles_ui.profile_reset_failed",
+                        "[red]Failed to reset profile '{name}'.[/red]",
+                        name=profile_name,
+                    )
+                )
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
     # If "BACK" or nothing selected, just return
 
 
@@ -373,14 +564,29 @@ def create_custom_profile() -> None:
     """
     from .custom_config import configure_by_categories
 
-    console.print("\n[bold cyan]Create Custom Profile[/bold cyan]")
+    console.print(
+        tr(
+            "profiles_ui.create_custom_profile_title",
+            "\n[bold cyan]Create Custom Profile[/bold cyan]",
+        )
+    )
 
-    name = input("Profile name: ").strip()
+    name = input(tr("profiles_ui.profile_name_prompt", "Profile name: ")).strip()
     if not name:
-        console.print("[yellow]Profile name required.[/yellow]")
+        console.print(
+            tr(
+                "profiles_ui.profile_name_required",
+                "[yellow]Profile name required.[/yellow]",
+            )
+        )
         return
 
-    description = input("Profile description (optional): ").strip()
+    description = input(
+        tr(
+            "profiles_ui.profile_description_prompt",
+            "Profile description (optional): ",
+        )
+    ).strip()
     if not description:
         description = "Custom configuration"
 
@@ -401,13 +607,22 @@ def create_custom_profile() -> None:
     }
 
     config_manager.save_user_profile(name, profile_data)
-    console.print(f"\n[green]✓ Profile '{name}' created successfully.[/green]")
+    console.print(
+        tr(
+            "profiles_ui.profile_created",
+            "\n[green]✓ Profile '{name}' created successfully.[/green]",
+            name=name,
+        )
+    )
 
     # Display the created profile
     config_with_defaults = config_manager.profile_manager.apply_dynamic_defaults(config)
-    display_config(config_with_defaults, title="Profile Configuration")
+    display_config(
+        config_with_defaults,
+        title=tr("profiles_ui.profile_configuration", "Profile Configuration"),
+    )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def edit_specific_profile(profile_name: str) -> None:
@@ -425,7 +640,13 @@ def edit_specific_profile(profile_name: str) -> None:
     # Get the profile
     profile = config_manager.get_profile(profile_name)
     if not profile:
-        console.print(f"[red]Profile '{profile_name}' not found.[/red]")
+        console.print(
+            tr(
+                "profiles_ui.profile_not_found",
+                "[red]Profile '{name}' not found.[/red]",
+                name=profile_name,
+            )
+        )
         return
 
     # Get configuration
@@ -438,59 +659,127 @@ def edit_specific_profile(profile_name: str) -> None:
         and not config_manager.profile_manager.has_user_override(profile_name)
     ):
         console.print(
-            f"\n[yellow]Note: Editing built-in profile '{profile_name}'.[/yellow]"
+            tr(
+                "profiles_ui.editing_builtin_note",
+                "\n[yellow]Note: Editing built-in profile '{name}'.[/yellow]",
+                name=profile_name,
+            )
         )
         console.print(
-            "[yellow]Your changes will create a customized version that overrides the default.[/yellow]"
+            tr(
+                "profiles_ui.editing_builtin_changes_note",
+                "[yellow]Your changes will create a customized version that "
+                "overrides the default.[/yellow]",
+            )
         )
-        console.print("[dim]You can reset to default later if needed.[/dim]\n")
+        console.print(
+            tr(
+                "profiles_ui.editing_builtin_reset_note",
+                "[dim]You can reset to default later if needed.[/dim]\n",
+            )
+        )
 
-    console.print(f"\n[bold cyan]Editing Profile: {profile_name}[/bold cyan]")
+    console.print(
+        tr(
+            "profiles_ui.editing_profile_title",
+            "\n[bold cyan]Editing Profile: {name}[/bold cyan]",
+            name=profile_name,
+        )
+    )
 
     # Offer edit options
     edit_options = [
-        "Modify existing values only",
-        "Full configuration (add/remove/modify)",
-        "Edit environment variables",
-        "Cancel",
+        (
+            "modify_existing",
+            tr("profiles_ui.edit_option_modify", "Modify existing values only"),
+        ),
+        (
+            "full_config",
+            tr(
+                "profiles_ui.edit_option_full",
+                "Full configuration (add/remove/modify)",
+            ),
+        ),
+        (
+            "edit_env",
+            tr("profiles_ui.edit_option_env", "Edit environment variables"),
+        ),
+        ("cancel", tr("profiles_ui.edit_option_cancel", "Cancel")),
     ]
 
-    edit_choice = unified_prompt(
-        "edit_choice", "What would you like to edit?", edit_options, allow_back=False
+    edit_choice = prompt_choice(
+        "edit_choice",
+        tr("profiles_ui.what_to_edit", "What would you like to edit?"),
+        edit_options,
+        allow_back=False,
     )
 
-    if edit_choice == "Cancel" or not edit_choice:
+    if edit_choice in ("cancel", None):
         return
 
     # Modify existing values only
-    if edit_choice == "Modify existing values only":
+    if edit_choice == "modify_existing":
         if not config:
-            console.print("\n[yellow]No configuration values to modify.[/yellow]")
             console.print(
-                "[dim]Use 'Full configuration' option to add arguments first.[/dim]"
+                tr(
+                    "profiles_ui.no_configuration_values",
+                    "\n[yellow]No configuration values to modify.[/yellow]",
+                )
             )
-            input("\nPress Enter to continue...")
+            console.print(
+                tr(
+                    "profiles_ui.use_full_configuration_hint",
+                    "[dim]Use 'Full configuration' option to add arguments first.[/dim]",
+                )
+            )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         else:
-            console.print("\n[bold]Current configuration:[/bold]")
+            console.print(
+                tr(
+                    "profiles_ui.current_configuration",
+                    "\n[bold]Current configuration:[/bold]",
+                )
+            )
             display_config(config)
 
-            console.print("\nEnter new values (press Enter to keep current):")
             console.print(
-                "[dim]For type-aware editing, use 'Full configuration' option[/dim]\n"
+                tr(
+                    "profiles_ui.enter_new_values",
+                    "\nEnter new values (press Enter to keep current):",
+                )
+            )
+            console.print(
+                tr(
+                    "profiles_ui.type_aware_editing_hint",
+                    "[dim]For type-aware editing, use 'Full configuration' "
+                    "option[/dim]\n",
+                )
             )
 
             for key in list(config.keys()):
                 current_value = config[key]
+                value_prompt = tr(
+                    "profiles_ui.edit_value_prompt",
+                    "{key} [{value}]: ",
+                    key=key,
+                    value=current_value,
+                )
+                bool_prompt = tr(
+                    "profiles_ui.edit_bool_prompt",
+                    "{key} [{value}] (true/false): ",
+                    key=key,
+                    value=current_value,
+                )
 
                 # Simple value editing - try to preserve type
                 if isinstance(current_value, bool):
                     new_value = (
-                        input(f"{key} [{current_value}] (true/false): ").strip().lower()
+                        input(bool_prompt).strip().lower()
                     )
                     if new_value:
                         config[key] = new_value in ["true", "yes", "1", "y"]
                 elif isinstance(current_value, int):
-                    new_value = input(f"{key} [{current_value}]: ").strip()
+                    new_value = input(value_prompt).strip()
                     if new_value:
                         # Special handling for max_model_len to support "1M", "100K" formats
                         if key == "max_model_len":
@@ -499,52 +788,92 @@ def edit_specific_profile(profile_name: str) -> None:
                                 config[key] = parsed
                             else:
                                 console.print(
-                                    f"[red]Invalid format for {key}, keeping current value[/red]"
+                                    tr(
+                                        "profiles_ui.invalid_format_for_key",
+                                        "[red]Invalid format for {key}, keeping current "
+                                        "value[/red]",
+                                        key=key,
+                                    )
                                 )
                         else:
                             try:
                                 config[key] = int(new_value)
                             except ValueError:
                                 console.print(
-                                    f"[red]Invalid integer value for {key}, keeping current value[/red]"
+                                    tr(
+                                        "profiles_ui.invalid_int_for_key",
+                                        "[red]Invalid integer value for {key}, keeping "
+                                        "current value[/red]",
+                                        key=key,
+                                    )
                                 )
                 elif isinstance(current_value, float):
-                    new_value = input(f"{key} [{current_value}]: ").strip()
+                    new_value = input(value_prompt).strip()
                     if new_value:
                         try:
                             config[key] = float(new_value)
                         except ValueError:
                             console.print(
-                                f"[red]Invalid number value for {key}, keeping current value[/red]"
+                                tr(
+                                    "profiles_ui.invalid_number_for_key",
+                                    "[red]Invalid number value for {key}, keeping current "
+                                    "value[/red]",
+                                    key=key,
+                                )
                             )
                 else:  # string or other types
-                    new_value = input(f"{key} [{current_value}]: ").strip()
+                    new_value = input(value_prompt).strip()
                     if new_value:
                         config[key] = new_value
 
     # Full configuration (add/remove/modify)
-    elif edit_choice == "Full configuration (add/remove/modify)":
-        console.print("\n[bold]Full Configuration Mode[/bold]")
+    elif edit_choice == "full_config":
         console.print(
-            "[dim]Navigate categories to add, modify, or remove arguments[/dim]"
+            tr(
+                "profiles_ui.full_configuration_mode",
+                "\n[bold]Full Configuration Mode[/bold]",
+            )
+        )
+        console.print(
+            tr(
+                "profiles_ui.full_configuration_hint",
+                "[dim]Navigate categories to add, modify, or remove arguments[/dim]",
+            )
         )
 
         # Use the existing hierarchical configuration system
         config = configure_advanced_hierarchical(config, config_manager)
 
-        console.print("\n[green]Configuration updated[/green]")
+        console.print(
+            tr(
+                "profiles_ui.configuration_updated",
+                "\n[green]Configuration updated[/green]",
+            )
+        )
 
     # Edit environment variables
-    elif edit_choice == "Edit environment variables":
-        console.print("\n[bold]Environment Variables:[/bold]")
+    elif edit_choice == "edit_env":
+        console.print(
+            tr(
+                "profiles_ui.environment_variables",
+                "\n[bold]Environment Variables:[/bold]",
+            )
+        )
         if environment:
             for key, value in environment.items():
                 if "KEY" in key.upper() or "TOKEN" in key.upper():
-                    console.print(f"  • {key}: <hidden>")
+                    console.print(
+                        tr("profiles_ui.env_var_hidden", "  • {key}: <hidden>", key=key)
+                    )
                 else:
                     console.print(f"  • {key}: {value}")
         else:
-            console.print("[dim]No environment variables configured[/dim]")
+            console.print(
+                tr(
+                    "profiles_ui.no_environment_variables",
+                    "[dim]No environment variables configured[/dim]",
+                )
+            )
 
         console.print("")
         environment = configure_environment_variables(environment)
@@ -563,15 +892,28 @@ def edit_specific_profile(profile_name: str) -> None:
 
     if profile_name in config_manager.default_profiles:
         console.print(
-            f"[green]Profile '{profile_name}' customized successfully.[/green]"
+            tr(
+                "profiles_ui.profile_customized",
+                "[green]Profile '{name}' customized successfully.[/green]",
+                name=profile_name,
+            )
         )
         console.print(
-            "[dim]The built-in version is preserved and can be restored later.[/dim]"
+            tr(
+                "profiles_ui.builtin_version_preserved",
+                "[dim]The built-in version is preserved and can be restored later.[/dim]",
+            )
         )
     else:
-        console.print(f"[green]Profile '{profile_name}' updated.[/green]")
+        console.print(
+            tr(
+                "profiles_ui.profile_updated",
+                "[green]Profile '{name}' updated.[/green]",
+                name=profile_name,
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def export_specific_profile(profile_name: str) -> None:
@@ -581,12 +923,28 @@ def export_specific_profile(profile_name: str) -> None:
     """
     config_manager = ConfigManager()
 
-    console.print(f"\n[bold cyan]Export Profile: {profile_name}[/bold cyan]")
+    console.print(
+        tr(
+            "profiles_ui.export_profile_title",
+            "\n[bold cyan]Export Profile: {name}[/bold cyan]",
+            name=profile_name,
+        )
+    )
 
     # Get export path
-    filepath = input("Enter export path (e.g., profile.json): ").strip()
+    filepath = input(
+        tr(
+            "profiles_ui.export_path_prompt",
+            "Enter export path (e.g., profile.json): ",
+        )
+    ).strip()
     if not filepath:
-        console.print("[yellow]No file path provided.[/yellow]")
+        console.print(
+            tr(
+                "profiles_ui.no_file_path_provided",
+                "[yellow]No file path provided.[/yellow]",
+            )
+        )
         return
 
     from pathlib import Path
@@ -598,21 +956,41 @@ def export_specific_profile(profile_name: str) -> None:
         file_path = file_path.with_suffix(".json")
 
     if config_manager.export_profile(profile_name, file_path):
-        console.print(f"[green]Profile exported to {file_path}[/green]")
+        console.print(
+            tr(
+                "profiles_ui.profile_exported",
+                "[green]Profile exported to {path}[/green]",
+                path=file_path,
+            )
+        )
     else:
-        console.print("[red]Failed to export profile.[/red]")
+        console.print(
+            tr("profiles_ui.export_failed", "[red]Failed to export profile.[/red]")
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def import_profile() -> None:
     """Import a profile from a JSON file."""
-    console.print("\n[bold cyan]Import Profile[/bold cyan]")
+    console.print(
+        tr(
+            "profiles_ui.import_profile_title",
+            "\n[bold cyan]Import Profile[/bold cyan]",
+        )
+    )
 
-    filepath = input("Enter path to profile JSON file: ").strip()
+    filepath = input(
+        tr("profiles_ui.import_path_prompt", "Enter path to profile JSON file: ")
+    ).strip()
     if not filepath:
-        console.print("[yellow]No file path provided.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "profiles_ui.no_file_path_provided",
+                "[yellow]No file path provided.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     from pathlib import Path
@@ -620,17 +998,35 @@ def import_profile() -> None:
     file_path = Path(filepath)
 
     if not file_path.exists():
-        console.print(f"[red]File not found: {filepath}[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "profiles_ui.file_not_found",
+                "[red]File not found: {path}[/red]",
+                path=filepath,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Ask for a name for the imported profile
-    name = input("Profile name (leave empty to use file name): ").strip()
+    name = input(
+        tr(
+            "profiles_ui.import_name_prompt",
+            "Profile name (leave empty to use file name): ",
+        )
+    ).strip()
 
     config_manager = ConfigManager()
     if config_manager.import_profile(file_path, name if name else None):
-        console.print("[green]Profile imported successfully.[/green]")
+        console.print(
+            tr(
+                "profiles_ui.profile_imported",
+                "[green]Profile imported successfully.[/green]",
+            )
+        )
     else:
-        console.print("[red]Failed to import profile.[/red]")
+        console.print(
+            tr("profiles_ui.import_failed", "[red]Failed to import profile.[/red]")
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")

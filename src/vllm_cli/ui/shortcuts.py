@@ -12,10 +12,11 @@ from pathlib import Path
 import inquirer
 
 from ..config import ConfigManager
+from ..i18n import tr
 from .common import console
 from .display import display_config
 from .model_manager import select_model
-from .navigation import unified_prompt
+from .navigation import prompt_choice, unified_prompt
 from .server_control import select_profile
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,9 @@ def manage_shortcuts(i18n_manager=None) -> str:
         shortcuts = config_manager.list_shortcuts()
 
         if shortcuts:
-            console.print("[bold]Your Shortcuts:[/bold]")
+            console.print(
+                tr("shortcuts_ui.your_shortcuts", "[bold]Your Shortcuts:[/bold]")
+            )
             for shortcut in shortcuts:
                 name = shortcut["name"]
                 model = shortcut["model"]
@@ -67,51 +70,79 @@ def manage_shortcuts(i18n_manager=None) -> str:
                     model_display = model
 
                 console.print(f"  → {name}")
-                console.print(f"    Model: {model_display} | Profile: {profile}")
+                console.print(
+                    tr(
+                        "shortcuts_ui.shortcut_list_line",
+                        "    Model: {model} | Profile: {profile}",
+                        model=model_display,
+                        profile=profile,
+                    )
+                )
                 if desc:
                     console.print(f"    [dim]{desc}[/dim]")
         else:
-            console.print("[dim]No shortcuts configured yet[/dim]")
+            console.print(
+                tr(
+                    "shortcuts_ui.no_shortcuts_yet",
+                    "[dim]No shortcuts configured yet[/dim]",
+                )
+            )
 
         # Action menu
         actions = [
-            "Create New Shortcut",
-            "View/Edit Shortcut",
-            "Delete Shortcut",
-            "Import Shortcut",
-            "Export Shortcut",
+            ("create", tr("shortcuts_ui.action_create", "Create New Shortcut")),
+            (
+                "view_edit",
+                tr("shortcuts_ui.action_view_edit", "View/Edit Shortcut"),
+            ),
+            ("delete", tr("shortcuts_ui.action_delete", "Delete Shortcut")),
+            ("import", tr("shortcuts_ui.action_import", "Import Shortcut")),
+            ("export", tr("shortcuts_ui.action_export", "Export Shortcut")),
         ]
 
-        action = unified_prompt(
-            "shortcut_action", "What would you like to do?", actions, allow_back=True
+        action = prompt_choice(
+            "shortcut_action",
+            tr("shortcuts_ui.select_action", "What would you like to do?"),
+            actions,
+            allow_back=True,
         )
 
         if action == "BACK" or not action:
             return "continue"
-        elif action == "Create New Shortcut":
+        elif action == "create":
             create_shortcut()
-        elif action == "View/Edit Shortcut":
+        elif action == "view_edit":
             view_edit_shortcut()
-        elif action == "Delete Shortcut":
+        elif action == "delete":
             delete_shortcut()
-        elif action == "Import Shortcut":
+        elif action == "import":
             import_shortcut()
-        elif action == "Export Shortcut":
+        elif action == "export":
             export_shortcut()
 
 
 def create_shortcut() -> None:
     """Create a new shortcut."""
-    console.print("\n[bold cyan]Create New Shortcut[/bold cyan]")
+    console.print(
+        tr("shortcuts_ui.create_title", "\n[bold cyan]Create New Shortcut[/bold cyan]")
+    )
 
     # Step 1: Select model
-    console.print("\n[bold]Step 1: Select Model[/bold]")
+    console.print(
+        tr(
+            "shortcuts_ui.step1_select_model",
+            "\n[bold]Step 1: Select Model[/bold]",
+        )
+    )
     model_selection = select_model()
     if not model_selection:
         console.print(
-            "[yellow]No model selected. Shortcut creation cancelled.[/yellow]"
+            tr(
+                "shortcuts_ui.no_model_cancelled",
+                "[yellow]No model selected. Shortcut creation cancelled.[/yellow]",
+            )
         )
-        input("\nPress Enter to continue...")
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Handle different model formats
@@ -123,17 +154,24 @@ def create_shortcut() -> None:
         model_name = model
 
     # Step 2: Select profile
-    console.print("\n[bold]Step 2: Select Profile[/bold]")
+    console.print(
+        tr("shortcuts_ui.step2_select_profile", "\n[bold]Step 2: Select Profile[/bold]")
+    )
     profile_name = select_profile()
     if not profile_name:
         console.print(
-            "[yellow]No profile selected. Shortcut creation cancelled.[/yellow]"
+            tr(
+                "shortcuts_ui.no_profile_cancelled",
+                "[yellow]No profile selected. Shortcut creation cancelled.[/yellow]",
+            )
         )
-        input("\nPress Enter to continue...")
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Step 3: Name the shortcut
-    console.print("\n[bold]Step 3: Name Your Shortcut[/bold]")
+    console.print(
+        tr("shortcuts_ui.step3_name", "\n[bold]Step 3: Name Your Shortcut[/bold]")
+    )
 
     # Suggest a default name
     if "/" in str(model_name):
@@ -142,12 +180,20 @@ def create_shortcut() -> None:
         model_short = str(model_name)
     suggested_name = f"{model_short}-{profile_name}"
 
-    name = input(f"Shortcut name [{suggested_name}]: ").strip()
+    name = input(
+        tr(
+            "shortcuts_ui.name_prompt",
+            "Shortcut name [{suggested}]: ",
+            suggested=suggested_name,
+        )
+    ).strip()
     if not name:
         name = suggested_name
 
     # Step 4: Optional description
-    description = input("Description (optional): ").strip()
+    description = input(
+        tr("shortcuts_ui.description_prompt", "Description (optional): ")
+    ).strip()
     if not description:
         description = f"{model_name} with {profile_name} profile"
 
@@ -161,16 +207,47 @@ def create_shortcut() -> None:
 
     try:
         if config_manager.save_shortcut(name, shortcut_data):
-            console.print(f"\n[green]✓ Shortcut '{name}' created successfully![/green]")
-            console.print("\nYou can now use this shortcut from:")
-            console.print("  • Quick Serve menu in interactive mode")
-            console.print(f'  • Command line: vllm-cli serve --shortcut "{name}"')
+            console.print(
+                tr(
+                    "shortcuts_ui.created",
+                    "\n[green]✓ Shortcut '{name}' created successfully![/green]",
+                    name=name,
+                )
+            )
+            console.print(
+                tr(
+                    "shortcuts_ui.use_shortcut_from",
+                    "\nYou can now use this shortcut from:",
+                )
+            )
+            console.print(
+                tr(
+                    "shortcuts_ui.use_quick_serve",
+                    "  • Quick Serve menu in interactive mode",
+                )
+            )
+            console.print(
+                f"{tr('shortcuts_ui.use_command_line', '  • Command line:')} "
+                f'vllm-cli serve --shortcut "{name}"'
+            )
         else:
-            console.print(f"[red]Failed to create shortcut '{name}'.[/red]")
+            console.print(
+                tr(
+                    "shortcuts_ui.create_failed",
+                    "[red]Failed to create shortcut '{name}'.[/red]",
+                    name=name,
+                )
+            )
     except Exception as e:
-        console.print(f"[red]Error creating shortcut: {e}[/red]")
+        console.print(
+            tr(
+                "shortcuts_ui.create_error",
+                "[red]Error creating shortcut: {error}[/red]",
+                error=e,
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def view_edit_shortcut() -> None:
@@ -179,15 +256,20 @@ def view_edit_shortcut() -> None:
     shortcuts = config_manager.list_shortcuts()
 
     if not shortcuts:
-        console.print("[yellow]No shortcuts available to view.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.none_to_view",
+                "[yellow]No shortcuts available to view.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Select shortcut to view
     shortcut_names = [s["name"] for s in shortcuts]
     selected_name = unified_prompt(
         "select_shortcut",
-        "Select a shortcut to view/edit",
+        tr("shortcuts_ui.select_to_view", "Select a shortcut to view/edit"),
         shortcut_names,
         allow_back=True,
     )
@@ -198,41 +280,95 @@ def view_edit_shortcut() -> None:
     # Get full shortcut data
     shortcut = config_manager.get_shortcut(selected_name)
     if not shortcut:
-        console.print(f"[red]Shortcut '{selected_name}' not found.[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.not_found",
+                "[red]Shortcut '{name}' not found.[/red]",
+                name=selected_name,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Display shortcut details
-    console.print(f"\n[bold cyan]Shortcut: {selected_name}[/bold cyan]")
-    console.print("\n[bold]Configuration:[/bold]")
-    console.print(f"  Model: {shortcut['model']}")
-    console.print(f"  Profile: {shortcut['profile']}")
-    console.print(f"  Description: {shortcut.get('description', 'No description')}")
+    console.print(
+        tr(
+            "shortcuts_ui.detail_title",
+            "\n[bold cyan]Shortcut: {name}[/bold cyan]",
+            name=selected_name,
+        )
+    )
+    console.print(tr("shortcuts_ui.configuration", "\n[bold]Configuration:[/bold]"))
+    console.print(
+        tr("shortcuts_ui.detail_model", "  Model: {model}", model=shortcut["model"])
+    )
+    console.print(
+        tr(
+            "shortcuts_ui.detail_profile",
+            "  Profile: {profile}",
+            profile=shortcut["profile"],
+        )
+    )
+    console.print(
+        tr(
+            "shortcuts_ui.detail_description",
+            "  Description: {description}",
+            description=shortcut.get(
+                "description",
+                tr("shortcuts_ui.no_description", "No description"),
+            ),
+        )
+    )
 
     if shortcut.get("created_at"):
-        console.print(f"  Created: {shortcut['created_at']}")
+        console.print(
+            tr(
+                "shortcuts_ui.detail_created",
+                "  Created: {value}",
+                value=shortcut["created_at"],
+            )
+        )
     if shortcut.get("last_used"):
-        console.print(f"  Last Used: {shortcut['last_used']}")
+        console.print(
+            tr(
+                "shortcuts_ui.detail_last_used",
+                "  Last Used: {value}",
+                value=shortcut["last_used"],
+            )
+        )
 
     # Show profile configuration
     profile = config_manager.get_profile(shortcut["profile"])
     if profile and profile.get("config"):
         display_config(
-            profile["config"], title=f"Profile Settings ({shortcut['profile']})"
+            profile["config"],
+            title=(
+                f"{tr('shortcuts_ui.profile_settings', 'Profile Settings')} "
+                f"({shortcut['profile']})"
+            ),
         )
         console.print()  # Add spacing after table to prevent display issues
 
     # Edit options
     edit_actions = [
-        "Edit Description",
-        "Change Model",
-        "Change Profile",
-        "Rename Shortcut",
+        (
+            "edit_description",
+            tr("shortcuts_ui.action_edit_description", "Edit Description"),
+        ),
+        (
+            "change_model",
+            tr("shortcuts_ui.action_change_model", "Change Model"),
+        ),
+        (
+            "change_profile",
+            tr("shortcuts_ui.action_change_profile", "Change Profile"),
+        ),
+        ("rename", tr("shortcuts_ui.action_rename", "Rename Shortcut")),
     ]
 
-    action = unified_prompt(
+    action = prompt_choice(
         "edit_shortcut_action",
-        "What would you like to do?",
+        tr("shortcuts_ui.select_action", "What would you like to do?"),
         edit_actions,
         allow_back=True,
     )
@@ -242,16 +378,25 @@ def view_edit_shortcut() -> None:
 
     modified = False
 
-    if action == "Edit Description":
+    if action == "edit_description":
         new_desc = input(
-            f"New description [{shortcut.get('description', '')}]: "
+            tr(
+                "shortcuts_ui.new_description_prompt",
+                "New description [{current}]: ",
+                current=shortcut.get("description", ""),
+            )
         ).strip()
         if new_desc:
             shortcut["description"] = new_desc
             modified = True
 
-    elif action == "Change Model":
-        console.print("\n[bold]Select new model:[/bold]")
+    elif action == "change_model":
+        console.print(
+            tr(
+                "shortcuts_ui.select_new_model",
+                "\n[bold]Select new model:[/bold]",
+            )
+        )
         new_model = select_model()
         if new_model:
             if isinstance(new_model, dict):
@@ -260,39 +405,74 @@ def view_edit_shortcut() -> None:
                 shortcut["model"] = new_model
             modified = True
 
-    elif action == "Change Profile":
-        console.print("\n[bold]Select new profile:[/bold]")
+    elif action == "change_profile":
+        console.print(
+            tr("shortcuts_ui.select_new_profile", "\n[bold]Select new profile:[/bold]")
+        )
         new_profile = select_profile()
         if new_profile:
             shortcut["profile"] = new_profile
             modified = True
 
-    elif action == "Rename Shortcut":
-        new_name = input(f"New name [{selected_name}]: ").strip()
+    elif action == "rename":
+        new_name = input(
+            tr(
+                "shortcuts_ui.new_name_prompt",
+                "New name [{current}]: ",
+                current=selected_name,
+            )
+        ).strip()
         if new_name and new_name != selected_name:
             # Check if new name already exists
             if config_manager.get_shortcut(new_name):
-                console.print(f"[red]Shortcut '{new_name}' already exists.[/red]")
+                console.print(
+                    tr(
+                        "shortcuts_ui.name_exists",
+                        "[red]Shortcut '{name}' already exists.[/red]",
+                        name=new_name,
+                    )
+                )
             else:
                 # Rename by saving with new name and deleting old
                 shortcut["name"] = new_name
                 if config_manager.save_shortcut(new_name, shortcut):
                     config_manager.delete_shortcut(selected_name)
-                    console.print(f"[green]✓ Shortcut renamed to '{new_name}'[/green]")
+                    console.print(
+                        tr(
+                            "shortcuts_ui.renamed",
+                            "[green]✓ Shortcut renamed to '{name}'[/green]",
+                            name=new_name,
+                        )
+                    )
                     selected_name = new_name
                 else:
-                    console.print("[red]Failed to rename shortcut.[/red]")
+                    console.print(
+                        tr(
+                            "shortcuts_ui.rename_failed",
+                            "[red]Failed to rename shortcut.[/red]",
+                        )
+                    )
 
     # Save modifications if any
     if modified:
         if config_manager.save_shortcut(selected_name, shortcut):
             console.print(
-                f"[green]✓ Shortcut '{selected_name}' updated successfully![/green]"
+                tr(
+                    "shortcuts_ui.updated",
+                    "[green]✓ Shortcut '{name}' updated successfully![/green]",
+                    name=selected_name,
+                )
             )
         else:
-            console.print(f"[red]Failed to update shortcut '{selected_name}'.[/red]")
+            console.print(
+                tr(
+                    "shortcuts_ui.update_failed",
+                    "[red]Failed to update shortcut '{name}'.[/red]",
+                    name=selected_name,
+                )
+            )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def delete_shortcut() -> None:
@@ -301,15 +481,20 @@ def delete_shortcut() -> None:
     shortcuts = config_manager.list_shortcuts()
 
     if not shortcuts:
-        console.print("[yellow]No shortcuts available to delete.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.none_to_delete",
+                "[yellow]No shortcuts available to delete.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Select shortcut to delete
     shortcut_names = [s["name"] for s in shortcuts]
     selected_name = unified_prompt(
         "delete_shortcut",
-        "Select a shortcut to delete",
+        tr("shortcuts_ui.select_to_delete", "Select a shortcut to delete"),
         shortcut_names,
         allow_back=True,
     )
@@ -319,18 +504,40 @@ def delete_shortcut() -> None:
 
     # Confirm deletion
     confirm = inquirer.confirm(
-        f"Delete shortcut '{selected_name}'? This cannot be undone.", default=False
+        tr(
+            "shortcuts_ui.delete_confirm",
+            "Delete shortcut '{name}'? This cannot be undone.",
+            name=selected_name,
+        ),
+        default=False,
     )
 
     if confirm:
         if config_manager.delete_shortcut(selected_name):
-            console.print(f"[green]✓ Shortcut '{selected_name}' deleted.[/green]")
+            console.print(
+                tr(
+                    "shortcuts_ui.deleted",
+                    "[green]✓ Shortcut '{name}' deleted.[/green]",
+                    name=selected_name,
+                )
+            )
         else:
-            console.print(f"[red]Failed to delete shortcut '{selected_name}'.[/red]")
+            console.print(
+                tr(
+                    "shortcuts_ui.delete_failed",
+                    "[red]Failed to delete shortcut '{name}'.[/red]",
+                    name=selected_name,
+                )
+            )
     else:
-        console.print("[yellow]Deletion cancelled.[/yellow]")
+        console.print(
+            tr(
+                "shortcuts_ui.deletion_cancelled",
+                "[yellow]Deletion cancelled.[/yellow]",
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def export_shortcut() -> None:
@@ -339,15 +546,20 @@ def export_shortcut() -> None:
     shortcuts = config_manager.list_shortcuts()
 
     if not shortcuts:
-        console.print("[yellow]No shortcuts available to export.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.none_to_export",
+                "[yellow]No shortcuts available to export.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Select shortcut to export
     shortcut_names = [s["name"] for s in shortcuts]
     selected_name = unified_prompt(
         "export_shortcut",
-        "Select a shortcut to export",
+        tr("shortcuts_ui.select_to_export", "Select a shortcut to export"),
         shortcut_names,
         allow_back=True,
     )
@@ -356,7 +568,13 @@ def export_shortcut() -> None:
         return
 
     # Get export path
-    filepath = input(f"Export path [shortcut_{selected_name}.json]: ").strip()
+    filepath = input(
+        tr(
+            "shortcuts_ui.export_path_prompt",
+            "Export path [{suggested}]: ",
+            suggested=f"shortcut_{selected_name}.json",
+        )
+    ).strip()
     if not filepath:
         filepath = f"shortcut_{selected_name}.json"
 
@@ -367,45 +585,92 @@ def export_shortcut() -> None:
         file_path = file_path.with_suffix(".json")
 
     if config_manager.shortcut_manager.export_shortcut(selected_name, file_path):
-        console.print(f"[green]✓ Shortcut exported to {file_path}[/green]")
+        console.print(
+            tr(
+                "shortcuts_ui.exported",
+                "[green]✓ Shortcut exported to {path}[/green]",
+                path=file_path,
+            )
+        )
     else:
-        console.print("[red]Failed to export shortcut.[/red]")
+        console.print(
+            tr("shortcuts_ui.export_failed", "[red]Failed to export shortcut.[/red]")
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def import_shortcut() -> None:
     """Import a shortcut from a file."""
-    console.print("\n[bold cyan]Import Shortcut[/bold cyan]")
+    console.print(
+        tr("shortcuts_ui.import_title", "\n[bold cyan]Import Shortcut[/bold cyan]")
+    )
 
-    filepath = input("Enter path to shortcut JSON file: ").strip()
+    filepath = input(
+        tr(
+            "shortcuts_ui.import_path_prompt",
+            "Enter path to shortcut JSON file: ",
+        )
+    ).strip()
     if not filepath:
-        console.print("[yellow]No file path provided.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.no_path_provided",
+                "[yellow]No file path provided.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     file_path = Path(filepath)
 
     if not file_path.exists():
-        console.print(f"[red]File not found: {filepath}[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.file_not_found",
+                "[red]File not found: {path}[/red]",
+                path=filepath,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return
 
     # Ask for a name for the imported shortcut
-    name = input("Shortcut name (leave empty to use file name): ").strip()
+    name = input(
+        tr(
+            "shortcuts_ui.import_name_prompt",
+            "Shortcut name (leave empty to use file name): ",
+        )
+    ).strip()
 
     config_manager = ConfigManager()
     try:
         if config_manager.shortcut_manager.import_shortcut(
             file_path, name if name else None
         ):
-            console.print("[green]✓ Shortcut imported successfully![/green]")
+            console.print(
+                tr(
+                    "shortcuts_ui.imported",
+                    "[green]✓ Shortcut imported successfully![/green]",
+                )
+            )
         else:
-            console.print("[red]Failed to import shortcut.[/red]")
+            console.print(
+                tr(
+                    "shortcuts_ui.import_failed",
+                    "[red]Failed to import shortcut.[/red]",
+                )
+            )
     except Exception as e:
-        console.print(f"[red]Error importing shortcut: {e}[/red]")
+        console.print(
+            tr(
+                "shortcuts_ui.import_error",
+                "[red]Error importing shortcut: {error}[/red]",
+                error=e,
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def serve_with_shortcut(shortcut_name: str) -> str:
@@ -425,15 +690,27 @@ def serve_with_shortcut(shortcut_name: str) -> str:
     # Get the shortcut
     shortcut = config_manager.get_shortcut(shortcut_name)
     if not shortcut:
-        console.print(f"[red]Shortcut '{shortcut_name}' not found.[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.not_found",
+                "[red]Shortcut '{name}' not found.[/red]",
+                name=shortcut_name,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "continue"
 
     # Get the profile configuration
     profile = config_manager.get_profile(shortcut["profile"])
     if not profile:
-        console.print(f"[red]Profile '{shortcut['profile']}' not found.[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "shortcuts_ui.profile_not_found",
+                "[red]Profile '{name}' not found.[/red]",
+                name=shortcut["profile"],
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "continue"
 
     # Build the configuration
@@ -448,16 +725,45 @@ def serve_with_shortcut(shortcut_name: str) -> str:
     config_with_defaults = config_manager.profile_manager.apply_dynamic_defaults(config)
 
     # Display configuration
-    console.print(f"\n[bold cyan]Starting with Shortcut: {shortcut_name}[/bold cyan]")
-    console.print(f"Model: {shortcut['model']}")
-    console.print(f"Profile: {shortcut['profile']}")
+    console.print(
+        tr(
+            "shortcuts_ui.starting_with",
+            "\n[bold cyan]Starting with Shortcut: {name}[/bold cyan]",
+            name=shortcut_name,
+        )
+    )
+    console.print(
+        tr("shortcuts_ui.line_model", "Model: {model}", model=shortcut["model"])
+    )
+    console.print(
+        tr(
+            "shortcuts_ui.line_profile",
+            "Profile: {profile}",
+            profile=shortcut["profile"],
+        )
+    )
     if shortcut.get("description"):
-        console.print(f"Description: {shortcut['description']}")
+        console.print(
+            tr(
+                "shortcuts_ui.line_description",
+                "Description: {description}",
+                description=shortcut["description"],
+            )
+        )
 
-    display_config(config_with_defaults, title="Shortcut Configuration")
+    display_config(
+        config_with_defaults,
+        title=tr("shortcuts_ui.config_title", "Shortcut Configuration"),
+    )
 
     # Confirm and start
-    confirm = inquirer.confirm("Start server with this configuration?", default=True)
+    confirm = inquirer.confirm(
+        tr(
+            "shortcuts_ui.start_confirm",
+            "Start server with this configuration?",
+        ),
+        default=True,
+    )
 
     if confirm:
         # Update last used timestamp

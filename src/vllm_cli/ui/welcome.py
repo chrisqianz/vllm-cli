@@ -10,6 +10,7 @@ from rich.align import Align
 from rich.text import Text
 
 from .. import __version__
+from ..i18n import tr
 from .common import console, create_panel
 from .components import create_system_overview_panel
 from .gpu_utils import create_gpu_status_panel
@@ -45,9 +46,15 @@ def show_welcome_screen(i18n_manager=None) -> None:
             tagline_text = i18n_manager.t("welcome.tagline")
             press_enter_text = i18n_manager.t("welcome.press_enter")
         else:
-            subtitle_text = "vLLM CLI - Convenient vLLM Serving Tool"
-            tagline_text = "Serve • Configure • Monitor Your LLMs"
-            press_enter_text = "Press Enter to continue..."
+            subtitle_text = tr(
+                "welcome.title", "vLLM CLI - Convenient vLLM Serving Tool"
+            )
+            tagline_text = tr(
+                "welcome.tagline", "Serve • Configure • Monitor Your LLMs"
+            )
+            press_enter_text = tr(
+                "common.press_enter", "Press Enter to continue..."
+            )
 
         # Subtitle and version
         subtitle = Text(
@@ -101,5 +108,16 @@ def show_welcome_screen(i18n_manager=None) -> None:
 
     except Exception as e:
         logger.error(f"Error displaying welcome screen: {e}")
-        console.print(f"[red]Error displaying welcome screen: {e}[/red]")
-        console.print("[yellow]Continuing to main menu...[/yellow]")
+        console.print(
+            tr(
+                "welcome_ui.error_displaying",
+                "[red]Error displaying welcome screen: {error}[/red]",
+                error=e,
+            )
+        )
+        console.print(
+            tr(
+                "welcome_ui.continuing_to_main_menu",
+                "[yellow]Continuing to main menu...[/yellow]",
+            )
+        )

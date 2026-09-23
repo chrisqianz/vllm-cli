@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.7.0.0] - 2026-09-23
+
+### Added
+- **Full Chinese (i18n) localization of the interactive UI**: every screen of the application now follows the language selected in Settings, not just the main menu. 1,453 new translation keys were added (en/zh in lockstep); roughly 1,400 hard-coded user-facing strings across 18 UI/CLI modules were wrapped. Visible-string coverage went from ~12% to ~99% overall (UI layer 12% → 91%; the remaining hard-coded strings are intentional dynamic data such as model names and file paths).
+- **Stable action-key menus (`prompt_choice`)**: new navigation primitive that displays translated labels while returning stable ASCII action keys, so a menu option can never silently die because a label drifted from its comparison. 31 option prompts (profiles, model manager, proxy wizard, settings, …) were migrated to it.
+- **Process-wide `tr()` helper**: translation lookup without threading an i18n manager through every call site; falls back to the embedded English default when no manager or key is available, so CLI paths and headless use stay safe.
+
+### Fixed
+- **Running-proxy management menu no longer spins on cancel**: pressing Ctrl+C / EOF at the "running proxy" action prompt used to re-loop forever because the cancel result (`None`) matched no branch; it now exits the menu like "Back".
+
+### Modules now fully localized
+`ui/settings`, `ui/model_manager`, `ui/shortcuts`, `ui/profiles`, `ui/model_directories`, `ui/custom_config`, `ui/system_info`, `ui/hf_integration`, `ui/welcome`, `ui/server_control`, `ui/server_monitor`, `ui/log_viewer`, `ui/recipes_sync`, `ui/proxy/control`, `ui/proxy/menu`, `ui/proxy/monitor`, `cli/handlers`.
+
+### Regression guards
+- Static checks enforce: no f-strings inside `tr()` keys/args, and no translated-option menu may compare against bare English literals (the exact bug class behind the v0.6.0.1 proxy failure).
+- Functional suite verifies zh/en dispatch of the proxy wizard, running-proxy actions, settings pages, and `prompt_choice` label→key mapping (9/9 passing), plus the v0.6.0.1 proxy regression suite (5/5).
+
 ## [v0.6.0.1] - 2026-09-23
 
 ### Fixed

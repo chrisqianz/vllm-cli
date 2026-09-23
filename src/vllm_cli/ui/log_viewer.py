@@ -16,9 +16,10 @@ from typing import List, Optional, Tuple
 
 from rich.text import Text
 
+from ..i18n import tr
 from ..server import VLLMServer
 from .common import console, create_panel
-from .navigation import unified_prompt
+from .navigation import prompt_choice
 
 logger = logging.getLogger(__name__)
 
@@ -240,12 +241,24 @@ def display_full_log(log_path: str) -> str:
         Action taken by user
     """
     if not Path(log_path).exists():
-        console.print(f"[red]Log file not found: {log_path}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.log_file_not_found",
+                "[red]Log file not found: {path}[/red]",
+                path=log_path,
+            )
+        )
         return "back"
 
     try:
         console.clear()
-        console.print(f"[bold cyan]Full Log - {Path(log_path).name}[/bold cyan]")
+        console.print(
+            tr(
+                "log_viewer_ui.full_log_title",
+                "[bold cyan]Full Log - {name}[/bold cyan]",
+                name=Path(log_path).name,
+            )
+        )
         console.print("[dim]" + "=" * 80 + "[/dim]")
 
         with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -253,15 +266,29 @@ def display_full_log(log_path: str) -> str:
             if content.strip():
                 console.print(content)
             else:
-                console.print("[dim]Log file is empty[/dim]")
+                console.print(
+                    f"[dim]{tr('log_viewer_ui.log_file_empty', 'Log file is empty')}[/dim]"
+                )
 
         console.print("\n[dim]" + "=" * 80 + "[/dim]")
-        console.print(f"[dim]Log file: {log_path}[/dim]")
+        console.print(
+            tr(
+                "log_viewer_ui.log_file_path",
+                "[dim]Log file: {path}[/dim]",
+                path=log_path,
+            )
+        )
 
     except Exception as e:
-        console.print(f"[red]Error reading log file: {e}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.error_reading_log",
+                "[red]Error reading log file: {error}[/red]",
+                error=e,
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "back"
 
 
@@ -277,13 +304,24 @@ def display_log_tail(log_path: str, lines: int = 50) -> str:
         Action taken by user
     """
     if not Path(log_path).exists():
-        console.print(f"[red]Log file not found: {log_path}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.log_file_not_found",
+                "[red]Log file not found: {path}[/red]",
+                path=log_path,
+            )
+        )
         return "back"
 
     try:
         console.clear()
         console.print(
-            f"[bold cyan]Last {lines} Lines - {Path(log_path).name}[/bold cyan]"
+            tr(
+                "log_viewer_ui.tail_title",
+                "[bold cyan]Last {count} Lines - {name}[/bold cyan]",
+                count=lines,
+                name=Path(log_path).name,
+            )
         )
         console.print("[dim]" + "=" * 80 + "[/dim]")
 
@@ -295,15 +333,30 @@ def display_log_tail(log_path: str, lines: int = 50) -> str:
                 for line in tail_lines:
                     console.print(line.rstrip("\n\r"))
             else:
-                console.print("[dim]Log file is empty[/dim]")
+                console.print(
+                    f"[dim]{tr('log_viewer_ui.log_file_empty', 'Log file is empty')}[/dim]"
+                )
 
         console.print("\n[dim]" + "=" * 80 + "[/dim]")
-        console.print(f"[dim]Showing last {lines} lines of {log_path}[/dim]")
+        console.print(
+            tr(
+                "log_viewer_ui.showing_last_lines",
+                "[dim]Showing last {count} lines of {path}[/dim]",
+                count=lines,
+                path=log_path,
+            )
+        )
 
     except Exception as e:
-        console.print(f"[red]Error reading log file: {e}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.error_reading_log",
+                "[red]Error reading log file: {error}[/red]",
+                error=e,
+            )
+        )
 
-    input("\nPress Enter to continue...")
+    input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "back"
 
 
@@ -318,12 +371,24 @@ def view_full_log(log_path: str) -> str:
         Action taken by user
     """
     if not Path(log_path).exists():
-        console.print(f"[red]Log file not found: {log_path}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.log_file_not_found",
+                "[red]Log file not found: {path}[/red]",
+                path=log_path,
+            )
+        )
         return "back"
 
     viewer = LogViewer(log_path)
     if not viewer.load_log_file():
-        console.print(f"[red]Failed to load log file: {log_path}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.failed_to_load_log",
+                "[red]Failed to load log file: {path}[/red]",
+                path=log_path,
+            )
+        )
         return "back"
 
     console.clear()
@@ -335,9 +400,10 @@ def view_full_log(log_path: str) -> str:
     log_height = max(10, console_height - header_height - footer_height)
 
     # Instructions
-    instructions = (
+    instructions = tr(
+        "log_viewer_ui.controls_hint",
         "[cyan]Controls:[/cyan] ↑/↓ Navigate | PgUp/PgDn Fast scroll | "
-        "Home/End Jump to start/end | S Search | T Tail mode | O Open in editor | Q Quit"
+        "Home/End Jump to start/end | S Search | T Tail mode | O Open in editor | Q Quit",
     )
 
     try:
@@ -346,7 +412,10 @@ def view_full_log(log_path: str) -> str:
             visible_lines, start_line, end_line = viewer.get_visible_lines(log_height)
 
             if not visible_lines:
-                content = Text("Log file is empty", style="dim yellow")
+                content = Text(
+                    tr("log_viewer_ui.log_file_empty", "Log file is empty"),
+                    style="dim yellow",
+                )
             else:
                 content = Text("\n".join(visible_lines))
 
@@ -355,10 +424,22 @@ def view_full_log(log_path: str) -> str:
             total_lines = len(viewer.lines)
             current_pos = viewer.current_line + 1
 
-            status_info.append(f"Line {current_pos}/{total_lines}")
+            status_info.append(
+                tr(
+                    "log_viewer_ui.status_line_position",
+                    "Line {current}/{total}",
+                    current=current_pos,
+                    total=total_lines,
+                )
+            )
 
             if viewer.search_term:
-                match_info = f"Search: '{viewer.search_term}' ({len(viewer.search_results)} matches)"
+                match_info = tr(
+                    "log_viewer_ui.status_search_matches",
+                    "Search: '{term}' ({count} matches)",
+                    term=viewer.search_term,
+                    count=len(viewer.search_results),
+                )
                 if viewer.search_results:
                     match_info += (
                         f" [{viewer.search_index + 1}/{len(viewer.search_results)}]"
@@ -366,22 +447,34 @@ def view_full_log(log_path: str) -> str:
                 status_info.append(match_info)
 
             if viewer.tail_mode:
-                status_info.append("[green]TAIL MODE[/green]")
+                status_info.append(
+                    f"[green]{tr('log_viewer_ui.status_tail_mode', 'TAIL MODE')}[/green]"
+                )
 
             status_text = " | ".join(status_info)
 
             # Create panels
             header_panel = create_panel(
                 instructions,
-                title=f"Log Viewer - {Path(log_path).name}",
+                title=tr(
+                    "log_viewer_ui.viewer_panel_title",
+                    "Log Viewer - {name}",
+                    name=Path(log_path).name,
+                ),
                 border_style="cyan",
             )
 
             content_panel = create_panel(
-                content, title="Log Content", border_style="white"
+                content,
+                title=tr("log_viewer_ui.panel_log_content", "Log Content"),
+                border_style="white",
             )
 
-            footer_panel = create_panel(status_text, title="Status", border_style="dim")
+            footer_panel = create_panel(
+                status_text,
+                title=tr("log_viewer_ui.panel_status", "Status"),
+                border_style="dim",
+            )
 
             # Display
             console.clear()
@@ -390,58 +483,82 @@ def view_full_log(log_path: str) -> str:
             console.print(footer_panel)
 
             # Handle input (simplified for now - in real implementation would use keyboard input)
-            console.print("\n[dim]Available actions:[/dim]")
+            console.print(
+                f"\n[dim]{tr('log_viewer_ui.available_actions', 'Available actions:')}[/dim]"
+            )
             actions = [
-                "↑ Up",
-                "↓ Down",
-                "Search",
-                "Tail Mode",
-                "Open in Editor",
-                "← Back",
+                ("up", tr("log_viewer_ui.action_up", "↑ Up")),
+                ("down", tr("log_viewer_ui.action_down", "↓ Down")),
+                ("search", tr("log_viewer_ui.action_search", "Search")),
+                ("tail", tr("log_viewer_ui.action_tail_mode", "Tail Mode")),
+                ("editor", tr("log_viewer_ui.action_open_editor", "Open in Editor")),
             ]
 
             if viewer.tail_mode:
-                actions = ["Stop Tail"] + actions[:-1] + ["← Back"]
+                actions = [
+                    ("stop_tail", tr("log_viewer_ui.action_stop_tail", "Stop Tail"))
+                ] + actions
 
-            action = unified_prompt(
-                "log_action", "Choose action", actions, allow_back=False
+            action = prompt_choice(
+                "log_action",
+                tr("log_viewer_ui.choose_action", "Choose action"),
+                actions,
+                allow_back=True,
             )
 
-            if not action or action == "← Back":
+            if not action or action == "BACK":
                 viewer.stop_tail_mode()
                 return "back"
-            elif action == "↑ Up":
+            elif action == "up":
                 viewer.current_line = max(0, viewer.current_line - 1)
-            elif action == "↓ Down":
+            elif action == "down":
                 viewer.current_line = min(
                     len(viewer.lines) - 1, viewer.current_line + 1
                 )
-            elif action == "Search":
-                search_term = input("Enter search term: ").strip()
+            elif action == "search":
+                search_term = input(
+                    tr("log_viewer_ui.enter_search_term", "Enter search term: ")
+                ).strip()
                 if search_term:
                     matches = viewer.search_logs(search_term)
                     if matches:
-                        console.print(f"[green]Found {len(matches)} matches[/green]")
+                        console.print(
+                            tr(
+                                "log_viewer_ui.found_matches",
+                                "[green]Found {count} matches[/green]",
+                                count=len(matches),
+                            )
+                        )
                         viewer.current_line = matches[0]
                     else:
-                        console.print("[yellow]No matches found[/yellow]")
+                        console.print(
+                            f"[yellow]{tr('log_viewer_ui.no_matches_found', 'No matches found')}[/yellow]"
+                        )
                         time.sleep(1)
-            elif action == "Tail Mode":
+            elif action == "tail":
                 viewer.start_tail_mode()
                 console.print(
-                    "[green]Tail mode started. Watching for new log entries...[/green]"
+                    f"[green]{tr('log_viewer_ui.tail_started', 'Tail mode started. Watching for new log entries...')}[/green]"
                 )
                 time.sleep(1)
-            elif action == "Stop Tail":
+            elif action == "stop_tail":
                 viewer.stop_tail_mode()
-                console.print("[yellow]Tail mode stopped[/yellow]")
+                console.print(
+                    f"[yellow]{tr('log_viewer_ui.tail_stopped', 'Tail mode stopped')}[/yellow]"
+                )
                 time.sleep(1)
-            elif action == "Open in Editor":
+            elif action == "editor":
                 try:
                     editor = os.environ.get("EDITOR", "nano")
                     subprocess.run([editor, str(log_path)], check=True)
                 except Exception as e:
-                    console.print(f"[red]Failed to open editor: {e}[/red]")
+                    console.print(
+                        tr(
+                            "log_viewer_ui.failed_to_open_editor",
+                            "[red]Failed to open editor: {error}[/red]",
+                            error=e,
+                        )
+                    )
                     time.sleep(2)
 
             # Update from tail if active
@@ -454,7 +571,13 @@ def view_full_log(log_path: str) -> str:
     except Exception as e:
         logger.error(f"Error in log viewer: {e}")
         viewer.stop_tail_mode()
-        console.print(f"[red]Error viewing logs: {e}[/red]")
+        console.print(
+            tr(
+                "log_viewer_ui.error_viewing_logs",
+                "[red]Error viewing logs: {error}[/red]",
+                error=e,
+            )
+        )
         return "back"
 
 
@@ -469,42 +592,64 @@ def show_log_menu(server: VLLMServer) -> str:
         Action taken by user
     """
     if not server.log_path or not server.log_path.exists():
-        console.print("[yellow]No log file available for this server[/yellow]")
+        console.print(
+            f"[yellow]{tr('log_viewer_ui.no_log_for_server', 'No log file available for this server')}[/yellow]"
+        )
         return "back"
 
     options = [
-        "Display Full Log",
-        "Show Last 50 Lines",
-        "Show Last 100 Lines",
-        "Open in External Editor",
-        "Show Log Path",
+        ("full", tr("log_viewer_ui.option_display_full", "Display Full Log")),
+        ("last_50", tr("log_viewer_ui.option_last_50", "Show Last 50 Lines")),
+        ("last_100", tr("log_viewer_ui.option_last_100", "Show Last 100 Lines")),
+        (
+            "editor",
+            tr("log_viewer_ui.option_external_editor", "Open in External Editor"),
+        ),
+        ("path", tr("log_viewer_ui.option_show_path", "Show Log Path")),
     ]
 
-    action = unified_prompt("log_option", f"Log Options - {server.model}", options)
+    action = prompt_choice(
+        "log_option",
+        tr("log_viewer_ui.log_options_title", "Log Options - {model}", model=server.model),
+        options,
+    )
 
-    if not action or action == "← Back":
+    if not action or action == "BACK":
         return "back"
-    elif action == "Display Full Log":
+    elif action == "full":
         return display_full_log(str(server.log_path))
-    elif action == "Show Last 50 Lines":
+    elif action == "last_50":
         return display_log_tail(str(server.log_path), 50)
-    elif action == "Show Last 100 Lines":
+    elif action == "last_100":
         return display_log_tail(str(server.log_path), 100)
-    elif action == "Open in External Editor":
+    elif action == "editor":
         try:
             editor = os.environ.get("EDITOR", "nano")
             subprocess.run([editor, str(server.log_path)], check=True)
             return "back"
         except Exception as e:
-            console.print(f"[red]Failed to open editor: {e}[/red]")
+            console.print(
+                tr(
+                    "log_viewer_ui.failed_to_open_editor",
+                    "[red]Failed to open editor: {error}[/red]",
+                    error=e,
+                )
+            )
             return "back"
-    elif action == "Show Log Path":
-        console.print("\n[cyan]Log file location:[/cyan]")
+    elif action == "path":
+        console.print(
+            f"\n[cyan]{tr('log_viewer_ui.log_file_location', 'Log file location:')}[/cyan]"
+        )
         console.print(f"[white]{server.log_path}[/white]")
         console.print(
-            "\n[dim]You can open this file in any text editor or use 'tail -f' to follow it.[/dim]"
+            "\n[dim]"
+            + tr(
+                "log_viewer_ui.log_path_hint",
+                "You can open this file in any text editor or use 'tail -f' to follow it.",
+            )
+            + "[/dim]"
         )
-        input("\nPress Enter to continue...")
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
         return "back"
 
     return "back"
@@ -521,7 +666,9 @@ def select_server_for_logs() -> Optional[VLLMServer]:
 
     servers = get_active_servers()
     if not servers:
-        console.print("[yellow]No active servers found[/yellow]")
+        console.print(
+            f"[yellow]{tr('log_viewer_ui.no_active_servers', 'No active servers found')}[/yellow]"
+        )
         return None
 
     if len(servers) == 1:
@@ -529,21 +676,42 @@ def select_server_for_logs() -> Optional[VLLMServer]:
 
     # Create server selection menu
     server_choices = []
-    for server in servers:
-        status = "Running" if server.is_running() else "Stopped"
-        choice = f"{server.model} (Port {server.port}) - {status}"
-        server_choices.append(choice)
+    for i, server in enumerate(servers):
+        status = (
+            tr("log_viewer_ui.status_running", "Running")
+            if server.is_running()
+            else tr("log_viewer_ui.status_stopped", "Stopped")
+        )
+        server_choices.append(
+            (
+                f"server_{i}",
+                tr(
+                    "log_viewer_ui.server_choice",
+                    "{model} (Port {port}) - {status}",
+                    model=server.model,
+                    port=server.port,
+                    status=status,
+                ),
+            )
+        )
 
-    selection = unified_prompt(
-        "server_select", "Select server to view logs", server_choices
+    selection = prompt_choice(
+        "server_select",
+        tr("log_viewer_ui.select_server", "Select server to view logs"),
+        server_choices,
     )
 
-    if not selection or selection == "← Back":
+    if not selection or selection == "BACK":
         return None
 
-    # Find selected server
-    for i, choice in enumerate(server_choices):
-        if choice == selection:
-            return servers[i]
+    # Map the stable value back to the selected server
+    if selection.startswith("server_"):
+        try:
+            index = int(selection.rsplit("_", 1)[-1])
+        except ValueError:
+            logger.warning(f"Unrecognized server selection value: {selection}")
+            return None
+        if 0 <= index < len(servers):
+            return servers[index]
 
     return None

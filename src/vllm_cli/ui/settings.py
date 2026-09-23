@@ -10,9 +10,10 @@ import logging
 from rich.table import Table
 
 from ..config import ConfigManager
+from ..i18n import tr
 from ..ui.progress_styles import get_progress_bar, list_available_styles
 from .common import console
-from .navigation import unified_prompt
+from .navigation import prompt_choice, unified_prompt
 from .profiles import manage_profiles
 from .shortcuts import manage_shortcuts
 
@@ -27,20 +28,26 @@ def configure_language(i18n_manager) -> str:
         i18n_manager: I18nManager instance
     """
     if not i18n_manager:
-        console.print("[red]Language configuration not available[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            f"[red]{tr('settings_ui.language_config_unavailable', 'Language configuration not available')}[/red]"
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "continue"
 
     from ..i18n import LanguageSelector
 
-    console.print("\n[bold cyan]Language Settings / 语言设置[/bold cyan]\n")
+    console.print(
+        f"\n[bold cyan]{tr('settings_ui.language_settings_title', 'Language Settings')}[/bold cyan]\n"
+    )
 
     # Show current language
     current_lang = i18n_manager.get_current_language()
     lang_names = {"en": "English", "zh": "中文"}
     current_name = lang_names.get(current_lang, current_lang)
 
-    console.print(f"Current language / 当前语言: [yellow]{current_name}[/yellow]\n")
+    console.print(
+        f"{tr('settings_ui.current_language', 'Current language')}: [yellow]{current_name}[/yellow]\n"
+    )
 
     # Get available languages
     languages = i18n_manager.get_available_languages()
@@ -49,8 +56,8 @@ def configure_language(i18n_manager) -> str:
     from rich.table import Table
 
     table = Table(show_header=False, box=None, padding=(0, 2))
-    table.add_column("Number", style="cyan", width=4)
-    table.add_column("Language", style="yellow")
+    table.add_column(tr("settings_ui.col_number", "Number"), style="cyan", width=4)
+    table.add_column(tr("menu.settings.language", "Language"), style="yellow")
 
     for idx, lang in enumerate(languages, 1):
         marker = " ✓" if lang["code"] == current_lang else ""
@@ -61,13 +68,19 @@ def configure_language(i18n_manager) -> str:
 
     # Prompt for selection
     console.print(
-        "Select a language / 选择语言 (1-2), or press Enter to cancel / 或按回车取消:"
+        tr(
+            "settings_ui.select_language_prompt",
+            "Select a language (1-{count}), or press Enter to cancel",
+            count=len(languages),
+        )
     )
     choice = input().strip()
 
     if not choice:
-        console.print("[yellow]Language change cancelled / 语言更改已取消[/yellow]")
-        input("\nPress Enter to continue / 按回车继续...")
+        console.print(
+            f"[yellow]{tr('settings_ui.language_change_cancelled', 'Language change cancelled')}[/yellow]"
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "continue"
 
     if choice.isdigit():
@@ -76,7 +89,9 @@ def configure_language(i18n_manager) -> str:
             new_lang = languages[choice_num - 1]["code"]
 
             if new_lang == current_lang:
-                console.print("[yellow]Language unchanged / 语言未更改[/yellow]")
+                console.print(
+                    f"[yellow]{tr('settings_ui.language_unchanged', 'Language unchanged')}[/yellow]"
+                )
             else:
                 # Change language
                 old_lang = current_lang
@@ -85,16 +100,18 @@ def configure_language(i18n_manager) -> str:
                     selector = LanguageSelector(i18n_manager)
                     selector.show_language_change_confirmation(old_lang, new_lang)
                     console.print(
-                        f"[green]Language preference saved / 语言偏好已保存[/green]"
+                        f"[green]{tr('settings_ui.language_preference_saved', 'Language preference saved')}[/green]"
                     )
                 else:
-                    console.print("[red]Failed to change language / 语言更改失败[/red]")
+                    console.print(
+                        f"[red]{tr('settings_ui.language_change_failed', 'Failed to change language')}[/red]"
+                    )
 
-            input("\nPress Enter to continue / 按回车继续...")
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             return "continue"
 
-    console.print("[red]Invalid choice / 无效选择[/red]")
-    input("\nPress Enter to continue / 按回车继续...")
+    console.print(f"[red]{tr('common.invalid_choice', 'Invalid choice')}[/red]")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
     return "continue"
 
 
@@ -243,42 +260,53 @@ def manage_proxy_configurations(i18n_manager=None) -> str:
 
         # Menu options
         options = [
-            t("settings.view_details", "View configuration details"),
-            t("settings.edit_config", "Edit configuration"),
-            t("settings.delete_config", "Delete configuration"),
-            t("settings.export_config", "Export configuration"),
+            ("view", t("settings.view_details", "View configuration details")),
+            ("edit", t("settings.edit_config", "Edit configuration")),
+            ("delete", t("settings.delete_config", "Delete configuration")),
+            ("export", t("settings.export_config", "Export configuration")),
         ]
+        option_labels = dict(options)
 
-        action = unified_prompt(
-            "manage_proxy_action", t("settings.select_action", "Select action"), options, allow_back=True
+        action = prompt_choice(
+            "manage_proxy_action",
+            t("settings.select_action", "Select action"),
+            options,
+            allow_back=True,
         )
 
-        if action == "BACK":
+        if action == "BACK" or not action:
             return "continue"
 
         # Select configuration for action
         config_names = list(saved_configs.keys())
-        config_names.append("Cancel")
+        cancel_label = tr("messages.cancel", "Cancel")
+        config_names.append(cancel_label)
 
         selected_name = unified_prompt(
             "select_proxy_config",
-            f"Select configuration to {action.lower()}",
+            tr(
+                "settings_ui.select_config_for_action",
+                "Select configuration for action: {action}",
+                action=option_labels.get(action, action),
+            ),
             config_names,
             allow_back=False,
         )
 
-        if selected_name == "Cancel":
+        if selected_name == cancel_label:
             continue
 
-        if action == "View configuration details":
+        if action == "view":
             # Load and display full configuration
             config = config_manager.load_named_config(selected_name)
             if config:
-                console.print(f"\n[bold]Configuration: {selected_name}[/bold]")
+                console.print(
+                    f"\n[bold]{tr('settings.configuration', 'Configuration')}: {selected_name}[/bold]"
+                )
                 display_proxy_config(config)
-                input("\nPress Enter to continue...")
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
-        elif action == "Edit configuration":
+        elif action == "edit":
             # Load configuration for editing
             config = config_manager.load_named_config(selected_name)
             if config:
@@ -286,58 +314,90 @@ def manage_proxy_configurations(i18n_manager=None) -> str:
                 if edited_config:
                     # Ask if user wants to save changes
                     if (
-                        unified_prompt(
+                        prompt_choice(
                             "save_proxy_changes",
-                            "Save changes?",
-                            ["Yes, save changes", "No, discard changes"],
+                            tr("settings.save_changes", "Save Changes?"),
+                            [
+                                ("save", tr("settings.yes_save", "Yes, Save Changes")),
+                                (
+                                    "discard",
+                                    tr("settings.no_discard", "No, Discard Changes"),
+                                ),
+                            ],
                             allow_back=False,
                         )
-                        == "Yes, save changes"
+                        == "save"
                     ):
                         config_manager.save_named_config(edited_config, selected_name)
-                        console.print(
-                            f"[green]✓ Configuration '{selected_name}' updated[/green]"
+                        updated = tr(
+                            "settings_ui.config_updated_named",
+                            "Configuration '{name}' updated",
+                            name=selected_name,
                         )
+                        console.print(f"[green]✓ {updated}[/green]")
 
-        elif action == "Delete configuration":
+        elif action == "delete":
             # Confirm deletion
-            console.print(
-                f"\n[yellow]Warning: This will delete configuration '{selected_name}'[/yellow]"
+            delete_warning = tr(
+                "settings_ui.delete_config_warning",
+                "Warning: This will delete configuration '{name}'",
+                name=selected_name,
             )
+            console.print(f"\n[yellow]{delete_warning}[/yellow]")
             if (
-                unified_prompt(
+                prompt_choice(
                     "confirm_proxy_delete",
-                    "Are you sure?",
-                    ["Yes, delete", "No, cancel"],
+                    tr("messages.confirm", "Are you sure?"),
+                    [
+                        ("confirm", tr("settings.yes_delete", "Yes, Delete")),
+                        ("cancel", tr("settings.no_cancel", "No, Cancel")),
+                    ],
                     allow_back=False,
                 )
-                == "Yes, delete"
+                == "confirm"
             ):
                 if config_manager.delete_named_config(selected_name):
-                    console.print(
-                        f"[green]✓ Configuration '{selected_name}' deleted[/green]"
+                    deleted = tr(
+                        "settings_ui.config_deleted_named",
+                        "Configuration '{name}' deleted",
+                        name=selected_name,
                     )
+                    console.print(f"[green]✓ {deleted}[/green]")
                 else:
-                    console.print("[red]Failed to delete configuration[/red]")
+                    console.print(
+                        f"[red]{tr('settings_ui.delete_config_failed', 'Failed to delete configuration')}[/red]"
+                    )
 
-        elif action == "Export configuration":
+        elif action == "export":
             # Export to custom location
             config = config_manager.load_named_config(selected_name)
             if config:
-                console.print("\nEnter path to export configuration to:")
-                export_path = input("Path (e.g., ./my-proxy.yaml): ").strip()
+                console.print(
+                    f"\n{tr('settings_ui.export_path_header', 'Enter path to export configuration to:')}"
+                )
+                export_path = input(
+                    tr("settings_ui.export_path_input", "Path (e.g., ./my-proxy.yaml): ")
+                ).strip()
                 if export_path:
                     try:
                         from pathlib import Path
 
                         export_file = Path(export_path)
                         config_manager.save_config(config, export_file)
-                        console.print(
-                            f"[green]✓ Configuration exported to {export_file}[/green]"
+                        exported = tr(
+                            "settings_ui.config_exported_to",
+                            "Configuration exported to {path}",
+                            path=export_file,
                         )
+                        console.print(f"[green]✓ {exported}[/green]")
                     except Exception as e:
-                        console.print(f"[red]Export failed: {e}[/red]")
-                input("\nPress Enter to continue...")
+                        failed = tr(
+                            "settings_ui.export_failed_error",
+                            "Export failed: {error}",
+                            error=e,
+                        )
+                        console.print(f"[red]{failed}[/red]")
+                input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def configure_universal_environment(i18n_manager=None) -> str:
@@ -351,17 +411,23 @@ def configure_universal_environment(i18n_manager=None) -> str:
 
     config_manager = ConfigManager()
 
-    console.print("\n[bold cyan]Universal Environment Variables[/bold cyan]")
-    console.print("\nThese environment variables will be applied to ALL servers.")
     console.print(
-        "[dim]Profile-specific variables can override these settings.[/dim]\n"
+        f"\n[bold cyan]{tr('settings.universal_env_title', 'Universal Environment Variables')}[/bold cyan]"
+    )
+    console.print(
+        f"\n{tr('settings_ui.universal_env_desc', 'These environment variables will be applied to ALL servers.')}"
+    )
+    console.print(
+        f"[dim]{tr('settings_ui.profile_override_note', 'Profile-specific variables can override these settings.')}[/dim]\n"
     )
 
     # Get current universal environment
     universal_env = config_manager.config.get("universal_environment", {})
 
     if universal_env:
-        console.print("[bold]Current Universal Environment Variables:[/bold]")
+        console.print(
+            f"[bold]{tr('settings.current_vars', 'Current Universal Environment Variables')}:[/bold]"
+        )
         for key, value in universal_env.items():
             if "KEY" in key.upper() or "TOKEN" in key.upper():
                 console.print(f"  • {key}: <hidden>")
@@ -369,7 +435,9 @@ def configure_universal_environment(i18n_manager=None) -> str:
                 console.print(f"  • {key}: {value}")
         console.print("")
     else:
-        console.print("[dim]No universal environment variables configured.\n[/dim]")
+        console.print(
+            f"[dim]{tr('settings_ui.no_universal_env', 'No universal environment variables configured.')}\n[/dim]"
+        )
 
     # Configure environment variables using the same UI
     updated_env = configure_environment_variables(universal_env)
@@ -379,13 +447,18 @@ def configure_universal_environment(i18n_manager=None) -> str:
     config_manager._save_config()
 
     if updated_env:
-        console.print(
-            f"\n[green]✓ Saved {len(updated_env)} universal environment variable(s).[/green]"
+        saved = tr(
+            "settings_ui.universal_env_saved",
+            "Saved {count} universal environment variable(s).",
+            count=len(updated_env),
         )
+        console.print(f"\n[green]✓ {saved}[/green]")
     else:
-        console.print("\n[green]✓ Universal environment variables cleared.[/green]")
+        console.print(
+            f"\n[green]✓ {tr('settings.vars_cleared', 'Universal Environment Variables Cleared')}[/green]"
+        )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
     return "continue"
 
 
@@ -415,52 +488,67 @@ def configure_hf_token(i18n_manager=None) -> str:
 
     config_manager = ConfigManager()
 
-    console.print("\n[bold cyan]HuggingFace Token Configuration[/bold cyan]")
     console.print(
-        "\nConfigure your HuggingFace token for accessing gated or private models."
+        f"\n[bold cyan]{tr('settings.hf_token_title', 'HuggingFace Token Configuration')}[/bold cyan]"
     )
     console.print(
-        "[dim]Your token will be stored securely in your user config.[/dim]\n"
+        f"\n{tr('settings_ui.hf_token_desc', 'Configure your HuggingFace token for accessing gated or private models.')}"
+    )
+    console.print(
+        f"[dim]{tr('settings_ui.hf_token_stored', 'Your token will be stored securely in your user config.')}[/dim]\n"
     )
 
     # Check if token already exists
     current_token = config_manager.config.get("hf_token", "")
     if current_token:
-        console.print("[green]✓[/green] HuggingFace token is currently configured")
+        console.print(
+            f"[green]✓[/green] {tr('settings.token_configured', 'HuggingFace Token Is Currently Configured')}"
+        )
         console.print(
             f"[dim]Token: {current_token[:8]}...{current_token[-4:] if len(current_token) > 12 else ''}[/dim]\n"
         )
     else:
-        console.print("[yellow]⚠[/yellow] No HuggingFace token configured\n")
+        console.print(
+            f"[yellow]⚠[/yellow] {tr('settings.no_token', 'No HuggingFace Token Configured')}\n"
+        )
 
     # Options
     options = [
-        "Set/Update Token",
-        "Remove Token",
-        "Test Token",
-        "View Token Info",
+        ("set", tr("settings.set_update_token", "Set/Update Token")),
+        ("remove", tr("settings.remove_token", "Remove Token")),
+        ("test", tr("settings.test_token", "Test Token")),
+        ("view", tr("settings.view_token_info", "View Token Info")),
     ]
 
-    action = unified_prompt(
-        "hf_token_action", "Select Action", options, allow_back=True
+    action = prompt_choice(
+        "hf_token_action",
+        tr("settings.select_action", "Select Action"),
+        options,
+        allow_back=True,
     )
 
     if not action or action == "BACK":
         return "continue"
 
-    if action == "Set/Update Token":
-        console.print("\n[cyan]Enter your HuggingFace token:[/cyan]")
+    if action == "set":
         console.print(
-            "[dim]Get your token from: https://huggingface.co/settings/tokens[/dim]"
+            f"\n[cyan]{tr('settings.enter_token', 'Enter Your HuggingFace Token')}:[/cyan]"
         )
-        console.print("[dim]The token will be hidden as you type.[/dim]\n")
+        console.print(
+            f"[dim]{tr('settings.get_token_from', 'Get Your Token from')}: https://huggingface.co/settings/tokens[/dim]"
+        )
+        console.print(
+            f"[dim]{tr('settings.token_hidden', 'The Token Will Be Hidden as You Type')}\n[/dim]"
+        )
 
         # Use getpass for secure input
-        token = getpass.getpass("Token: ").strip()
+        token = getpass.getpass(f"{tr('settings_ui.token_input', 'Token')} ").strip()
 
         if token:
             # Validate token with HuggingFace API
-            console.print("\n[cyan]Validating token...[/cyan]")
+            console.print(
+                f"\n[cyan]{tr('settings.validating_token', 'Validating Token...')}[/cyan]"
+            )
 
             from ..validation.token import validate_hf_token
 
@@ -471,51 +559,76 @@ def configure_hf_token(i18n_manager=None) -> str:
                 config_manager.config["hf_token"] = token
                 config_manager._save_config()
 
-                console.print("[green]✓ Token validated and saved successfully[/green]")
+                console.print(
+                    f"[green]✓ {tr('settings.token_validated', 'Token Validated and Saved Successfully')}[/green]"
+                )
+                unknown = tr("settings_ui.unknown", "Unknown")
                 if user_info:
                     console.print(
-                        f"[dim]Authenticated as: {user_info.get('name', 'Unknown')}[/dim]"
+                        f"[dim]{tr('settings.authenticated_as', 'Authenticated as')}: {user_info.get('name', unknown)}[/dim]"
                     )
                     if user_info.get("email"):
-                        console.print(f"[dim]Email: {user_info.get('email')}[/dim]")
+                        console.print(
+                            f"[dim]{tr('settings.email', 'Email')}: {user_info.get('email')}[/dim]"
+                        )
                 console.print(
-                    "[dim]The token will be used automatically when accessing gated models.[/dim]"
+                    f"[dim]{tr('settings_ui.token_used_automatically', 'The token will be used automatically when accessing gated models.')}[/dim]"
                 )
             else:
-                console.print("[red]✗ Token validation failed[/red]")
-                console.print("[dim]The token appears to be invalid or expired.[/dim]")
-                console.print("[dim]Please check your token and try again.[/dim]")
+                console.print(
+                    f"[red]✗ {tr('settings.token_invalid', 'Token Validation Failed')}[/red]"
+                )
+                console.print(
+                    f"[dim]{tr('settings_ui.token_invalid_detail', 'The token appears to be invalid or expired.')}[/dim]"
+                )
+                console.print(
+                    f"[dim]{tr('settings_ui.check_token_again', 'Please check your token and try again')}[/dim]"
+                )
 
                 # Ask if they want to save it anyway
-                confirm = input("\nSave the token anyway? (y/N): ").strip().lower()
+                confirm = input(
+                    f"\n{tr('settings.save_anyway', 'Save the Token Anyway?')} (y/N): "
+                ).strip().lower()
                 if confirm == "y":
                     config_manager.config["hf_token"] = token
                     config_manager._save_config()
                     console.print(
-                        "[yellow]Token saved (but may not work properly)[/yellow]"
+                        f"[yellow]{tr('settings_ui.token_saved_maybe', 'Token saved (but may not work properly)')}[/yellow]"
                     )
         else:
-            console.print("[yellow]No token provided[/yellow]")
+            console.print(
+                f"[yellow]{tr('settings.no_token_provided', 'No Token Provided')}[/yellow]"
+            )
 
-    elif action == "Remove Token":
+    elif action == "remove":
         if current_token:
             confirm = (
-                input("Are you sure you want to remove the token? (y/N): ")
+                input(
+                    f"{tr('settings.remove_confirm', 'Are You Sure You Want to Remove the Token?')} (y/N): "
+                )
                 .strip()
                 .lower()
             )
             if confirm == "y":
                 config_manager.config.pop("hf_token", None)
                 config_manager._save_config()
-                console.print("[green]Token removed successfully[/green]")
+                console.print(
+                    f"[green]{tr('settings.token_removed', 'Token Removed Successfully')}[/green]"
+                )
         else:
-            console.print("[yellow]No token to remove[/yellow]")
+            console.print(
+                f"[yellow]{tr('settings.no_token_to_remove', 'No Token to Remove')}[/yellow]"
+            )
 
-    elif action == "Test Token":
+    elif action == "test":
         if not current_token:
-            console.print("[red]No token configured[/red]")
+            console.print(
+                f"[red]{tr('settings_ui.no_token_configured', 'No token configured')}[/red]"
+            )
         else:
-            console.print("\n[cyan]Testing HuggingFace token...[/cyan]")
+            console.print(
+                f"\n[cyan]{tr('settings.testing_token', 'Testing HuggingFace Token...')}[/cyan]"
+            )
             try:
                 import requests
 
@@ -526,53 +639,90 @@ def configure_hf_token(i18n_manager=None) -> str:
                     timeout=10,
                 )
 
+                unknown = tr("settings_ui.unknown", "Unknown")
                 if response.status_code == 200:
                     user_info = response.json()
-                    console.print("[green]✓ Token is valid[/green]")
                     console.print(
-                        f"[dim]Authenticated as: {user_info.get('name', 'Unknown')}[/dim]"
+                        f"[green]✓ {tr('settings.token_valid', 'Token is Valid')}[/green]"
                     )
                     console.print(
-                        f"[dim]Email: {user_info.get('email', 'Not available')}[/dim]"
+                        f"[dim]{tr('settings.authenticated_as', 'Authenticated as')}: {user_info.get('name', unknown)}[/dim]"
+                    )
+                    console.print(
+                        f"[dim]{tr('settings.email', 'Email')}: {user_info.get('email', tr('settings_ui.not_available', 'Not available'))}[/dim]"
                     )
                     if user_info.get("orgs"):
                         org_names = [
-                            org.get("name", "Unknown")
+                            org.get("name", unknown)
                             for org in user_info.get("orgs", [])
                         ]
                         console.print(
-                            f"[dim]Organizations: {', '.join(org_names)}[/dim]"
+                            f"[dim]{tr('settings.organizations', 'Organizations')}: {', '.join(org_names)}[/dim]"
                         )
                 elif response.status_code == 401:
-                    console.print("[red]✗ Token is invalid or expired[/red]")
-                    console.print("[dim]Please check your token and try again[/dim]")
+                    console.print(
+                        f"[red]✗ {tr('settings.token_expired', 'Token is Invalid or Expired')}[/red]"
+                    )
+                    console.print(
+                        f"[dim]{tr('settings_ui.check_token_again', 'Please check your token and try again')}[/dim]"
+                    )
                 else:
                     console.print(
-                        f"[red]✗ Token validation failed (HTTP {response.status_code})[/red]"
+                        f"[red]✗ {tr('settings.token_invalid', 'Token Validation Failed')} (HTTP {response.status_code})[/red]"
                     )
-                    console.print(f"[dim]Response: {response.text}[/dim]")
+                    body = tr(
+                        "settings_ui.response_body",
+                        "Response: {response}",
+                        response=response.text,
+                    )
+                    console.print(f"[dim]{body}[/dim]")
             except requests.exceptions.Timeout:
-                console.print("[red]Token test timed out[/red]")
-                console.print("[dim]Check your internet connection[/dim]")
+                console.print(
+                    f"[red]{tr('settings.token_test_timeout', 'Token Test Timed Out')}[/red]"
+                )
+                console.print(
+                    f"[dim]{tr('settings_ui.check_internet', 'Check your internet connection')}[/dim]"
+                )
             except requests.exceptions.ConnectionError:
-                console.print("[red]Failed to connect to HuggingFace API[/red]")
-                console.print("[dim]Check your internet connection[/dim]")
+                console.print(
+                    f"[red]{tr('settings.connection_failed', 'Failed to Connect to HuggingFace API')}[/red]"
+                )
+                console.print(
+                    f"[dim]{tr('settings_ui.check_internet', 'Check your internet connection')}[/dim]"
+                )
             except Exception as e:
-                console.print(f"[red]Error testing token: {e}[/red]")
+                error_msg = tr(
+                    "settings_ui.token_test_error",
+                    "Error testing token: {error}",
+                    error=e,
+                )
+                console.print(f"[red]{error_msg}[/red]")
 
-    elif action == "View Token Info":
+    elif action == "view":
         if not current_token:
-            console.print("[red]No token configured[/red]")
-        else:
-            console.print("\n[bold]Token Information:[/bold]")
-            console.print(f"Token prefix: {current_token[:8]}...")
-            console.print(f"Token suffix: ...{current_token[-4:]}")
-            console.print(f"Token length: {len(current_token)} characters")
             console.print(
-                "\n[dim]To get more information, use 'Test Token' option[/dim]"
+                f"[red]{tr('settings_ui.no_token_configured', 'No token configured')}[/red]"
             )
+        else:
+            console.print(
+                f"\n[bold]{tr('settings.token_info', 'Token Information')}:[/bold]"
+            )
+            console.print(
+                f"{tr('settings.token_prefix', 'Token Prefix')}: {current_token[:8]}..."
+            )
+            console.print(
+                f"{tr('settings.token_suffix', 'Token Suffix')}: ...{current_token[-4:]}"
+            )
+            console.print(
+                f"{tr('settings.token_length', 'Token Length')}: {len(current_token)} {tr('settings.token_length_chars', 'Characters')}"
+            )
+            info_hint = tr(
+                "settings_ui.use_test_token_hint",
+                "To get more information, use 'Test Token' option",
+            )
+            console.print(f"\n[dim]{info_hint}[/dim]")
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
     return "continue"
 
 
@@ -586,34 +736,44 @@ def configure_server_defaults(i18n_manager=None) -> str:
     config_manager = ConfigManager()
     defaults = config_manager.get_server_defaults()
 
-    console.print("\n[bold cyan]Server Defaults[/bold cyan]")
-    console.print("Configure default settings for all servers:")
+    console.print(
+        f"\n[bold cyan]{tr('settings.server_defaults_title', 'Server Defaults')}[/bold cyan]"
+    )
+    console.print(
+        f"{tr('settings.configure_defaults', 'Configure Default Settings for All Servers')}:"
+    )
 
     # Edit defaults
     defaults["default_port"] = int(
-        input(f"Default port [{defaults.get('default_port', 8000)}]: ").strip()
+        input(
+            f"{tr('settings.default_port', 'Default Port')} [{defaults.get('default_port', 8000)}]: "
+        ).strip()
         or defaults.get("default_port", 8000)
     )
     defaults["auto_restart"] = input(
-        f"Auto-restart on failure (yes/no) [{defaults.get('auto_restart', False)}]: "
+        f"{tr('settings.auto_restart', 'Auto-Restart on Failure')} (yes/no) [{defaults.get('auto_restart', False)}]: "
     ).strip().lower() in ["yes", "true", "1"]
     defaults["log_level"] = input(
-        f"Log level (info/debug/warning/error) [{defaults.get('log_level', 'info')}]: "
+        f"{tr('settings.log_level_options', 'Log Level (info/debug/warning/error)')} [{defaults.get('log_level', 'info')}]: "
     ).strip() or defaults.get("log_level", "info")
 
     # Add cleanup_on_exit setting
     current_cleanup = defaults.get("cleanup_on_exit", True)
     cleanup_str = "yes" if current_cleanup else "no"
-    console.print("\n[yellow]Server Cleanup on Exit:[/yellow]")
     console.print(
-        "[dim]When enabled, all servers will be stopped when the CLI exits.[/dim]"
+        f"\n[yellow]{tr('settings_ui.server_cleanup_title', 'Server Cleanup on Exit')}:[/yellow]"
     )
     console.print(
-        "[dim]When disabled, servers will continue running in the background.[/dim]"
+        f"[dim]{tr('settings.cleanup_enabled', 'When Enabled, All Servers Will Be Stopped When CLI Exits')}[/dim]"
+    )
+    console.print(
+        f"[dim]{tr('settings.cleanup_disabled', 'When Disabled, Servers Will Continue Running in Background')}[/dim]"
     )
 
     cleanup_input = (
-        input(f"Stop all servers on CLI exit (yes/no) [{cleanup_str}]: ")
+        input(
+            f"{tr('settings.stop_on_exit', 'Stop All Servers on CLI Exit?')} (yes/no) [{cleanup_str}]: "
+        )
         .strip()
         .lower()
     )
@@ -622,17 +782,29 @@ def configure_server_defaults(i18n_manager=None) -> str:
         defaults["cleanup_on_exit"] = True
     elif cleanup_input in ["no", "n", "false", "0"]:
         defaults["cleanup_on_exit"] = False
-        console.print("\n[yellow]⚠ Warning:[/yellow]")
-        console.print("[dim]Servers will continue running after CLI exits.[/dim]")
-        console.print("[dim]Use 'vllm-cli status' to view active servers.[/dim]")
         console.print(
-            "[dim]Use 'vllm-cli stop --port PORT' to stop servers manually.[/dim]"
+            f"\n[yellow]⚠ {tr('settings_ui.warning_label', 'Warning')}:[/yellow]"
         )
+        console.print(
+            f"[dim]{tr('settings_ui.servers_keep_running_note', 'Servers will continue running after CLI exits.')}[/dim]"
+        )
+        status_hint = tr(
+            "settings.use_status_command",
+            "Use 'vllm-cli status' to View Active Servers",
+        )
+        stop_hint = tr(
+            "settings.use_stop_command",
+            "Use 'vllm-cli stop --port PORT' to Stop Servers Manually",
+        )
+        console.print(f"[dim]{status_hint}[/dim]")
+        console.print(f"[dim]{stop_hint}[/dim]")
     # else keep current value
 
     config_manager.save_server_defaults(defaults)
-    console.print("[green]Server defaults updated.[/green]")
-    input("\nPress Enter to continue...")
+    console.print(
+        f"[green]{tr('settings.defaults_updated', 'Server Defaults Updated')}[/green]"
+    )
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
     return "continue"
 
@@ -647,20 +819,24 @@ def configure_ui_preferences(i18n_manager=None) -> str:
     config_manager = ConfigManager()
     ui_prefs = config_manager.get_ui_preferences()
 
-    console.print("\n[bold cyan]UI Preferences[/bold cyan]")
+    console.print(
+        f"\n[bold cyan]{tr('settings.ui_prefs_title', 'UI Preferences')}[/bold cyan]"
+    )
 
     # Show current settings
     current_style = ui_prefs.get("progress_bar_style", "blocks")
-    console.print(f"\nCurrent progress bar style: [yellow]{current_style}[/yellow]")
+    console.print(
+        f"\n{tr('settings.current_style', 'Current Progress Bar Style')}: [yellow]{current_style}[/yellow]"
+    )
 
     # Create preview table
     preview_table = Table(
-        title="[bold]Progress Bar Style Preview[/bold]",
+        title=f"[bold]{tr('settings.style_preview', 'Progress Bar Style Preview')}[/bold]",
         show_header=True,
         header_style="bold cyan",
     )
     preview_table.add_column("#", style="cyan", width=3)
-    preview_table.add_column("Style", style="yellow", width=12)
+    preview_table.add_column(tr("settings.style", "Style"), style="yellow", width=12)
     preview_table.add_column("25%", style="white")
     preview_table.add_column("50%", style="white")
     preview_table.add_column("75%", style="white")
@@ -681,27 +857,38 @@ def configure_ui_preferences(i18n_manager=None) -> str:
     console.print(preview_table)
 
     # Select new style
-    console.print("\nSelect a progress bar style:")
+    console.print(f"\n{tr('settings.select_style', 'Select a Progress Bar Style')}:")
     for i, style in enumerate(styles, 1):
         console.print(f"  {i}. {style}")
 
     choice = input(
-        f"\nEnter choice (1-{len(styles)}) [{styles.index(current_style) + 1}]: "
+        tr(
+            "settings_ui.enter_style_choice",
+            "Enter choice (1-{count}) [{current}]:",
+            count=len(styles),
+            current=styles.index(current_style) + 1,
+        )
+        + " "
     ).strip()
 
     if choice.isdigit() and 1 <= int(choice) <= len(styles):
         new_style = styles[int(choice) - 1]
         ui_prefs["progress_bar_style"] = new_style
-        console.print(f"\n[green]Progress bar style set to: {new_style}[/green]")
+        style_set = tr("settings.style_set", "Progress Bar Style Set to")
+        console.print(f"\n[green]{style_set}: {new_style}[/green]")
     else:
-        console.print("[yellow]No change made to progress bar style[/yellow]")
+        console.print(
+            f"[yellow]{tr('settings.no_change', 'No Change Made to Progress Bar Style')}[/yellow]"
+        )
 
     # Configure GPU monitoring
-    console.print("\n[bold]GPU Monitoring Settings[/bold]")
+    console.print(
+        f"\n[bold]{tr('settings.gpu_monitoring', 'GPU Monitoring Settings')}[/bold]"
+    )
     show_gpu = ui_prefs.get("show_gpu_in_monitor", True)
     gpu_choice = (
         input(
-            f"Show GPU panel in server monitor? (yes/no) [{'yes' if show_gpu else 'no'}]: "
+            f"{tr('settings.show_gpu_panel', 'Show GPU Panel in Server Monitor?')} (yes/no) [{'yes' if show_gpu else 'no'}]: "
         )
         .strip()
         .lower()
@@ -709,57 +896,79 @@ def configure_ui_preferences(i18n_manager=None) -> str:
 
     if gpu_choice in ["yes", "y", "true", "1"]:
         ui_prefs["show_gpu_in_monitor"] = True
-        console.print("[green]GPU panel will be shown in server monitor[/green]")
+        console.print(
+            f"[green]{tr('settings.gpu_panel_shown', 'GPU Panel Will Be Shown in Server Monitor')}[/green]"
+        )
     elif gpu_choice in ["no", "n", "false", "0"]:
         ui_prefs["show_gpu_in_monitor"] = False
-        console.print("[yellow]GPU panel will be hidden in server monitor[/yellow]")
+        console.print(
+            f"[yellow]{tr('settings.gpu_panel_hidden', 'GPU Panel Will Be Hidden in Server Monitor')}[/yellow]"
+        )
 
     # Configure log display settings
-    console.print("\n[bold]Log Display Settings[/bold]")
+    console.print(f"\n[bold]{tr('settings.log_display', 'Log Display Settings')}[/bold]")
 
     # Startup log lines
     current_startup_lines = ui_prefs.get("log_lines_startup", 50)
     console.print(
-        f"Current startup log lines: [yellow]{current_startup_lines}[/yellow]"
+        f"{tr('settings.startup_log_lines', 'Startup Log Lines')}: [yellow]{current_startup_lines}[/yellow]"
     )
     startup_choice = input(
-        f"Number of log lines during startup (5-50) [{current_startup_lines}]: "
+        tr(
+            "settings_ui.startup_lines_prompt",
+            "Number of log lines during startup (5-50) [{current}]:",
+            current=current_startup_lines,
+        )
+        + " "
     ).strip()
 
     if startup_choice.isdigit() and 5 <= int(startup_choice) <= 50:
         ui_prefs["log_lines_startup"] = int(startup_choice)
-        console.print(f"[green]Startup log lines set to: {startup_choice}[/green]")
+        lines_set = tr("settings.startup_lines_set", "Startup Log Lines Set to")
+        console.print(f"[green]{lines_set}: {startup_choice}[/green]")
     elif startup_choice:
-        console.print("[yellow]Invalid input. Startup log lines unchanged.[/yellow]")
+        console.print(
+            f"[yellow]{tr('settings_ui.invalid_startup_lines', 'Invalid input. Startup log lines unchanged.')}[/yellow]"
+        )
 
     # Monitor log lines
     current_monitor_lines = ui_prefs.get("log_lines_monitor", 50)
     console.print(
-        f"Current monitor log lines: [yellow]{current_monitor_lines}[/yellow]"
+        f"{tr('settings.monitor_log_lines', 'Monitor Log Lines')}: [yellow]{current_monitor_lines}[/yellow]"
     )
     monitor_choice = input(
-        f"Number of log lines in server monitor (10-100) [{current_monitor_lines}]: "
+        tr(
+            "settings_ui.monitor_lines_prompt",
+            "Number of log lines in server monitor (10-100) [{current}]:",
+            current=current_monitor_lines,
+        )
+        + " "
     ).strip()
 
     if monitor_choice.isdigit() and 10 <= int(monitor_choice) <= 100:
         ui_prefs["log_lines_monitor"] = int(monitor_choice)
-        console.print(f"[green]Monitor log lines set to: {monitor_choice}[/green]")
+        lines_set = tr("settings.monitor_lines_set", "Monitor Log Lines Set to")
+        console.print(f"[green]{lines_set}: {monitor_choice}[/green]")
     elif monitor_choice:
-        console.print("[yellow]Invalid input. Monitor log lines unchanged.[/yellow]")
+        console.print(
+            f"[yellow]{tr('settings_ui.invalid_monitor_lines', 'Invalid input. Monitor log lines unchanged.')}[/yellow]"
+        )
 
     # Configure refresh rates
-    console.print("\n[bold]Log Refresh Rate Settings[/bold]")
     console.print(
-        "[dim]Higher refresh rates provide more responsive logs but use more CPU[/dim]"
+        f"\n[bold]{tr('settings.refresh_rate', 'Log Refresh Rate Settings')}[/bold]"
+    )
+    console.print(
+        f"[dim]{tr('settings.higher_rate_note', 'Higher Refresh Rates Provide More Responsive Logs but Use More CPU')}[/dim]"
     )
 
     # Startup refresh rate
     current_startup_rate = ui_prefs.get("startup_refresh_rate", 4.0)
     console.print(
-        f"Current startup refresh rate: [yellow]{current_startup_rate} Hz[/yellow]"
+        f"{tr('settings.startup_refresh_rate', 'Startup Log Refresh Rate')}: [yellow]{current_startup_rate} Hz[/yellow]"
     )
     startup_rate_choice = input(
-        f"Startup log refresh rate (1-10 Hz) [{current_startup_rate}]: "
+        f"{tr('settings.startup_refresh_rate', 'Startup Log Refresh Rate')} (1-10 Hz) [{current_startup_rate}]: "
     ).strip()
 
     if startup_rate_choice:
@@ -767,23 +976,24 @@ def configure_ui_preferences(i18n_manager=None) -> str:
             rate = float(startup_rate_choice)
             if 1.0 <= rate <= 10.0:
                 ui_prefs["startup_refresh_rate"] = rate
-                console.print(f"[green]Startup refresh rate set to: {rate} Hz[/green]")
+                rate_set = tr("settings.startup_rate_set", "Startup Refresh Rate Set to")
+                console.print(f"[green]{rate_set}: {rate} Hz[/green]")
             else:
                 console.print(
-                    "[yellow]Invalid range. Startup refresh rate unchanged.[/yellow]"
+                    f"[yellow]{tr('settings_ui.invalid_startup_rate_range', 'Invalid range. Startup refresh rate unchanged.')}[/yellow]"
                 )
         except ValueError:
             console.print(
-                "[yellow]Invalid input. Startup refresh rate unchanged.[/yellow]"
+                f"[yellow]{tr('settings_ui.invalid_startup_rate_input', 'Invalid input. Startup refresh rate unchanged.')}[/yellow]"
             )
 
     # Monitor refresh rate
     current_monitor_rate = ui_prefs.get("monitor_refresh_rate", 1.0)
     console.print(
-        f"Current monitor refresh rate: [yellow]{current_monitor_rate} Hz[/yellow]"
+        f"{tr('settings.monitor_refresh_rate', 'Monitor Log Refresh Rate')}: [yellow]{current_monitor_rate} Hz[/yellow]"
     )
     monitor_rate_choice = input(
-        f"Monitor log refresh rate (0.5-5 Hz) [{current_monitor_rate}]: "
+        f"{tr('settings.monitor_refresh_rate', 'Monitor Log Refresh Rate')} (0.5-5 Hz) [{current_monitor_rate}]: "
     ).strip()
 
     if monitor_rate_choice:
@@ -791,19 +1001,20 @@ def configure_ui_preferences(i18n_manager=None) -> str:
             rate = float(monitor_rate_choice)
             if 0.5 <= rate <= 5.0:
                 ui_prefs["monitor_refresh_rate"] = rate
-                console.print(f"[green]Monitor refresh rate set to: {rate} Hz[/green]")
+                rate_set = tr("settings.monitor_rate_set", "Monitor Refresh Rate Set to")
+                console.print(f"[green]{rate_set}: {rate} Hz[/green]")
             else:
                 console.print(
-                    "[yellow]Invalid range. Monitor refresh rate unchanged.[/yellow]"
+                    f"[yellow]{tr('settings_ui.invalid_monitor_rate_range', 'Invalid range. Monitor refresh rate unchanged.')}[/yellow]"
                 )
         except ValueError:
             console.print(
-                "[yellow]Invalid input. Monitor refresh rate unchanged.[/yellow]"
+                f"[yellow]{tr('settings_ui.invalid_monitor_rate_input', 'Invalid input. Monitor refresh rate unchanged.')}[/yellow]"
             )
 
     # Save preferences
     config_manager.save_ui_preferences(ui_prefs)
-    console.print("\n[green]UI preferences saved.[/green]")
-    input("\nPress Enter to continue...")
+    console.print(f"\n[green]{tr('settings.prefs_saved', 'UI Preferences Saved')}[/green]")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
     return "continue"

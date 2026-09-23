@@ -18,6 +18,7 @@ from rich.rule import Rule
 from rich.text import Text
 
 from ..config import ConfigManager
+from ..i18n import tr
 from ..server import VLLMServer
 from ..system import get_gpu_info
 from .common import console, create_panel
@@ -25,7 +26,7 @@ from .display import display_config, select_profile
 from .gpu_utils import calculate_gpu_panel_size, create_gpu_status_panel
 from .log_viewer import show_log_menu
 from .model_manager import select_model
-from .navigation import unified_prompt
+from .navigation import prompt_choice, unified_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +222,13 @@ def handle_serve_with_profile(i18n_manager=None) -> str:
     config_manager = ConfigManager()
     profile = config_manager.get_profile(profile_name)
     if not profile:
-        console.print(f"[red]Profile '{profile_name}' not found.[/red]")
+        console.print(
+            tr(
+                "server_ui.profile_not_found",
+                "[red]Profile '{name}' not found.[/red]",
+                name=profile_name,
+            )
+        )
         return "continue"
 
     config = profile.get("config", {}).copy()
@@ -260,13 +267,18 @@ def handle_serve_with_profile(i18n_manager=None) -> str:
     # Add universal variables
     for key, value in universal_env.items():
         total_env_vars[key] = value
-        env_sources[key] = "universal"
+        env_sources[key] = tr("server_ui.env_source_universal", "universal")
 
     # Add/override with profile variables
     for key, value in profile_env.items():
         total_env_vars[key] = value
         env_sources[key] = (
-            "profile" if key not in universal_env else "profile (overrides universal)"
+            tr("server_ui.env_source_profile", "profile")
+            if key not in universal_env
+            else tr(
+                "server_ui.env_source_profile_override",
+                "profile (overrides universal)",
+            )
         )
 
     # Show environment variables if present
@@ -288,7 +300,7 @@ def handle_serve_with_profile(i18n_manager=None) -> str:
             rank = lora.get("rank", 16)
             path = lora.get("path", "")
             console.print(f"  • {name} (rank={rank})")
-            console.print(f"    Path: {path}")
+            console.print(f"    {tr('server_ui.path_label', 'Path')}: {path}")
 
     # Confirm and start
     console.print()  # Add blank line for spacing
@@ -385,13 +397,18 @@ def handle_custom_config(i18n_manager=None) -> str:
 
     # Show LoRA adapters if present
     if lora_modules:
-        console.print(f"\n[cyan]LoRA Adapters ({len(lora_modules)}):[/cyan]")
+        lora_header = tr(
+            "server_ui.lora_adapters_header",
+            "LoRA Adapters ({count})",
+            count=len(lora_modules),
+        )
+        console.print(f"\n[cyan]{lora_header}[/cyan]")
         for lora in lora_modules:
             name = lora.get("name", "unknown")
             rank = lora.get("rank", 16)
             path = lora.get("path", "")
             console.print(f"  • {name} (rank={rank})")
-            console.print(f"    Path: {path}")
+            console.print(f"    {tr('server_ui.path_label', 'Path')}: {path}")
 
     # Option to add raw custom vLLM arguments
     # Note: configure_by_categories already provides comprehensive configuration,
@@ -402,9 +419,12 @@ def handle_custom_config(i18n_manager=None) -> str:
     if add_raw_args:
         console.print(f"\n[yellow]{t('server_control.custom_arguments', 'Custom vLLM Arguments')}[/yellow]")
         console.print(
-            "Enter additional vLLM arguments exactly as you would on the command line."
+            tr(
+                "server_ui.raw_args_instructions",
+                "Enter additional vLLM arguments exactly as you would on the command line.",
+            )
         )
-        console.print("Examples:")
+        console.print(tr("server_ui.examples_label", "Examples:"))
         console.print("  --seed 42 --enable-prefix-caching")
         console.print("  --max-num-seqs 256 --disable-log-stats")
         console.print("  --lora-modules name=/path/to/lora")
@@ -414,7 +434,13 @@ def handle_custom_config(i18n_manager=None) -> str:
         ).strip()
         if extra_args:
             config["extra_args"] = extra_args
-            console.print(f"[green]Custom arguments: {extra_args}[/green]")
+            console.print(
+                tr(
+                    "server_ui.custom_args_applied",
+                    "[green]Custom arguments: {args}[/green]",
+                    args=extra_args,
+                )
+            )
 
     # Ask about saving configuration
     console.print()  # Add blank line for spacing
@@ -447,7 +473,13 @@ def handle_custom_config(i18n_manager=None) -> str:
                 "api_usage_info": config.get("api_usage_info"),  # Save API usage info
             }
             config_manager.save_user_profile(profile_name, profile_data)
-            console.print(f"[green]✓ Profile '{profile_name}' saved.[/green]")
+            console.print(
+                tr(
+                    "server_ui.profile_saved_ok",
+                    "[green]✓ Profile '{name}' saved.[/green]",
+                    name=profile_name,
+                )
+            )
             if env_vars:
                 console.print(
                     f"[green]  Including {len(env_vars)} {t('settings.env_vars', 'environment variable(s)')}[/green]"
@@ -473,7 +505,7 @@ def handle_custom_config(i18n_manager=None) -> str:
                             f"[green]✓ {t('server_control.shortcuts', 'Shortcut')} '{shortcut_name}' {t('server_control.shortcut_created', 'created')}![/green]"
                         )
                         console.print(
-                            f'[dim]Quick launch: vllm-cli serve --shortcut "{shortcut_name}"[/dim]'
+                            f'[dim]{tr("server_ui.quick_launch_hint", "Quick launch")}: vllm-cli serve --shortcut "{shortcut_name}"[/dim]'
                         )
                     else:
                         console.print(f"[red]{t('server_control.server_failed', 'Failed to create shortcut')}.[/red]")
@@ -502,24 +534,34 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
     # Basic validation
     is_valid, errors = config_manager.validate_config(config)
     if not is_valid:
-        console.print("[red]Configuration validation failed:[/red]")
+        console.print(
+            f"[red]{tr('server_ui.config_validation_failed', 'Configuration validation failed:')}[/red]"
+        )
         for error in errors:
             console.print(f"  • {error}")
-        input("\nPress Enter to continue...")
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
         return "continue"
 
     # Compatibility validation
     is_compatible, warnings = config_manager.validate_argument_combination(config)
     if warnings:
-        console.print("[yellow]Configuration warnings:[/yellow]")
+        console.print(
+            f"[yellow]{tr('server_ui.config_warnings', 'Configuration warnings:')}[/yellow]"
+        )
         for warning in warnings:
             console.print(f"  • {warning}")
 
         # For errors (severity), ask user if they want to continue
         if not is_compatible:
-            console.print("\n[red]Some configuration conflicts were detected.[/red]")
+            console.print(
+                f"\n[red]{tr('server_ui.conflicts_detected', 'Some configuration conflicts were detected.')}[/red]"
+            )
             continue_anyway = inquirer.confirm(
-                "Continue anyway? (The server may not work as expected)", default=False
+                tr(
+                    "server_ui.continue_anyway",
+                    "Continue anyway? (The server may not work as expected)",
+                ),
+                default=False,
             )
             if not continue_anyway:
                 return "continue"
@@ -550,16 +592,18 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
 
     if is_remote_model:
         console.print(
-            f"\n[bold cyan]Starting vLLM server with remote model:[/bold cyan] {model_name}"
+            f"\n[bold cyan]{tr('server_ui.starting_remote_model', 'Starting vLLM server with remote model:')}[/bold cyan] {model_name}"
         )
         console.print(
-            "[yellow]Note: First-time use will download the model from HuggingFace Hub.[/yellow]"
+            f"[yellow]{tr('server_ui.remote_model_note', 'Note: First-time use will download the model from HuggingFace Hub.')}[/yellow]"
         )
         console.print(
-            "[dim]Download may take 10-30 minutes depending on size and connection speed.[/dim]\n"
+            f"[dim]{tr('server_ui.remote_model_download_time', 'Download may take 10-30 minutes depending on size and connection speed.')}[/dim]\n"
         )
     else:
-        console.print("\n[bold cyan]Starting vLLM server...[/bold cyan]")
+        console.print(
+            f"\n[bold cyan]{tr('server_ui.starting_server', 'Starting vLLM server...')}[/bold cyan]"
+        )
 
     # Get UI preferences for configurable log lines and refresh rate
     ui_prefs = config_manager.get_ui_preferences()
@@ -592,8 +636,8 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
         # Initial status
         layout["status"].update(
             create_panel(
-                "[yellow]⠋ Starting vLLM server... This may take a few minutes for model loading.[/yellow]",
-                title="Status",
+                f"[yellow]{tr('server_ui.status_starting', '⠋ Starting vLLM server... This may take a few minutes for model loading.')}[/yellow]",
+                title=tr("server_ui.panel_title_status", "Status"),
                 border_style="yellow",
             )
         )
@@ -608,15 +652,25 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
 
         layout["info"].update(
             create_panel(
-                f"Port: {server.port} | Model: {model_display}",
-                title="Info",
+                tr(
+                    "server_ui.info_panel",
+                    "Port: {port} | Model: {model}",
+                    port=server.port,
+                    model=model_display,
+                ),
+                title=tr("server_ui.panel_title_info", "Info"),
                 border_style="blue",
             )
         )
 
         # Footer with exit instructions
         layout["footer"].update(
-            Align.center(Text("Press Ctrl+C to cancel startup", style="dim yellow"))
+            Align.center(
+                Text(
+                    tr("server_ui.footer_cancel_startup", "Press Ctrl+C to cancel startup"),
+                    style="dim yellow",
+                )
+            )
         )
 
         startup_logs = []
@@ -640,8 +694,8 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                         startup_failed = True
                         layout["status"].update(
                             create_panel(
-                                "[red]✗ Server process terminated unexpectedly[/red]",
-                                title="Status",
+                                f"[red]{tr('server_ui.status_process_terminated', '✗ Server process terminated unexpectedly')}[/red]",
+                                title=tr("server_ui.panel_title_status", "Status"),
                                 border_style="red",
                             )
                         )
@@ -707,8 +761,11 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                     # Update status based on logs
                     if not startup_complete and not startup_failed:
                         elapsed = int(time.time() - start_time)
-                        status_msg = (
-                            f"{spinner} Starting vLLM server... ({elapsed}s elapsed)"
+                        status_msg = tr(
+                            "server_ui.status_msg_starting",
+                            "{spinner} Starting vLLM server... ({elapsed}s elapsed)",
+                            spinner=spinner,
+                            elapsed=elapsed,
                         )
 
                         # Try to detect what stage we're in from logs
@@ -719,15 +776,30 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                                 "loading weights" in log_lower
                                 or "loading model" in log_lower
                             ):
-                                status_msg = f"{spinner} Loading model weights... This may take a while ({elapsed}s)"
+                                status_msg = tr(
+                                    "server_ui.status_msg_loading_weights",
+                                    "{spinner} Loading model weights... This may take a while ({elapsed}s)",
+                                    spinner=spinner,
+                                    elapsed=elapsed,
+                                )
                                 # stage_detected = True  # Not needed
                                 break
                             elif "initializing" in log_lower and "engine" in log_lower:
-                                status_msg = f"{spinner} Initializing vLLM engine... ({elapsed}s)"
+                                status_msg = tr(
+                                    "server_ui.status_msg_initializing_engine",
+                                    "{spinner} Initializing vLLM engine... ({elapsed}s)",
+                                    spinner=spinner,
+                                    elapsed=elapsed,
+                                )
                                 # stage_detected = True  # Not needed
                                 break
                             elif "compiling" in log_lower or "cuda graph" in log_lower:
-                                status_msg = f"{spinner} Compiling CUDA kernels and graphs... ({elapsed}s)"
+                                status_msg = tr(
+                                    "server_ui.status_msg_compiling",
+                                    "{spinner} Compiling CUDA kernels and graphs... ({elapsed}s)",
+                                    spinner=spinner,
+                                    elapsed=elapsed,
+                                )
                                 # stage_detected = True  # Not needed
                                 break
                             elif "downloading" in log_lower or "fetching" in log_lower:
@@ -741,21 +813,32 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                                     if match:
                                         progress_info = f" - {match.group(1)}%"
 
-                                status_msg = f"{spinner} Downloading model from HuggingFace Hub{progress_info}... ({elapsed}s)"
+                                status_msg = tr(
+                                    "server_ui.status_msg_downloading",
+                                    "{spinner} Downloading model from HuggingFace Hub{progress}... ({elapsed}s)",
+                                    spinner=spinner,
+                                    progress=progress_info,
+                                    elapsed=elapsed,
+                                )
                                 # stage_detected = True  # Not needed
                                 break
                             elif (
                                 "starting server" in log_lower
                                 or "starting uvicorn" in log_lower
                             ):
-                                status_msg = f"{spinner} Starting API server... Almost ready! ({elapsed}s)"
+                                status_msg = tr(
+                                    "server_ui.status_msg_starting_api",
+                                    "{spinner} Starting API server... Almost ready! ({elapsed}s)",
+                                    spinner=spinner,
+                                    elapsed=elapsed,
+                                )
                                 # stage_detected = True  # Not needed
                                 break
 
                         layout["status"].update(
                             create_panel(
                                 f"[yellow]{status_msg}[/yellow]",
-                                title="Status",
+                                title=tr("server_ui.panel_title_status", "Status"),
                                 border_style="yellow",
                             )
                         )
@@ -764,12 +847,21 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                     if startup_logs:
                         layout["log_divider"].update(
                             Rule(
-                                f"Startup Logs (Last {len(startup_logs)} lines)",
+                                tr(
+                                    "server_ui.startup_logs_divider",
+                                    "Startup Logs (Last {count} lines)",
+                                    count=len(startup_logs),
+                                ),
                                 style="cyan",
                             )
                         )
                     else:
-                        layout["log_divider"].update(Rule("Startup Logs", style="cyan"))
+                        layout["log_divider"].update(
+                            Rule(
+                                tr("server_ui.startup_logs_divider_plain", "Startup Logs"),
+                                style="cyan",
+                            )
+                        )
 
                     # Update logs (no panel, just text)
                     if startup_logs:
@@ -778,11 +870,23 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                     else:
                         # Show different messages based on how long we've been waiting
                         if no_log_count < 2:
-                            msg = f"{spinner} Initializing vLLM server..."
+                            msg = tr(
+                                "server_ui.no_logs_initializing",
+                                "{spinner} Initializing vLLM server...",
+                                spinner=spinner,
+                            )
                         elif no_log_count < 8:
-                            msg = f"{spinner} Starting vLLM process..."
+                            msg = tr(
+                                "server_ui.no_logs_starting_process",
+                                "{spinner} Starting vLLM process...",
+                                spinner=spinner,
+                            )
                         else:
-                            msg = f"{spinner} Still waiting for vLLM output... Check if vLLM is installed and in your PATH."
+                            msg = tr(
+                                "server_ui.no_logs_still_waiting",
+                                "{spinner} Still waiting for vLLM output... Check if vLLM is installed and in your PATH.",
+                                spinner=spinner,
+                            )
 
                         log_text = Text(msg, style="dim yellow")
                         layout["logs"].update(Padding(log_text, (0, 2)))
@@ -790,70 +894,130 @@ def start_server_with_config(config: Dict[str, Any]) -> str:
                     time.sleep(0.25)  # Reduced sleep for faster updates
         except KeyboardInterrupt:
             startup_cancelled = True
-            console.print("\n[yellow]Startup cancelled by user.[/yellow]")
+            console.print(
+                f"\n[yellow]{tr('server_ui.startup_cancelled_by_user', 'Startup cancelled by user.')}[/yellow]"
+            )
 
         # Show final status
         if startup_cancelled:
-            console.print("[yellow]Server startup was cancelled.[/yellow]")
+            console.print(
+                f"[yellow]{tr('server_ui.startup_was_cancelled', 'Server startup was cancelled.')}[/yellow]"
+            )
             console.print("")
             console.print(
-                "[bold]Do you want to stop the server process?[/bold] [dim](Y/n):[/dim] ",
+                f"[bold]{tr('server_ui.stop_server_question', 'Do you want to stop the server process?')}[/bold] [dim](Y/n):[/dim] ",
                 end="",
             )
             response = input().strip().lower()
             if response != "n" and response != "no":
-                console.print("[yellow]Stopping server...[/yellow]")
-                server.stop()
-                console.print("[green]✓ Server stopped.[/green]")
-            else:
-                console.print("[dim]Server process continues in background.[/dim]")
                 console.print(
-                    "[yellow]⚠ Warning: You will not be able to monitor server logs from vLLM CLI[/yellow]"
+                    f"[yellow]{tr('server_ui.stopping_server', 'Stopping server...')}[/yellow]"
+                )
+                server.stop()
+                console.print(
+                    f"[green]{tr('server_ui.server_stopped', '✓ Server stopped.')}[/green]"
+                )
+            else:
+                console.print(
+                    f"[dim]{tr('server_ui.server_continues_background', 'Server process continues in background.')}[/dim]"
                 )
                 console.print(
-                    f"[dim]Note: Server may still be starting up. Check port {server.port}[/dim]"
+                    f"[yellow]{tr('server_ui.monitor_logs_unavailable_warning', '⚠ Warning: You will not be able to monitor server logs from vLLM CLI')}[/yellow]"
+                )
+                console.print(
+                    tr(
+                        "server_ui.server_may_still_start",
+                        "[dim]Note: Server may still be starting up. Check port {port}[/dim]",
+                        port=server.port,
+                    )
                 )
         elif startup_complete:
             console.print(
-                f"[green]✓ Server successfully started on port {server.port}[/green]"
+                tr(
+                    "server_ui.server_started_on_port",
+                    "[green]✓ Server successfully started on port {port}[/green]",
+                    port=server.port,
+                )
             )
             console.print(
-                f"[green]API endpoint: http://localhost:{server.port}[/green]"
+                tr(
+                    "server_ui.api_endpoint",
+                    "[green]API endpoint: http://localhost:{port}[/green]",
+                    port=server.port,
+                )
             )
 
             # Option to monitor - use navigation system
-            options = ["Monitor server output", "Return to main menu"]
+            post_options = [
+                (
+                    "monitor",
+                    tr("server_ui.monitor_output_option", "Monitor server output"),
+                ),
+                (
+                    "main_menu",
+                    tr("server_ui.return_to_menu_option", "Return to main menu"),
+                ),
+            ]
 
-            choice = unified_prompt(
-                "post_startup", "What would you like to do?", options, allow_back=False
+            choice = prompt_choice(
+                "post_startup",
+                tr("server_ui.what_would_you_like", "What would you like to do?"),
+                post_options,
+                allow_back=False,
             )
 
-            if choice == "Monitor server output":
+            if choice == "monitor":
                 return monitor_server(server)
             else:
-                console.print("[green]Server is running in background.[/green]")
+                console.print(
+                    f"[green]{tr('server_ui.server_running_background', 'Server is running in background.')}[/green]"
+                )
         else:
-            console.print("\n[red]✗ Failed to start server[/red]")
+            console.print(
+                f"\n[red]{tr('server_ui.start_failed', '✗ Failed to start server')}[/red]"
+            )
             if startup_logs:
-                console.print("\n[bold]Last logs:[/bold]")
+                console.print(
+                    f"\n[bold]{tr('server_ui.last_logs_label', 'Last logs:')}[/bold]"
+                )
                 for log in startup_logs[-5:]:
                     console.print(f"  {log}")
             # Offer to view logs interactively
             console.print(
-                "\n[yellow]Server startup failed. Last logs shown above.[/yellow]"
+                f"\n[yellow]{tr('server_ui.startup_failed_hint', 'Server startup failed. Last logs shown above.')}[/yellow]"
             )
 
             view_logs = (
-                input("\nWould you like to view the full logs? (y/N): ").strip().lower()
+                input(
+                    "\n"
+                    + tr(
+                        "server_ui.view_full_logs_question",
+                        "Would you like to view the full logs? (y/N): ",
+                    )
+                )
+                .strip()
+                .lower()
             )
             if view_logs in ["y", "yes"]:
                 show_log_menu(server)
             else:
-                console.print(f"\n[dim]Full log file: {server.log_path}[/dim]")
-                input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "server_ui.full_log_file",
+                        "\n[dim]Full log file: {path}[/dim]",
+                        path=server.log_path,
+                    )
+                )
+                input("\n" + tr("common.press_enter", "Press Enter to continue..."))
 
     except Exception as e:
         logger.error(f"Error starting server: {e}")
-        console.print(f"[red]Error starting server: {e}[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "server_ui.error_starting_server",
+                "[red]Error starting server: {error}[/red]",
+                error=e,
+            )
+        )
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "continue"

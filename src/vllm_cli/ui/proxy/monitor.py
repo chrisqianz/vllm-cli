@@ -23,10 +23,11 @@ from rich.table import Table
 from rich.text import Text
 
 from ...config import ConfigManager
+from ...i18n import tr
 from ...system import get_gpu_info
 from ..common import console, create_panel
 from ..gpu_utils import calculate_gpu_panel_size, create_gpu_status_panel
-from ..navigation import unified_prompt
+from ..navigation import prompt_choice
 from .components import create_model_registry_table
 
 if TYPE_CHECKING:
@@ -182,27 +183,52 @@ def create_models_log_panel(
             header.append(" - ")
 
             if status == "ready":
-                header.append("✓ Ready", style="green")
+                header.append(
+                    tr("proxy_monitor.status_ready", "✓ Ready"), style="green"
+                )
             elif status == "failed":
-                header.append("✗ Failed", style="red")
+                header.append(
+                    tr("proxy_monitor.status_failed", "✗ Failed"), style="red"
+                )
             elif status == "starting":
-                header.append("⠋ Starting...", style="yellow")
+                header.append(
+                    tr("proxy_monitor.status_starting", "⠋ Starting..."),
+                    style="yellow",
+                )
             elif status == "pending":
-                header.append("Pending", style="dim")
+                header.append(
+                    tr("proxy_monitor.status_pending", "Pending"), style="dim"
+                )
             else:
                 # For overview mode, check if server is running
                 if model_name in proxy_manager.vllm_servers:
                     server = proxy_manager.vllm_servers[model_name]
                     if server.is_running():
-                        header.append("● Running", style="green")
+                        header.append(
+                            tr("proxy_monitor.status_running_dot", "● Running"),
+                            style="green",
+                        )
                     else:
-                        header.append("○ Stopped", style="red")
+                        header.append(
+                            tr("proxy_monitor.status_stopped_dot", "○ Stopped"),
+                            style="red",
+                        )
 
         # Add port and GPU info
-        header.append(f" (Port: {model_config.port}", style="dim")
+        header.append(
+            tr(
+                "proxy_monitor.port_fragment",
+                " (Port: {port}",
+                port=model_config.port,
+            ),
+            style="dim",
+        )
         if model_config.gpu_ids:
             gpu_str = ",".join(str(g) for g in model_config.gpu_ids)
-            header.append(f", GPU: {gpu_str}", style="dim")
+            header.append(
+                tr("proxy_monitor.gpu_fragment", ", GPU: {gpu}", gpu=gpu_str),
+                style="dim",
+            )
         header.append(")", style="dim")
 
         models_content.append(header)
@@ -218,10 +244,20 @@ def create_models_log_panel(
                     log_text = Text(f"  {log}", style="dim white")
                     models_content.append(log_text)
             else:
-                waiting_text = Text("  Waiting for logs...", style="dim")
+                waiting_text = Text(
+                    f"  {tr('proxy_monitor.waiting_for_logs', 'Waiting for logs...')}",
+                    style="dim",
+                )
                 models_content.append(waiting_text)
         else:
-            pending_text = Text("  Server not started yet...", style="dim")
+            pending_text = Text(
+                "  "
+                + tr(
+                    "proxy_monitor.server_not_started",
+                    "Server not started yet...",
+                ),
+                style="dim",
+            )
             models_content.append(pending_text)
 
     return models_content
@@ -240,8 +276,18 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
     Returns:
         True if all models started successfully, False otherwise
     """
-    console.print("\n[bold cyan]Model Startup Monitor[/bold cyan]")
-    console.print("[dim]Showing real-time logs from all models...[/dim]\n")
+    console.print(
+        tr(
+            "proxy_monitor.startup_monitor_title",
+            "\n[bold cyan]Model Startup Monitor[/bold cyan]",
+        )
+    )
+    console.print(
+        tr(
+            "proxy_monitor.startup_monitor_subtitle",
+            "[dim]Showing real-time logs from all models...[/dim]\n",
+        )
+    )
 
     # Get UI preferences
     config_manager = ConfigManager()
@@ -364,8 +410,11 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
     # Header
     layout["header"].update(
         create_panel(
-            "[bold cyan]Starting Model Servers...[/bold cyan]",
-            title="Proxy Startup",
+            tr(
+                "proxy_monitor.starting_model_servers",
+                "[bold cyan]Starting Model Servers...[/bold cyan]",
+            ),
+            title=tr("proxy_monitor.title_proxy_startup", "Proxy Startup"),
             border_style="cyan",
         )
     )
@@ -374,11 +423,18 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
     layout["gpu"].update(create_gpu_status_panel())
 
     # Divider
-    layout["divider"].update(Rule("Model Logs", style="cyan"))
+    layout["divider"].update(
+        Rule(tr("proxy_monitor.rule_model_logs", "Model Logs"), style="cyan")
+    )
 
     # Footer
     layout["footer"].update(
-        Align.center(Text("Press Ctrl+C to cancel", style="dim yellow"))
+        Align.center(
+            Text(
+                tr("proxy_monitor.press_ctrl_c_cancel", "Press Ctrl+C to cancel"),
+                style="dim yellow",
+            )
+        )
     )
 
     # Track if we've shown the final state
@@ -399,8 +455,12 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
 
                 # Update status
                 status_table = Table(show_header=False, box=None)
-                status_table.add_column("Model", style="cyan")
-                status_table.add_column("Status", style="green")
+                status_table.add_column(
+                    tr("proxy_monitor.column_model", "Model"), style="cyan"
+                )
+                status_table.add_column(
+                    tr("proxy_monitor.column_status", "Status"), style="green"
+                )
 
                 ready_count = sum(1 for s in startup_status.values() if s == "ready")
                 total_count = len(
@@ -408,13 +468,19 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
                 )
 
                 status_table.add_row(
-                    "Progress", f"{ready_count}/{total_count} models ready"
+                    tr("proxy_monitor.progress_label", "Progress"),
+                    tr(
+                        "proxy_monitor.progress_value",
+                        "{ready}/{total} models ready",
+                        ready=ready_count,
+                        total=total_count,
+                    ),
                 )
 
                 layout["status"].update(
                     create_panel(
                         status_table,
-                        title="Status",
+                        title=tr("proxy_monitor.title_status", "Status"),
                         border_style=(
                             "green" if ready_count == total_count else "yellow"
                         ),
@@ -437,7 +503,15 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
                     layout["models"].update(Padding(Group(*models_content), (1, 2)))
                 else:
                     layout["models"].update(
-                        Padding(Text("[dim]No models starting...[/dim]"), (1, 2))
+                        Padding(
+                            Text(
+                                tr(
+                                    "proxy_monitor.no_models_starting",
+                                    "[dim]No models starting...[/dim]",
+                                )
+                            ),
+                            (1, 2),
+                        )
                     )
 
                 # Check if all models are ready and mark final state shown
@@ -449,7 +523,12 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
                     time.sleep(0.5)
 
     except KeyboardInterrupt:
-        console.print("\n[yellow]Startup cancelled by user.[/yellow]")
+        console.print(
+            tr(
+                "proxy_monitor.startup_cancelled",
+                "\n[yellow]Startup cancelled by user.[/yellow]",
+            )
+        )
         startup_complete.set()
         return False
 
@@ -466,7 +545,13 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
     ]
 
     if fail_count > 0:
-        console.print(f"\n[red]✗ {fail_count} model(s) failed to start[/red]")
+        console.print(
+            tr(
+                "proxy_monitor.models_failed_to_start",
+                "\n[red]✗ {count} model(s) failed to start[/red]",
+                count=fail_count,
+            )
+        )
 
         # Offer to view logs for failed models
         if failed_models:
@@ -475,7 +560,11 @@ def monitor_startup_progress(proxy_manager: "ProxyManager") -> bool:
         return False
     else:
         console.print(
-            f"\n[green]✓ All {success_count} model(s) started successfully[/green]"
+            tr(
+                "proxy_monitor.all_models_started",
+                "\n[green]✓ All {count} model(s) started successfully[/green]",
+                count=success_count,
+            )
         )
         return True
 
@@ -504,11 +593,20 @@ def monitor_priority_group(
         True if all models in group started successfully, False otherwise
     """
     console.print(
-        f"\n[bold cyan]{priority_label} (Group {group_index}/{total_groups})[/bold cyan]"
+        tr(
+            "proxy_monitor.priority_group_header",
+            "\n[bold cyan]{label} (Group {index}/{total})[/bold cyan]",
+            label=priority_label,
+            index=group_index,
+            total=total_groups,
+        )
     )
     console.print(
-        f"[dim]Starting {len(models_in_group)} model(s) - "
-        f"showing real-time logs...[/dim]\n"
+        tr(
+            "proxy_monitor.starting_group_models",
+            "[dim]Starting {count} model(s) - showing real-time logs...[/dim]\n",
+            count=len(models_in_group),
+        )
     )
 
     # Get UI preferences
@@ -602,8 +700,17 @@ def monitor_priority_group(
     # Header
     layout["header"].update(
         create_panel(
-            f"[bold cyan]{priority_label} - Group {group_index}/{total_groups}[/bold cyan]",
-            title="Sequential Model Loading",
+            tr(
+                "proxy_monitor.priority_group_panel_header",
+                "[bold cyan]{label} - Group {index}/{total}[/bold cyan]",
+                label=priority_label,
+                index=group_index,
+                total=total_groups,
+            ),
+            title=tr(
+                "proxy_monitor.title_sequential_model_loading",
+                "Sequential Model Loading",
+            ),
             border_style="cyan",
         )
     )
@@ -612,11 +719,18 @@ def monitor_priority_group(
     layout["gpu"].update(create_gpu_status_panel())
 
     # Divider
-    layout["divider"].update(Rule("Model Logs", style="cyan"))
+    layout["divider"].update(
+        Rule(tr("proxy_monitor.rule_model_logs", "Model Logs"), style="cyan")
+    )
 
     # Footer
     layout["footer"].update(
-        Align.center(Text("Press Ctrl+C to cancel", style="dim yellow"))
+        Align.center(
+            Text(
+                tr("proxy_monitor.press_ctrl_c_cancel", "Press Ctrl+C to cancel"),
+                style="dim yellow",
+            )
+        )
     )
 
     # Track if we've shown the final state
@@ -632,20 +746,30 @@ def monitor_priority_group(
 
                 # Update status
                 status_table = Table(show_header=False, box=None)
-                status_table.add_column("Model", style="cyan")
-                status_table.add_column("Status", style="green")
+                status_table.add_column(
+                    tr("proxy_monitor.column_model", "Model"), style="cyan"
+                )
+                status_table.add_column(
+                    tr("proxy_monitor.column_status", "Status"), style="green"
+                )
 
                 ready_count = sum(1 for s in startup_status.values() if s == "ready")
                 total_count = len(models_in_group)
 
                 status_table.add_row(
-                    "Progress", f"{ready_count}/{total_count} models ready"
+                    tr("proxy_monitor.progress_label", "Progress"),
+                    tr(
+                        "proxy_monitor.progress_value",
+                        "{ready}/{total} models ready",
+                        ready=ready_count,
+                        total=total_count,
+                    ),
                 )
 
                 layout["status"].update(
                     create_panel(
                         status_table,
-                        title="Status",
+                        title=tr("proxy_monitor.title_status", "Status"),
                         border_style=(
                             "green" if ready_count == total_count else "yellow"
                         ),
@@ -669,7 +793,15 @@ def monitor_priority_group(
                     layout["models"].update(Padding(Group(*models_content), (1, 2)))
                 else:
                     layout["models"].update(
-                        Padding(Text("[dim]No models starting...[/dim]"), (1, 2))
+                        Padding(
+                            Text(
+                                tr(
+                                    "proxy_monitor.no_models_starting",
+                                    "[dim]No models starting...[/dim]",
+                                )
+                            ),
+                            (1, 2),
+                        )
                     )
 
                 # Check if all models are ready
@@ -680,7 +812,12 @@ def monitor_priority_group(
                     time.sleep(0.5)
 
     except KeyboardInterrupt:
-        console.print("\n[yellow]Startup cancelled by user.[/yellow]")
+        console.print(
+            tr(
+                "proxy_monitor.startup_cancelled",
+                "\n[yellow]Startup cancelled by user.[/yellow]",
+            )
+        )
         startup_complete.set()
         return False
 
@@ -698,14 +835,24 @@ def monitor_priority_group(
 
     if fail_count > 0:
         console.print(
-            f"\n[red]✗ {fail_count} model(s) in {priority_label} failed to start[/red]"
+            tr(
+                "proxy_monitor.group_models_failed",
+                "\n[red]✗ {count} model(s) in {label} failed to start[/red]",
+                count=fail_count,
+                label=priority_label,
+            )
         )
         if failed_models:
             handle_failed_models(proxy_manager, failed_models)
         return False
     else:
         console.print(
-            f"\n[green]✓ All {success_count} model(s) in {priority_label} started successfully[/green]"
+            tr(
+                "proxy_monitor.group_models_started",
+                "\n[green]✓ All {count} model(s) in {label} started successfully[/green]",
+                count=success_count,
+                label=priority_label,
+            )
         )
         return True
 
@@ -725,24 +872,46 @@ def handle_failed_models(
     for model_name in failed_models:
         if model_name in proxy_manager.vllm_servers:
             server = proxy_manager.vllm_servers[model_name]
-            console.print(f"\n[yellow]Model '{model_name}' failed to start[/yellow]")
+            console.print(
+                tr(
+                    "proxy_monitor.model_failed_to_start",
+                    "\n[yellow]Model '{name}' failed to start[/yellow]",
+                    name=model_name,
+                )
+            )
 
             # Show last few log lines
             recent_logs = server.get_recent_logs(5)
             if recent_logs:
-                console.print("[bold]Last logs:[/bold]")
+                console.print(
+                    tr("proxy_monitor.last_logs_header", "[bold]Last logs:[/bold]")
+                )
                 for log in recent_logs:
                     console.print(f"  {log}")
 
             # Offer to view full logs
             view_logs = (
-                input(f"\nView full logs for {model_name}? (y/N): ").strip().lower()
+                input(
+                    tr(
+                        "proxy_monitor.view_full_logs_for",
+                        "\nView full logs for {name}? (y/N): ",
+                        name=model_name,
+                    )
+                )
+                .strip()
+                .lower()
             )
             if view_logs in ["y", "yes"]:
                 show_log_menu(server)
             else:
                 if server.log_path:
-                    console.print(f"[dim]Log file: {server.log_path}[/dim]")
+                    console.print(
+                        tr(
+                            "proxy_monitor.log_file",
+                            "[dim]Log file: {path}[/dim]",
+                            path=server.log_path,
+                        )
+                    )
 
 
 def refresh_model_registry(proxy_manager: "ProxyManager"):
@@ -752,15 +921,36 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
     Args:
         proxy_manager: The ProxyManager instance
     """
-    console.print("\n[bold cyan]Refreshing Model Registry[/bold cyan]")
-    console.print("[dim]Scanning for models to register...[/dim]\n")
+    console.print(
+        tr(
+            "proxy_monitor.refreshing_registry_title",
+            "\n[bold cyan]Refreshing Model Registry[/bold cyan]",
+        )
+    )
+    console.print(
+        tr(
+            "proxy_monitor.refreshing_registry_subtitle",
+            "[dim]Scanning for models to register...[/dim]\n",
+        )
+    )
 
     # Call the refresh method
-    with console.status("[cyan]Refreshing model registrations...[/cyan]"):
+    with console.status(
+        tr(
+            "proxy_monitor.refreshing_registry_status",
+            "[cyan]Refreshing model registrations...[/cyan]",
+        )
+    ):
         result = proxy_manager.refresh_model_registrations()
 
     if result.get("status") == "error":
-        console.print(f"[red]✗ Error: {result.get('message', 'Unknown error')}[/red]")
+        console.print(
+            tr(
+                "proxy_monitor.error_prefix",
+                "[red]✗ Error: {message}[/red]",
+                message=result.get("message", "Unknown error"),
+            )
+        )
     else:
         # Display results
         summary = result.get("summary", {})
@@ -768,9 +958,15 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
 
         # Create a summary table for what changed
         summary_table = Table(box=box.ROUNDED)
-        summary_table.add_column("Status", style="cyan")
-        summary_table.add_column("Count", style="white")
-        summary_table.add_column("Models", style="dim")
+        summary_table.add_column(
+            tr("proxy_monitor.column_status", "Status"), style="cyan"
+        )
+        summary_table.add_column(
+            tr("proxy_monitor.column_count", "Count"), style="white"
+        )
+        summary_table.add_column(
+            tr("proxy_monitor.column_models", "Models"), style="dim"
+        )
 
         # Only add rows if there were changes
         has_changes = False
@@ -778,7 +974,7 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
             has_changes = True
             registered = details.get("newly_registered", [])
             summary_table.add_row(
-                "✓ Newly Registered",
+                tr("proxy_monitor.row_newly_registered", "✓ Newly Registered"),
                 str(summary.get("registered", 0)),
                 ", ".join(registered) if registered else "-",
             )
@@ -787,7 +983,7 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
             has_changes = True
             failed = details.get("newly_failed", [])
             summary_table.add_row(
-                "✗ Newly Failed",
+                tr("proxy_monitor.row_newly_failed", "✗ Newly Failed"),
                 str(summary.get("failed", 0)),
                 ", ".join(failed) if failed else "-",
             )
@@ -796,7 +992,7 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
             has_changes = True
             removed = details.get("removed", [])
             summary_table.add_row(
-                "[×] Removed (stopped)",
+                tr("proxy_monitor.row_removed_stopped", "[×] Removed (stopped)"),
                 str(summary.get("removed", 0)),
                 ", ".join(removed) if removed else "-",
             )
@@ -805,7 +1001,10 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
         if has_changes:
             summary_panel = Panel(
                 summary_table,
-                title="[bold cyan]Registration Changes[/bold cyan]",
+                title=tr(
+                    "proxy_monitor.registration_changes_title",
+                    "[bold cyan]Registration Changes[/bold cyan]",
+                ),
                 border_style="cyan",
                 padding=(1, 2),
             )
@@ -816,8 +1015,12 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
             available_list = details.get("already_available", [])
             if available_list:
                 console.print(
-                    f"\n[green]✓ {len(available_list)} model(s) verified as available:[/green] "
-                    f"{', '.join(available_list)}"
+                    tr(
+                        "proxy_monitor.models_verified_available",
+                        "\n[green]✓ {count} model(s) verified as available:[/green] {names}",
+                        count=len(available_list),
+                        names=", ".join(available_list),
+                    )
                 )
 
         # Get full registry status to show current state of all models
@@ -837,14 +1040,24 @@ def refresh_model_registry(proxy_manager: "ProxyManager"):
 
         # Show detailed failure reasons if any
         if details.get("failed"):
-            console.print("\n[yellow]Failed Registration Details:[/yellow]")
+            console.print(
+                tr(
+                    "proxy_monitor.failed_registration_details",
+                    "\n[yellow]Failed Registration Details:[/yellow]",
+                )
+            )
             for failure in details["failed"]:
                 console.print(
-                    f"  • {failure.get('name', 'unknown')}: "
-                    f"[dim]{failure.get('reason', 'Unknown reason')}[/dim]"
+                    "  • "
+                    + tr(
+                        "proxy_monitor.failure_reason",
+                        "{name}: [dim]{reason}[/dim]",
+                        name=failure.get("name", "unknown"),
+                        reason=failure.get("reason", "Unknown reason"),
+                    )
                 )
 
-    input("\nPress Enter to continue...")
+    input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
 
 
 def monitor_model_logs_menu(proxy_manager: "ProxyManager") -> str:
@@ -857,23 +1070,40 @@ def monitor_model_logs_menu(proxy_manager: "ProxyManager") -> str:
     Returns:
         Navigation command string ('back' or 'stop')
     """
-    console.print("[bold cyan]Monitor Model Logs[/bold cyan]\n")
-
-    options = [
-        "Overview - Monitor all models",
-        "Individual - Monitor specific model",
-    ]
-
-    choice = unified_prompt(
-        "model_monitoring_mode", "Select monitoring mode", options, allow_back=True
+    console.print(
+        tr(
+            "proxy_monitor.monitor_model_logs_title",
+            "[bold cyan]Monitor Model Logs[/bold cyan]\n",
+        )
     )
 
-    if choice == "BACK":
+    options = [
+        (
+            "overview",
+            tr("proxy_monitor.option_overview", "Overview - Monitor all models"),
+        ),
+        (
+            "individual",
+            tr(
+                "proxy_monitor.option_individual_model",
+                "Individual - Monitor specific model",
+            ),
+        ),
+    ]
+
+    choice = prompt_choice(
+        "model_monitoring_mode",
+        tr("proxy_monitor.select_monitoring_mode", "Select monitoring mode"),
+        options,
+        allow_back=True,
+    )
+
+    if choice == "BACK" or not choice:
         return "back"
 
-    if choice == "Overview - Monitor all models":
+    if choice == "overview":
         return monitor_proxy_overview(proxy_manager)
-    elif choice == "Individual - Monitor specific model":
+    elif choice == "individual":
         return monitor_individual_model(proxy_manager)
 
     return "back"
@@ -893,8 +1123,18 @@ def monitor_proxy(proxy_manager: "ProxyManager") -> str:
     """
     while True:
         console.clear()
-        console.print("[bold cyan]Multi-Model Proxy Monitor[/bold cyan]")
-        console.print("[dim]Press Ctrl+C to exit monitoring[/dim]\n")
+        console.print(
+            tr(
+                "proxy_monitor.proxy_monitor_title",
+                "[bold cyan]Multi-Model Proxy Monitor[/bold cyan]",
+            )
+        )
+        console.print(
+            tr(
+                "proxy_monitor.press_ctrl_c_exit",
+                "[dim]Press Ctrl+C to exit monitoring[/dim]\n",
+            )
+        )
 
         # Get UI preferences
         config_manager = ConfigManager()
@@ -904,34 +1144,64 @@ def monitor_proxy(proxy_manager: "ProxyManager") -> str:
 
         # Show monitoring options
         options = [
-            "Overview - Monitor all models",
-            "Individual - Monitor specific model logs",
-            "Proxy Server Logs - View proxy server logs",
-            "Refresh Model Registry - Scan and register models",
-            "Status - Show current status",
-            "Back to proxy menu",
+            (
+                "overview",
+                tr("proxy_monitor.option_overview", "Overview - Monitor all models"),
+            ),
+            (
+                "individual",
+                tr(
+                    "proxy_monitor.option_individual_logs",
+                    "Individual - Monitor specific model logs",
+                ),
+            ),
+            (
+                "proxy_logs",
+                tr(
+                    "proxy_monitor.option_proxy_logs",
+                    "Proxy Server Logs - View proxy server logs",
+                ),
+            ),
+            (
+                "refresh_registry",
+                tr(
+                    "proxy_monitor.option_refresh_registry",
+                    "Refresh Model Registry - Scan and register models",
+                ),
+            ),
+            (
+                "status",
+                tr("proxy_monitor.option_status", "Status - Show current status"),
+            ),
+            (
+                "back_menu",
+                tr("proxy_monitor.option_back_to_menu", "Back to proxy menu"),
+            ),
         ]
 
-        choice = unified_prompt(
-            "proxy_monitor", "Select monitoring mode", options, allow_back=True
+        choice = prompt_choice(
+            "proxy_monitor",
+            tr("proxy_monitor.select_monitoring_mode", "Select monitoring mode"),
+            options,
+            allow_back=True,
         )
 
-        if choice == "BACK" or choice == "Back to proxy menu":
+        if choice == "BACK" or choice == "back_menu" or not choice:
             return "back"
 
         result = None
-        if choice == "Overview - Monitor all models":
+        if choice == "overview":
             result = monitor_proxy_overview(proxy_manager)
-        elif choice == "Individual - Monitor specific model logs":
+        elif choice == "individual":
             result = monitor_individual_model(proxy_manager)
-        elif choice == "Proxy Server Logs - View proxy server logs":
+        elif choice == "proxy_logs":
             result = monitor_proxy_logs(proxy_manager)
-        elif choice == "Refresh Model Registry - Scan and register models":
+        elif choice == "refresh_registry":
             refresh_model_registry(proxy_manager)
             continue  # Loop back to menu
-        elif choice == "Status - Show current status":
+        elif choice == "status":
             show_proxy_status(proxy_manager)
-            input("\nPress Enter to continue...")
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             continue  # Loop back to menu
 
         # Handle navigation results from monitoring functions
@@ -954,8 +1224,18 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
 
     Shows status of all models and aggregated metrics.
     """
-    console.print("[bold cyan]Proxy Overview Monitor[/bold cyan]")
-    console.print("[dim]Press Ctrl+C for menu options[/dim]\n")
+    console.print(
+        tr(
+            "proxy_monitor.overview_monitor_title",
+            "[bold cyan]Proxy Overview Monitor[/bold cyan]",
+        )
+    )
+    console.print(
+        tr(
+            "proxy_monitor.press_ctrl_c_menu_line",
+            "[dim]Press Ctrl+C for menu options[/dim]\n",
+        )
+    )
 
     # Get UI preferences
     config_manager = ConfigManager()
@@ -994,7 +1274,11 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
 
         # Header
         header_text = Text(
-            f"Multi-Model Proxy Monitor - {len(proxy_manager.vllm_servers)} Models",
+            tr(
+                "proxy_monitor.overview_header",
+                "Multi-Model Proxy Monitor - {count} Models",
+                count=len(proxy_manager.vllm_servers),
+            ),
             style="bold cyan",
             justify="center",
         )
@@ -1004,7 +1288,10 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
         layout["footer"].update(
             Align.center(
                 Text(
-                    "Press Ctrl+C for menu options",
+                    tr(
+                        "proxy_monitor.press_ctrl_c_menu",
+                        "Press Ctrl+C for menu options",
+                    ),
                     style="dim cyan",
                 )
             )
@@ -1026,27 +1313,37 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
 
                 # Update proxy status
                 proxy_status = Table(show_header=False, box=None)
-                proxy_status.add_column("Key", style="cyan")
-                proxy_status.add_column("Value", style="magenta")
+                proxy_status.add_column(
+                    tr("proxy_monitor.column_key", "Key"), style="cyan"
+                )
+                proxy_status.add_column(
+                    tr("proxy_monitor.column_value", "Value"), style="magenta"
+                )
 
                 proxy_status.add_row(
-                    "Proxy Status",
+                    tr("proxy_monitor.row_proxy_status", "Proxy Status"),
                     (
-                        "[green]Running[/green]"
+                        tr("proxy_monitor.running_markup", "[green]Running[/green]")
                         if proxy_manager.proxy_process
                         and proxy_manager.proxy_process.is_running()
-                        else "[red]Stopped[/red]"
+                        else tr("proxy_monitor.stopped_markup", "[red]Stopped[/red]")
                     ),
                 )
-                proxy_status.add_row("Proxy Port", str(proxy_manager.proxy_config.port))
                 proxy_status.add_row(
-                    "Active Models", str(len(proxy_manager.vllm_servers))
+                    tr("proxy_monitor.row_proxy_port", "Proxy Port"),
+                    str(proxy_manager.proxy_config.port),
+                )
+                proxy_status.add_row(
+                    tr("proxy_monitor.row_active_models", "Active Models"),
+                    str(len(proxy_manager.vllm_servers)),
                 )
 
                 layout["proxy_status"].update(
                     create_panel(
                         proxy_status,
-                        title="Proxy Server",
+                        title=tr(
+                            "proxy_monitor.title_proxy_server", "Proxy Server"
+                        ),
                         border_style=(
                             "green"
                             if proxy_manager.proxy_process
@@ -1062,7 +1359,12 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
                     layout["gpu"].update(gpu_panel)
 
                 # Update log divider
-                layout["log_divider"].update(Rule("Model Logs", style="cyan"))
+                layout["log_divider"].update(
+                    Rule(
+                        tr("proxy_monitor.rule_model_logs", "Model Logs"),
+                        style="cyan",
+                    )
+                )
 
                 # Use common function to create models log panel with dynamic height
                 models_log_content = create_models_log_panel(
@@ -1076,7 +1378,14 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
                     logs_content = Padding(Group(*models_log_content), (1, 2))
                 else:
                     logs_content = Padding(
-                        Text("Waiting for logs...", style="dim yellow"), (1, 2)
+                        Text(
+                            tr(
+                                "proxy_monitor.waiting_for_logs",
+                                "Waiting for logs...",
+                            ),
+                            style="dim yellow",
+                        ),
+                        (1, 2),
                     )
 
                 layout["logs"].update(logs_content)
@@ -1086,22 +1395,42 @@ def monitor_proxy_overview(proxy_manager: "ProxyManager") -> str:
     except KeyboardInterrupt:
         pass
 
-    console.print("\n[yellow]Monitoring stopped.[/yellow]")
+    console.print(
+        tr(
+            "proxy_monitor.monitoring_stopped",
+            "\n[yellow]Monitoring stopped.[/yellow]",
+        )
+    )
 
     try:
-        input("\nPress Enter to return to monitoring menu...")
+        input(
+            tr(
+                "proxy_monitor.press_enter_return",
+                "\nPress Enter to return to monitoring menu...",
+            )
+        )
         return "back"
     except KeyboardInterrupt:
         # User wants to stop proxy
-        if (
-            unified_prompt(
-                "confirm_stop_overview",
+        stop_confirm = prompt_choice(
+            "confirm_stop_overview",
+            tr(
+                "proxy_monitor.stop_all_servers_confirm",
                 "Stop all proxy servers?",
-                ["Yes, stop all servers", "No, keep running"],
-                allow_back=False,
-            )
-            == "Yes, stop all servers"
-        ):
+            ),
+            [
+                (
+                    "yes",
+                    tr(
+                        "proxy_monitor.yes_stop_all_servers",
+                        "Yes, stop all servers",
+                    ),
+                ),
+                ("no", tr("proxy_monitor.no_keep_running", "No, keep running")),
+            ],
+            allow_back=False,
+        )
+        if stop_confirm == "yes":
             return "stop"
         return "back"
 
@@ -1120,8 +1449,14 @@ def monitor_individual_model_by_name(
         Navigation command string
     """
     if model_name not in proxy_manager.vllm_servers:
-        console.print(f"[red]Model '{model_name}' not found or not running[/red]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "proxy_monitor.model_not_found_running",
+                "[red]Model '{name}' not found or not running[/red]",
+                name=model_name,
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "back"
 
     server = proxy_manager.vllm_servers[model_name]
@@ -1135,30 +1470,61 @@ def monitor_individual_model(proxy_manager: "ProxyManager") -> str:
     Allows user to select a model and view its logs in real-time.
     """
     if not proxy_manager.vllm_servers:
-        console.print("[yellow]No models are currently running.[/yellow]")
-        input("\nPress Enter to continue...")
+        console.print(
+            tr(
+                "proxy_monitor.no_models_running",
+                "[yellow]No models are currently running.[/yellow]",
+            )
+        )
+        input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
         return "back"
 
     # List available models
-    console.print("\n[bold cyan]Select Model to Monitor[/bold cyan]")
+    console.print(
+        tr(
+            "proxy_monitor.select_model_title",
+            "\n[bold cyan]Select Model to Monitor[/bold cyan]",
+        )
+    )
 
     model_options = []
     for model_name, server in proxy_manager.vllm_servers.items():
-        status = "Running" if server.is_running() else "Stopped"
-        model_options.append(f"{model_name} (Port {server.port}, {status})")
+        status = (
+            tr("proxy_monitor.engine_running", "Running")
+            if server.is_running()
+            else tr("proxy_monitor.engine_stopped", "Stopped")
+        )
+        model_options.append(
+            (
+                model_name,
+                tr(
+                    "proxy_monitor.model_option_label",
+                    "{name} (Port {port}, {status})",
+                    name=model_name,
+                    port=server.port,
+                    status=status,
+                ),
+            )
+        )
 
-    choice = unified_prompt(
-        "select_model", "Select a model to monitor", model_options, allow_back=True
+    model_name = prompt_choice(
+        "select_model",
+        tr("proxy_monitor.select_model_prompt", "Select a model to monitor"),
+        model_options,
+        allow_back=True,
     )
 
-    if choice == "BACK":
+    if model_name == "BACK" or not model_name:
         return "back"
 
-    # Extract model name from choice
-    model_name = choice.split(" (")[0]
-
     if model_name not in proxy_manager.vllm_servers:
-        console.print(f"[red]Model '{model_name}' not found.[/red]")
+        console.print(
+            tr(
+                "proxy_monitor.model_not_found",
+                "[red]Model '{name}' not found.[/red]",
+                name=model_name,
+            )
+        )
         return monitor_individual_model(proxy_manager)
 
     server = proxy_manager.vllm_servers[model_name]
@@ -1211,12 +1577,20 @@ def monitor_model_engine(
 
         # Header
         header_text = Text(
-            f"Model Engine Monitor - {model_name}", style="bold cyan", justify="center"
+            tr(
+                "proxy_monitor.engine_monitor_header",
+                "Model Engine Monitor - {name}",
+                name=model_name,
+            ),
+            style="bold cyan",
+            justify="center",
         )
         layout["header"].update(Padding(header_text, (1, 0)))
 
         # Footer
-        footer_text = "Press Ctrl+C for menu options"
+        footer_text = tr(
+            "proxy_monitor.press_ctrl_c_menu", "Press Ctrl+C for menu options"
+        )
         layout["footer"].update(Align.center(Text(footer_text, style="dim cyan")))
 
         # Track operation state for completion detection
@@ -1238,33 +1612,46 @@ def monitor_model_engine(
             while True:
                 # Update status
                 status_table = Table(show_header=False, box=None)
-                status_table.add_column("Key", style="cyan")
-                status_table.add_column("Value", style="magenta")
+                status_table.add_column(
+                    tr("proxy_monitor.column_key", "Key"), style="cyan"
+                )
+                status_table.add_column(
+                    tr("proxy_monitor.column_value", "Value"), style="magenta"
+                )
 
                 status_table.add_row(
-                    "Status",
+                    tr("proxy_monitor.column_status", "Status"),
                     (
-                        "[green]Running[/green]"
+                        tr("proxy_monitor.running_markup", "[green]Running[/green]")
                         if server.is_running()
-                        else "[red]Stopped[/red]"
+                        else tr("proxy_monitor.stopped_markup", "[red]Stopped[/red]")
                     ),
                 )
-                status_table.add_row("Model", model_name)
-                status_table.add_row("Port", str(server.port))
                 status_table.add_row(
-                    "PID", str(server.process.pid) if server.process else "N/A"
+                    tr("proxy_monitor.column_model", "Model"), model_name
+                )
+                status_table.add_row(
+                    tr("proxy_monitor.column_port", "Port"), str(server.port)
+                )
+                status_table.add_row(
+                    tr("proxy_monitor.column_pid", "PID"),
+                    str(server.process.pid) if server.process else "N/A",
                 )
 
                 # Add GPU info
                 model_config = proxy_manager._get_model_config_by_name(model_name)
                 if model_config and model_config.gpu_ids:
                     gpu_str = ",".join(str(g) for g in model_config.gpu_ids)
-                    status_table.add_row("GPUs", gpu_str)
+                    status_table.add_row(
+                        tr("proxy_monitor.column_gpus", "GPUs"), gpu_str
+                    )
 
                 layout["status"].update(
                     create_panel(
                         status_table,
-                        title="Engine Status",
+                        title=tr(
+                            "proxy_monitor.title_engine_status", "Engine Status"
+                        ),
                         border_style="green" if server.is_running() else "red",
                     )
                 )
@@ -1372,12 +1759,14 @@ def monitor_model_engine(
                 if operation_state.get("type") and not operation_state.get("completed"):
                     # Operation in progress
                     if operation_state["type"] == "sleeping":
-                        progress_text = (
-                            "[yellow]⏳ Sleep operation in progress...[/yellow]"
+                        progress_text = tr(
+                            "proxy_monitor.sleep_in_progress",
+                            "[yellow]⏳ Sleep operation in progress...[/yellow]",
                         )
                     else:  # waking
-                        progress_text = (
-                            "[yellow]⏳ Wake operation in progress...[/yellow]"
+                        progress_text = tr(
+                            "proxy_monitor.wake_in_progress",
+                            "[yellow]⏳ Wake operation in progress...[/yellow]",
                         )
 
                     # Show progress indicator with logs
@@ -1385,13 +1774,23 @@ def monitor_model_engine(
                         (
                             "\n".join(recent_logs)
                             if recent_logs
-                            else "Waiting for logs..."
+                            else tr(
+                                "proxy_monitor.waiting_for_logs",
+                                "Waiting for logs...",
+                            )
                         ),
                         style="dim white",
                     )
                     logs_content = Group(
                         Panel(progress_text, border_style="yellow", box=box.ROUNDED),
-                        Rule(f"Engine Logs - {model_name}", style="yellow"),
+                        Rule(
+                            tr(
+                                "proxy_monitor.rule_engine_logs",
+                                "Engine Logs - {name}",
+                                name=model_name,
+                            ),
+                            style="yellow",
+                        ),
                         Padding(log_text, (0, 2)),
                     )
                 elif operation_state.get("completed") and operation_state.get(
@@ -1425,36 +1824,65 @@ def monitor_model_engine(
                         if show_notification:
                             # Show completion notification
                             notification_lines = []
+                            elapsed = f"{operation_state['completion_time']:.2f}"
 
                             if operation_state["type"] == "sleeping":
                                 notification_lines.append(
-                                    "[bold green]✓ SLEEP COMPLETED[/bold green]"
+                                    tr(
+                                        "proxy_monitor.sleep_completed_badge",
+                                        "[bold green]✓ SLEEP COMPLETED[/bold green]",
+                                    )
                                 )
                                 notification_lines.append(
-                                    f"[cyan]Time taken: {operation_state['completion_time']:.2f} seconds[/cyan]"
+                                    tr(
+                                        "proxy_monitor.time_taken",
+                                        "[cyan]Time taken: {seconds} seconds[/cyan]",
+                                        seconds=elapsed,
+                                    )
                                 )
                                 if operation_state.get("memory_freed"):
                                     notification_lines.append(
-                                        f"[yellow]Memory freed: {operation_state['memory_freed']:.2f} GiB[/yellow]"
+                                        tr(
+                                            "proxy_monitor.memory_freed",
+                                            "[yellow]Memory freed: {size} GiB[/yellow]",
+                                            size=f"{operation_state['memory_freed']:.2f}",
+                                        )
                                     )
                                     notification_lines.append(
-                                        f"[dim]Memory in use: {operation_state['memory_remaining']:.2f} GiB[/dim]"
+                                        tr(
+                                            "proxy_monitor.memory_in_use",
+                                            "[dim]Memory in use: {size} GiB[/dim]",
+                                            size=f"{operation_state['memory_remaining']:.2f}",
+                                        )
                                     )
                             elif operation_state["type"] == "waking":
                                 notification_lines.append(
-                                    "[bold green]✓ WAKE COMPLETED[/bold green]"
+                                    tr(
+                                        "proxy_monitor.wake_completed_badge",
+                                        "[bold green]✓ WAKE COMPLETED[/bold green]",
+                                    )
                                 )
                                 notification_lines.append(
-                                    f"[cyan]Time taken: {operation_state['completion_time']:.2f} seconds[/cyan]"
+                                    tr(
+                                        "proxy_monitor.time_taken",
+                                        "[cyan]Time taken: {seconds} seconds[/cyan]",
+                                        seconds=elapsed,
+                                    )
                                 )
                                 notification_lines.append(
-                                    "[green]Model is now fully operational[/green]"
+                                    tr(
+                                        "proxy_monitor.model_fully_operational",
+                                        "[green]Model is now fully operational[/green]",
+                                    )
                                 )
 
                             # Create notification panel
                             notification_panel = Panel(
                                 "\n".join(notification_lines),
-                                title="[bold yellow]Operation Complete[/bold yellow]",
+                                title=tr(
+                                    "proxy_monitor.operation_complete_title",
+                                    "[bold yellow]Operation Complete[/bold yellow]",
+                                ),
                                 border_style="green",
                                 box=box.DOUBLE,
                             )
@@ -1466,7 +1894,14 @@ def monitor_model_engine(
 
                             logs_content = Group(
                                 notification_panel,
-                                Rule(f"Engine Logs - {model_name}", style="yellow"),
+                                Rule(
+                                    tr(
+                                        "proxy_monitor.rule_engine_logs",
+                                        "Engine Logs - {name}",
+                                        name=model_name,
+                                    ),
+                                    style="yellow",
+                                ),
                                 Padding(log_text, (0, 2)),
                             )
                         else:
@@ -1475,12 +1910,22 @@ def monitor_model_engine(
                                 (
                                     "\n".join(recent_logs)
                                     if recent_logs
-                                    else "Waiting for logs..."
+                                    else tr(
+                                        "proxy_monitor.waiting_for_logs",
+                                        "Waiting for logs...",
+                                    )
                                 ),
                                 style="dim white",
                             )
                             logs_content = Group(
-                                Rule(f"Engine Logs - {model_name}", style="yellow"),
+                                Rule(
+                                    tr(
+                                        "proxy_monitor.rule_engine_logs",
+                                        "Engine Logs - {name}",
+                                        name=model_name,
+                                    ),
+                                    style="yellow",
+                                ),
                                 Padding(log_text, (0, 2)),
                             )
                     else:
@@ -1491,7 +1936,14 @@ def monitor_model_engine(
                         # Normal log display
                         log_text = Text("\n".join(recent_logs), style="dim white")
                         logs_content = Group(
-                            Rule(f"Engine Logs - {model_name}", style="yellow"),
+                            Rule(
+                                tr(
+                                    "proxy_monitor.rule_engine_logs",
+                                    "Engine Logs - {name}",
+                                    name=model_name,
+                                ),
+                                style="yellow",
+                            ),
                             Padding(log_text, (0, 2)),
                         )
                 else:
@@ -1499,10 +1951,23 @@ def monitor_model_engine(
                     if recent_logs:
                         log_text = Text("\n".join(recent_logs), style="dim white")
                     else:
-                        log_text = Text("Waiting for logs...", style="dim yellow")
+                        log_text = Text(
+                            tr(
+                                "proxy_monitor.waiting_for_logs",
+                                "Waiting for logs...",
+                            ),
+                            style="dim yellow",
+                        )
 
                     logs_content = Group(
-                        Rule(f"Engine Logs - {model_name}", style="yellow"),
+                        Rule(
+                            tr(
+                                "proxy_monitor.rule_engine_logs",
+                                "Engine Logs - {name}",
+                                name=model_name,
+                            ),
+                            style="yellow",
+                        ),
                         Padding(log_text, (0, 2)),
                     )
 
@@ -1527,17 +1992,38 @@ def monitor_model_engine(
 
     # Handle server failure after Live display has ended
     if server_failed:
-        console.print(f"\n[red]Model engine '{model_name}' has stopped.[/red]")
+        console.print(
+            tr(
+                "proxy_monitor.model_engine_stopped",
+                "\n[red]Model engine '{name}' has stopped.[/red]",
+                name=model_name,
+            )
+        )
 
         # Show last few log lines to help diagnose
         recent_logs = server.get_recent_logs(10)
         if recent_logs:
-            console.print("\n[bold]Last logs before failure:[/bold]")
+            console.print(
+                tr(
+                    "proxy_monitor.last_logs_before_failure",
+                    "\n[bold]Last logs before failure:[/bold]",
+                )
+            )
             for log in recent_logs[-5:]:  # Show last 5 lines
                 console.print(f"  {log}")
 
         # Offer to view full logs
-        view_logs = input(f"\nView full logs for {model_name}? (y/N): ").strip().lower()
+        view_logs = (
+            input(
+                tr(
+                    "proxy_monitor.view_full_logs_for",
+                    "\nView full logs for {name}? (y/N): ",
+                    name=model_name,
+                )
+            )
+            .strip()
+            .lower()
+        )
         if view_logs in ["y", "yes"]:
             from ..log_viewer import show_log_menu
 
@@ -1545,55 +2031,122 @@ def monitor_model_engine(
 
     # Display operation-specific completion summary
     if operation_state.get("completed"):
+        elapsed = f"{operation_state['completion_time']:.2f}"
         if operation_state["type"] == "sleeping":
             console.print(
-                "\n[bold green]✓ Sleep operation completed successfully![/bold green]"
+                tr(
+                    "proxy_monitor.sleep_summary",
+                    "\n[bold green]✓ Sleep operation completed successfully![/bold green]",
+                )
             )
             console.print(
-                f"[cyan]Time taken: {operation_state['completion_time']:.2f} seconds[/cyan]"
+                tr(
+                    "proxy_monitor.time_taken",
+                    "[cyan]Time taken: {seconds} seconds[/cyan]",
+                    seconds=elapsed,
+                )
             )
             if operation_state.get("memory_freed"):
                 console.print(
-                    f"[yellow]Memory freed: {operation_state['memory_freed']:.2f} GiB[/yellow]"
+                    tr(
+                        "proxy_monitor.memory_freed",
+                        "[yellow]Memory freed: {size} GiB[/yellow]",
+                        size=f"{operation_state['memory_freed']:.2f}",
+                    )
                 )
                 console.print(
-                    f"[dim]Memory still in use: {operation_state['memory_remaining']:.2f} GiB[/dim]"
+                    tr(
+                        "proxy_monitor.memory_still_in_use",
+                        "[dim]Memory still in use: {size} GiB[/dim]",
+                        size=f"{operation_state['memory_remaining']:.2f}",
+                    )
                 )
-            console.print(f"\n[green]Model '{model_name}' is now in sleep mode[/green]")
+            console.print(
+                tr(
+                    "proxy_monitor.model_sleep_mode",
+                    "\n[green]Model '{name}' is now in sleep mode[/green]",
+                    name=model_name,
+                )
+            )
         elif operation_state["type"] == "waking":
             console.print(
-                "\n[bold green]✓ Wake operation completed successfully![/bold green]"
+                tr(
+                    "proxy_monitor.wake_summary",
+                    "\n[bold green]✓ Wake operation completed successfully![/bold green]",
+                )
             )
             console.print(
-                f"[cyan]Time taken: {operation_state['completion_time']:.2f} seconds[/cyan]"
+                tr(
+                    "proxy_monitor.time_taken",
+                    "[cyan]Time taken: {seconds} seconds[/cyan]",
+                    seconds=elapsed,
+                )
             )
             console.print(
-                f"\n[green]Model '{model_name}' is now fully operational[/green]"
+                tr(
+                    "proxy_monitor.model_now_operational",
+                    "\n[green]Model '{name}' is now fully operational[/green]",
+                    name=model_name,
+                )
             )
 
         # Auto-return to menu after brief pause
-        console.print("\n[dim]Returning to proxy management menu in 3 seconds...[/dim]")
+        console.print(
+            tr(
+                "proxy_monitor.returning_to_menu",
+                "\n[dim]Returning to proxy management menu in 3 seconds...[/dim]",
+            )
+        )
         time.sleep(3)
         return "back"
     else:
         # Manual exit via Ctrl+C
-        console.print("\n[yellow]Monitoring stopped.[/yellow]")
-        console.print(f"[green]✓ Model '{model_name}' continues running[/green]")
+        console.print(
+            tr(
+                "proxy_monitor.monitoring_stopped",
+                "\n[yellow]Monitoring stopped.[/yellow]",
+            )
+        )
+        console.print(
+            tr(
+                "proxy_monitor.model_continues_running",
+                "[green]✓ Model '{name}' continues running[/green]",
+                name=model_name,
+            )
+        )
 
         try:
-            input("\nPress Enter to return to monitoring menu...")
+            input(
+                tr(
+                    "proxy_monitor.press_enter_return",
+                    "\nPress Enter to return to monitoring menu...",
+                )
+            )
             return "back"
         except KeyboardInterrupt:
             # User wants to stop proxy
-            if (
-                unified_prompt(
-                    "confirm_stop_model",
+            stop_confirm = prompt_choice(
+                "confirm_stop_model",
+                tr(
+                    "proxy_monitor.stop_all_servers_confirm",
                     "Stop all proxy servers?",
-                    ["Yes, stop all servers", "No, keep running"],
-                    allow_back=False,
-                )
-                == "Yes, stop all servers"
-            ):
+                ),
+                [
+                    (
+                        "yes",
+                        tr(
+                            "proxy_monitor.yes_stop_all_servers",
+                            "Yes, stop all servers",
+                        ),
+                    ),
+                    (
+                        "no",
+                        tr("proxy_monitor.no_keep_running", "No, keep running"),
+                    ),
+                ],
+                allow_back=False,
+            )
+            if stop_confirm == "yes":
                 return "stop"
             return "back"
 
@@ -1602,43 +2155,81 @@ def show_proxy_status(proxy_manager: "ProxyManager"):
     """
     Display current status of proxy and all models.
     """
-    console.print("\n[bold cyan]Proxy Server Status[/bold cyan]")
+    console.print(
+        tr(
+            "proxy_monitor.proxy_server_status_title",
+            "\n[bold cyan]Proxy Server Status[/bold cyan]",
+        )
+    )
 
     # Proxy status
     proxy_table = Table(show_header=False, box=None)
-    proxy_table.add_column("Property", style="cyan")
-    proxy_table.add_column("Value", style="magenta")
+    proxy_table.add_column(
+        tr("proxy_monitor.column_property", "Property"), style="cyan"
+    )
+    proxy_table.add_column(
+        tr("proxy_monitor.column_value", "Value"), style="magenta"
+    )
 
     proxy_table.add_row(
-        "Proxy Server",
+        tr("proxy_monitor.row_proxy_server", "Proxy Server"),
         (
-            "[green]Running[/green]"
+            tr("proxy_monitor.running_markup", "[green]Running[/green]")
             if proxy_manager.proxy_process and proxy_manager.proxy_process.is_running()
-            else "[red]Not Running[/red]"
+            else tr("proxy_monitor.not_running_markup", "[red]Not Running[/red]")
         ),
     )
-    proxy_table.add_row("Host", proxy_manager.proxy_config.host)
-    proxy_table.add_row("Port", str(proxy_manager.proxy_config.port))
     proxy_table.add_row(
-        "CORS", "Enabled" if proxy_manager.proxy_config.enable_cors else "Disabled"
+        tr("proxy_monitor.column_host", "Host"), proxy_manager.proxy_config.host
     )
     proxy_table.add_row(
-        "Metrics",
-        "Enabled" if proxy_manager.proxy_config.enable_metrics else "Disabled",
+        tr("proxy_monitor.column_port", "Port"),
+        str(proxy_manager.proxy_config.port),
+    )
+    proxy_table.add_row(
+        tr("proxy_monitor.row_cors", "CORS"),
+        tr("proxy_monitor.enabled", "Enabled")
+        if proxy_manager.proxy_config.enable_cors
+        else tr("proxy_monitor.disabled", "Disabled"),
+    )
+    proxy_table.add_row(
+        tr("proxy_monitor.row_metrics", "Metrics"),
+        tr("proxy_monitor.enabled", "Enabled")
+        if proxy_manager.proxy_config.enable_metrics
+        else tr("proxy_monitor.disabled", "Disabled"),
     )
 
-    console.print(create_panel(proxy_table, title="Proxy Configuration"))
+    console.print(
+        create_panel(
+            proxy_table,
+            title=tr(
+                "proxy_monitor.title_proxy_configuration", "Proxy Configuration"
+            ),
+        )
+    )
 
     # Models status
     if proxy_manager.vllm_servers:
-        console.print("\n[bold]Model Engines:[/bold]")
+        console.print(
+            tr("proxy_monitor.model_engines_header", "\n[bold]Model Engines:[/bold]")
+        )
 
         models_table = Table()
-        models_table.add_column("Model", style="cyan")
-        models_table.add_column("Port", style="magenta")
-        models_table.add_column("Status", style="green")
-        models_table.add_column("GPU(s)", style="yellow")
-        models_table.add_column("Profile", style="blue")
+        models_table.add_column(
+            tr("proxy_monitor.column_model", "Model"), style="cyan"
+        )
+        models_table.add_column(
+            tr("proxy_monitor.column_port", "Port"), style="magenta"
+        )
+        models_table.add_column(
+            tr("proxy_monitor.column_status", "Status"), style="green"
+        )
+        models_table.add_column(
+            tr("proxy_monitor.column_gpus_short", "GPU(s)"), style="yellow"
+        )
+        models_table.add_column(
+            tr("proxy_monitor.column_profile", "Profile"), style="blue"
+        )
 
         for model_name, server in proxy_manager.vllm_servers.items():
             model_config = proxy_manager._get_model_config_by_name(model_name)
@@ -1656,9 +2247,9 @@ def show_proxy_status(proxy_manager: "ProxyManager"):
                 model_name,
                 str(server.port),
                 (
-                    "[green]Running[/green]"
+                    tr("proxy_monitor.running_markup", "[green]Running[/green]")
                     if server.is_running()
-                    else "[red]Stopped[/red]"
+                    else tr("proxy_monitor.stopped_markup", "[red]Stopped[/red]")
                 ),
                 gpu_str,
                 profile_str,
@@ -1666,7 +2257,12 @@ def show_proxy_status(proxy_manager: "ProxyManager"):
 
         console.print(models_table)
     else:
-        console.print("\n[yellow]No models currently running.[/yellow]")
+        console.print(
+            tr(
+                "proxy_monitor.no_models_currently_running",
+                "\n[yellow]No models currently running.[/yellow]",
+            )
+        )
 
 
 def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
@@ -1681,7 +2277,12 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
     Returns:
         Navigation command string
     """
-    console.print("[bold cyan]Proxy Server Logs & Statistics[/bold cyan]\n")
+    console.print(
+        tr(
+            "proxy_monitor.proxy_logs_title",
+            "[bold cyan]Proxy Server Logs & Statistics[/bold cyan]\n",
+        )
+    )
 
     # Get UI preferences
     config_manager = ConfigManager()
@@ -1730,13 +2331,26 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
 
         # Header
         header_text = Text(
-            "Proxy Server Logs & Statistics", style="bold cyan", justify="center"
+            tr(
+                "proxy_monitor.proxy_logs_header",
+                "Proxy Server Logs & Statistics",
+            ),
+            style="bold cyan",
+            justify="center",
         )
         layout["header"].update(Padding(header_text, (1, 0)))
 
         # Footer
         layout["footer"].update(
-            Align.center(Text("Press Ctrl+C to stop monitoring", style="dim cyan"))
+            Align.center(
+                Text(
+                    tr(
+                        "proxy_monitor.press_ctrl_c_stop",
+                        "Press Ctrl+C to stop monitoring",
+                    ),
+                    style="dim cyan",
+                )
+            )
         )
 
         # Smart registry refresh for pending models
@@ -1766,12 +2380,21 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                     )
             else:
                 cached_registry_table = Table(box=box.ROUNDED)
-                cached_registry_table.add_column("Status", style="yellow")
-                cached_registry_table.add_row("Registry status unavailable")
+                cached_registry_table.add_column(
+                    tr("proxy_monitor.column_status", "Status"), style="yellow"
+                )
+                cached_registry_table.add_row(
+                    tr(
+                        "proxy_monitor.registry_status_unavailable",
+                        "Registry status unavailable",
+                    )
+                )
         except Exception as e:
             logger.warning(f"Error fetching initial registry: {e}")
             cached_registry_table = Table(box=box.ROUNDED)
-            cached_registry_table.add_column("Error", style="red")
+            cached_registry_table.add_column(
+                tr("proxy_monitor.column_error", "Error"), style="red"
+            )
             cached_registry_table.add_row(f"Error: {str(e)[:50]}")
 
         with Live(layout, console=console, refresh_per_second=monitor_refresh_rate):
@@ -1782,34 +2405,61 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                     and proxy_manager.proxy_process.is_running()
                 ):
                     proxy_table = Table(show_header=False, box=None)
-                    proxy_table.add_column("Key", style="cyan")
-                    proxy_table.add_column("Value", style="magenta")
+                    proxy_table.add_column(
+                        tr("proxy_monitor.column_key", "Key"), style="cyan"
+                    )
+                    proxy_table.add_column(
+                        tr("proxy_monitor.column_value", "Value"), style="magenta"
+                    )
 
                     proxy_table.add_row(
-                        "Status",
+                        tr("proxy_monitor.column_status", "Status"),
                         (
-                            "[green]Running[/green]"
+                            tr(
+                                "proxy_monitor.running_markup",
+                                "[green]Running[/green]",
+                            )
                             if proxy_manager.proxy_process
                             and proxy_manager.proxy_process.is_running()
-                            else "[red]Stopped[/red]"
+                            else tr(
+                                "proxy_monitor.stopped_markup", "[red]Stopped[/red]"
+                            )
                         ),
                     )
-                    proxy_table.add_row("Host", proxy_manager.proxy_config.host)
-                    proxy_table.add_row("Port", str(proxy_manager.proxy_config.port))
                     proxy_table.add_row(
-                        "CORS",
+                        tr("proxy_monitor.column_host", "Host"),
+                        proxy_manager.proxy_config.host,
+                    )
+                    proxy_table.add_row(
+                        tr("proxy_monitor.column_port", "Port"),
+                        str(proxy_manager.proxy_config.port),
+                    )
+                    proxy_table.add_row(
+                        tr("proxy_monitor.row_cors", "CORS"),
                         (
-                            "[green]Enabled[/green]"
+                            tr(
+                                "proxy_monitor.enabled_markup",
+                                "[green]Enabled[/green]",
+                            )
                             if proxy_manager.proxy_config.enable_cors
-                            else "[yellow]Disabled[/yellow]"
+                            else tr(
+                                "proxy_monitor.disabled_markup",
+                                "[yellow]Disabled[/yellow]",
+                            )
                         ),
                     )
                     proxy_table.add_row(
-                        "Metrics",
+                        tr("proxy_monitor.row_metrics", "Metrics"),
                         (
-                            "[green]Enabled[/green]"
+                            tr(
+                                "proxy_monitor.enabled_markup",
+                                "[green]Enabled[/green]",
+                            )
                             if proxy_manager.proxy_config.enable_metrics
-                            else "[yellow]Disabled[/yellow]"
+                            else tr(
+                                "proxy_monitor.disabled_markup",
+                                "[yellow]Disabled[/yellow]",
+                            )
                         ),
                     )
 
@@ -1824,7 +2474,8 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                         hours, remainder = divmod(int(uptime), 3600)
                         minutes, seconds = divmod(remainder, 60)
                         proxy_table.add_row(
-                            "Uptime", f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                            tr("proxy_monitor.column_uptime", "Uptime"),
+                            f"{hours:02d}:{minutes:02d}:{seconds:02d}",
                         )
 
                     # Request statistics are available via /proxy/status endpoint
@@ -1832,12 +2483,20 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                 else:
                     proxy_table = Table(show_header=False, box=None)
                     proxy_table.add_column("", style="red")
-                    proxy_table.add_row("Proxy server not running")
+                    proxy_table.add_row(
+                        tr(
+                            "proxy_monitor.proxy_server_not_running",
+                            "Proxy server not running",
+                        )
+                    )
 
                 layout["proxy_info"].update(
                     create_panel(
                         proxy_table,
-                        title="Proxy Server Status",
+                        title=tr(
+                            "proxy_monitor.title_proxy_server_status",
+                            "Proxy Server Status",
+                        ),
                         border_style=(
                             "green"
                             if proxy_manager.proxy_process
@@ -1911,7 +2570,10 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                 layout["backends"].update(
                     create_panel(
                         cached_registry_table,
-                        title="Current Model Registry",
+                        title=tr(
+                            "proxy_monitor.title_current_model_registry",
+                            "Current Model Registry",
+                        ),
                         border_style="blue",
                     )
                 )
@@ -1947,16 +2609,29 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
                     log_text = Text("\n".join(recent_logs), style="dim white")
                 else:
                     log_text = Text(
-                        "Waiting for proxy server logs...\n", style="dim yellow"
+                        tr(
+                            "proxy_monitor.waiting_for_proxy_logs",
+                            "Waiting for proxy server logs...\n",
+                        ),
+                        style="dim yellow",
                     )
                     log_text.append(
-                        "\nNote: Request logs will appear here when the proxy "
-                        "receives requests.",
+                        tr(
+                            "proxy_monitor.request_logs_note",
+                            "\nNote: Request logs will appear here when the proxy receives requests.",
+                        ),
                         style="dim",
                     )
 
                 logs_content = Group(
-                    Rule("Proxy Server Logs", style="yellow"), Padding(log_text, (1, 2))
+                    Rule(
+                        tr(
+                            "proxy_monitor.rule_proxy_server_logs",
+                            "Proxy Server Logs",
+                        ),
+                        style="yellow",
+                    ),
+                    Padding(log_text, (1, 2)),
                 )
                 layout["logs"].update(logs_content)
 
@@ -1965,21 +2640,41 @@ def monitor_proxy_logs(proxy_manager: "ProxyManager") -> str:
     except KeyboardInterrupt:
         pass
 
-    console.print("\n[yellow]Monitoring stopped.[/yellow]")
+    console.print(
+        tr(
+            "proxy_monitor.monitoring_stopped",
+            "\n[yellow]Monitoring stopped.[/yellow]",
+        )
+    )
 
     try:
-        input("\nPress Enter to return to monitoring menu...")
+        input(
+            tr(
+                "proxy_monitor.press_enter_return",
+                "\nPress Enter to return to monitoring menu...",
+            )
+        )
         return "back"
     except KeyboardInterrupt:
         # User wants to stop proxy
-        if (
-            unified_prompt(
-                "confirm_stop_proxy",
+        stop_confirm = prompt_choice(
+            "confirm_stop_proxy",
+            tr(
+                "proxy_monitor.stop_all_servers_confirm",
                 "Stop all proxy servers?",
-                ["Yes, stop all servers", "No, keep running"],
-                allow_back=False,
-            )
-            == "Yes, stop all servers"
-        ):
+            ),
+            [
+                (
+                    "yes",
+                    tr(
+                        "proxy_monitor.yes_stop_all_servers",
+                        "Yes, stop all servers",
+                    ),
+                ),
+                ("no", tr("proxy_monitor.no_keep_running", "No, keep running")),
+            ],
+            allow_back=False,
+        )
+        if stop_confirm == "yes":
             return "stop"
         return "back"

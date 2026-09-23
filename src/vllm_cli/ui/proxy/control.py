@@ -7,14 +7,29 @@ from typing import List, Optional
 
 from rich.table import Table
 
+from ...i18n import tr
 from ...proxy.config import ProxyConfigManager
 from ...proxy.models import ModelConfig, ProxyConfig
 from ..common import console
 from ..custom_config import select_gpus
 from ..model_manager import select_model
-from ..navigation import unified_prompt
+from ..navigation import prompt_choice, unified_prompt
 
 logger = logging.getLogger(__name__)
+
+
+def _status_label(enabled: bool) -> str:
+    """Return the displayed 'Enabled'/'Disabled' label for a boolean setting."""
+    if enabled:
+        return tr("proxy_wizard.status_enabled", "Enabled")
+    return tr("proxy_wizard.status_disabled", "Disabled")
+
+
+def _status_label_lowercase(enabled: bool) -> str:
+    """Return the displayed lowercase 'enabled'/'disabled' label."""
+    if enabled:
+        return tr("proxy_wizard.tgl_enabled", "enabled")
+    return tr("proxy_wizard.tgl_disabled", "disabled")
 
 
 def display_configured_models(models: List[ModelConfig]):
@@ -27,17 +42,29 @@ def display_configured_models(models: List[ModelConfig]):
     if not models:
         return
 
-    table = Table(title=f"Configured Models ({len(models)})")
+    table = Table(
+        title=tr(
+            "proxy_wizard.configured_models_title",
+            "Configured Models ({count})",
+            count=len(models),
+        )
+    )
     table.add_column("#", style="dim", width=3)
-    table.add_column("Model", style="cyan")
-    table.add_column("Port", style="magenta")
-    table.add_column("GPU(s)", style="yellow")
-    table.add_column("Profile", style="blue")
-    table.add_column("Priority", style="green", width=8)
+    table.add_column(tr("proxy_wizard.col_model", "Model"), style="cyan")
+    table.add_column(tr("proxy_wizard.col_port", "Port"), style="magenta")
+    table.add_column(tr("proxy_wizard.col_gpus", "GPU(s)"), style="yellow")
+    table.add_column(tr("proxy_wizard.col_profile", "Profile"), style="blue")
+    table.add_column(
+        tr("proxy_wizard.col_priority", "Priority"), style="green", width=8
+    )
 
     for idx, model in enumerate(models, 1):
-        gpu_str = ",".join(str(g) for g in model.gpu_ids) if model.gpu_ids else "Auto"
-        profile_str = model.profile or "None"
+        gpu_str = (
+            ",".join(str(g) for g in model.gpu_ids)
+            if model.gpu_ids
+            else tr("proxy_wizard.auto", "Auto")
+        )
+        profile_str = model.profile or tr("proxy_wizard.none", "None")
         priority_str = str(model.loading_priority) if model.loading_priority else "-"
         table.add_row(
             str(idx),
@@ -60,45 +87,82 @@ def configure_proxy_interactively() -> Optional[ProxyConfig]:
     Returns:
         ProxyConfig instance or None if cancelled
     """
-    console.print("\n[bold cyan]Configure Multi-Model Proxy Server[/bold cyan]")
+    console.print(
+        tr(
+            "proxy_wizard.configure_proxy_title",
+            "\n[bold cyan]Configure Multi-Model Proxy Server[/bold cyan]",
+        )
+    )
 
     # Proxy settings
-    console.print("\n[bold]Proxy Server Settings[/bold]")
+    console.print(
+        tr(
+            "proxy_wizard.proxy_settings_header",
+            "\n[bold]Proxy Server Settings[/bold]",
+        )
+    )
 
-    host = input("Host (default: 0.0.0.0): ").strip() or "0.0.0.0"  # nosec B104
-    port_str = input("Port (default: 8000): ").strip() or "8000"
+    host = (
+        input(
+            tr("proxy_wizard.host_prompt_default", "Host (default: 0.0.0.0): ")
+        ).strip()
+        or "0.0.0.0"
+    )  # nosec B104
+    port_str = (
+        input(
+            tr("proxy_wizard.port_prompt_default", "Port (default: 8000): ")
+        ).strip()
+        or "8000"
+    )
 
     try:
         port = int(port_str)
     except ValueError:
-        console.print("[red]Invalid port number[/red]")
+        console.print(
+            tr("proxy_wizard.invalid_port_number", "[red]Invalid port number[/red]")
+        )
         return None
 
     # CORS and metrics
+    yes_no = [
+        ("yes", tr("messages.yes", "Yes")),
+        ("no", tr("messages.no", "No")),
+    ]
+
     enable_cors = (
-        unified_prompt("enable_cors", "Enable CORS?", ["Yes", "No"], allow_back=False)
-        == "Yes"
+        prompt_choice(
+            "enable_cors",
+            tr("proxy_wizard.enable_cors", "Enable CORS?"),
+            yes_no,
+            allow_back=False,
+        )
+        == "yes"
     )
 
     enable_metrics = (
-        unified_prompt(
+        prompt_choice(
             "enable_metrics",
-            "Enable metrics endpoint?",
-            ["Yes", "No"],
+            tr("proxy_wizard.enable_metrics", "Enable metrics endpoint?"),
+            yes_no,
             allow_back=False,
         )
-        == "Yes"
+        == "yes"
     )
 
     log_requests = (
-        unified_prompt(
-            "log_requests", "Log all requests?", ["Yes", "No"], allow_back=False
+        prompt_choice(
+            "log_requests",
+            tr("proxy_wizard.log_requests", "Log all requests?"),
+            yes_no,
+            allow_back=False,
         )
-        == "Yes"
+        == "yes"
     )
 
     # Configure models
-    console.print("\n[bold]Configure Models[/bold]")
+    console.print(
+        tr("proxy_wizard.configure_models_header", "\n[bold]Configure Models[/bold]")
+    )
     models = []
 
     while True:
@@ -107,18 +171,33 @@ def configure_proxy_interactively() -> Optional[ProxyConfig]:
             display_configured_models(models)
 
         # Update prompt based on number of configured models
-        prompt_msg = "Model configuration"
+        prompt_msg = tr(
+            "proxy_wizard.model_configuration", "Model configuration"
+        )
         if models:
-            prompt_msg = f"Model configuration ({len(models)} model{'s' if len(models) > 1 else ''} configured)"
+            prompt_msg = tr(
+                "proxy_wizard.model_configuration_count",
+                "Model configuration ({count} model(s) configured)",
+                count=len(models),
+            )
 
-        action = unified_prompt(
+        action = prompt_choice(
             "model_action",
             prompt_msg,
-            ["Add a model", "✓ Done configuring models"],
+            [
+                ("add", tr("proxy_wizard.action_add_model", "Add a model")),
+                (
+                    "done",
+                    tr(
+                        "proxy_wizard.action_done_models",
+                        "✓ Done configuring models",
+                    ),
+                ),
+            ],
             allow_back=False,
         )
 
-        if action == "✓ Done configuring models":
+        if action == "done":
             break
 
         # Add a model - pass existing models for conflict checking
@@ -127,11 +206,21 @@ def configure_proxy_interactively() -> Optional[ProxyConfig]:
         )
         if model_config:
             models.append(model_config)
-            console.print(f"\n[green]✓ Added model: {model_config.name}[/green]")
+            console.print(
+                "\n"
+                + tr(
+                    "proxy_wizard.model_added",
+                    "[green]✓ Added model: {name}[/green]",
+                    name=model_config.name,
+                )
+            )
 
     if not models:
         console.print(
-            "[yellow]No models configured. Proxy needs at least one model.[/yellow]"
+            tr(
+                "proxy_wizard.no_models_for_proxy",
+                "[yellow]No models configured. Proxy needs at least one model.[/yellow]",
+            )
         )
         return None
 
@@ -173,15 +262,31 @@ def _check_parallel_settings_conflict(
             parallel_settings.append("enable_expert_parallel=True")
 
         if parallel_settings:
-            console.print("\n[yellow]⚠ Warning:[/yellow]")
             console.print(
-                f"Profile '{profile}' contains parallel settings: {', '.join(parallel_settings)}"
+                tr(
+                    "proxy_wizard.warning_label",
+                    "\n[yellow]⚠ Warning:[/yellow]",
+                )
             )
             console.print(
-                "These settings will be automatically disabled for single-GPU deployment."
+                tr(
+                    "proxy_wizard.profile_parallel_settings",
+                    "Profile '{profile}' contains parallel settings: {settings}",
+                    profile=profile,
+                    settings=", ".join(parallel_settings),
+                )
             )
             console.print(
-                "[dim]The model will run on a single GPU as configured.[/dim]\n"
+                tr(
+                    "proxy_wizard.parallel_disabled_note",
+                    "These settings will be automatically disabled for single-GPU deployment.",
+                )
+            )
+            console.print(
+                tr(
+                    "proxy_wizard.single_gpu_note",
+                    "[dim]The model will run on a single GPU as configured.[/dim]\n",
+                )
             )
 
 
@@ -211,31 +316,51 @@ def configure_model_for_proxy(
 
     # Display appropriate header
     if is_running_proxy:
-        console.print("\n[bold cyan]Add New Model[/bold cyan]\n")
+        console.print(
+            tr(
+                "proxy_wizard.add_new_model_title",
+                "\n[bold cyan]Add New Model[/bold cyan]\n",
+            )
+        )
     else:
-        console.print(f"\n[cyan]Configure Model #{index + 1}[/cyan]")
+        console.print(
+            tr(
+                "proxy_wizard.configure_model_number",
+                "\n[cyan]Configure Model #{number}[/cyan]",
+                number=index + 1,
+            )
+        )
 
     # Import here to avoid circular dependency
     from ...config import ConfigManager
     from ..model_manager import select_shortcut_for_serving
-    from ..navigation import unified_prompt
-
     config_manager = ConfigManager()
     shortcuts = config_manager.list_shortcuts()
 
     # First ask if user wants to use shortcut or select model
     model_source_choices = []
     if shortcuts:
-        model_source_choices.append("Use saved shortcut")
+        model_source_choices.append(
+            (
+                "shortcut",
+                tr("proxy_wizard.use_saved_shortcut", "Use saved shortcut"),
+            )
+        )
     model_source_choices.extend(
         [
-            "Select from models",
+            (
+                "models",
+                tr("proxy_wizard.select_from_models", "Select from models"),
+            )
         ]
     )
 
-    source_choice = unified_prompt(
+    source_choice = prompt_choice(
         "model_source_proxy",
-        "How would you like to configure this model?",
+        tr(
+            "proxy_wizard.how_configure_model",
+            "How would you like to configure this model?",
+        ),
         model_source_choices,
         allow_back=True,
     )
@@ -244,7 +369,7 @@ def configure_model_for_proxy(
         return None
 
     model_selection = None
-    if source_choice == "Use saved shortcut":
+    if source_choice == "shortcut":
         # Handle shortcut selection directly
         model_selection = select_shortcut_for_serving()
     else:
@@ -271,9 +396,27 @@ def configure_model_for_proxy(
             shortcut_name = model_selection["name"]
             model_config_overrides = model_selection.get("config_overrides", {})
 
-            console.print(f"\n[bold cyan]Using Shortcut: {shortcut_name}[/bold cyan]")
-            console.print(f"[green]Model: {model_name}[/green]")
-            console.print(f"[blue]Profile: {shortcut_profile}[/blue]")
+            console.print(
+                tr(
+                    "proxy_wizard.using_shortcut",
+                    "\n[bold cyan]Using Shortcut: {name}[/bold cyan]",
+                    name=shortcut_name,
+                )
+            )
+            console.print(
+                tr(
+                    "proxy_wizard.model_label",
+                    "[green]Model: {name}[/green]",
+                    name=model_name,
+                )
+            )
+            console.print(
+                tr(
+                    "proxy_wizard.profile_label",
+                    "[blue]Profile: {name}[/blue]",
+                    name=shortcut_profile,
+                )
+            )
 
         elif model_selection.get("type") == "ollama_model":
             # Ollama/GGUF model
@@ -306,30 +449,64 @@ def configure_model_for_proxy(
 
     # Display the model (only if not a shortcut, as shortcuts already display it)
     if not is_shortcut:
-        console.print(f"\n[green]Model: {model_name}[/green]")
+        console.print(
+            "\n"
+            + tr(
+                "proxy_wizard.model_label",
+                "[green]Model: {name}[/green]",
+                name=model_name,
+            )
+        )
 
     # Optional: Allow user to provide an alias
     alias = None
     use_alias = (
-        unified_prompt(
+        prompt_choice(
             "use_alias",
-            "Would you like to add an alias for this model?",
-            ["No, use model path/name", "Yes, add an alias"],
+            tr(
+                "proxy_wizard.add_alias_question",
+                "Would you like to add an alias for this model?",
+            ),
+            [
+                (
+                    "no",
+                    tr(
+                        "proxy_wizard.alias_no",
+                        "No, use model path/name",
+                    ),
+                ),
+                ("yes", tr("proxy_wizard.alias_yes", "Yes, add an alias")),
+            ],
             allow_back=False,
         )
-        == "Yes, add an alias"
+        == "yes"
     )
 
     if use_alias:
-        alias_input = input("Enter alias (optional, press Enter to skip): ").strip()
+        alias_input = (
+            input(
+                tr(
+                    "proxy_wizard.enter_alias_prompt",
+                    "Enter alias (optional, press Enter to skip): ",
+                )
+            )
+            .strip()
+        )
         if alias_input:
             alias = alias_input
             console.print(
-                f"[dim]Note: Both '{model_name}' and '{alias}' will route to this model[/dim]"
+                tr(
+                    "proxy_wizard.alias_routing_note",
+                    "[dim]Note: Both '{name}' and '{alias}' will route to this model[/dim]",
+                    name=model_name,
+                    alias=alias,
+                )
             )
 
     # GPU assignment
-    console.print("\n[bold]GPU Assignment[/bold]")
+    console.print(
+        tr("proxy_wizard.gpu_assignment_header", "\n[bold]GPU Assignment[/bold]")
+    )
 
     # Get gpu_memory_utilization from profile if available
     required_utilization = None
@@ -344,19 +521,34 @@ def configure_model_for_proxy(
                 "gpu_memory_utilization", 0.9
             )
             console.print(
-                f"[dim]Profile '{shortcut_profile}' uses {required_utilization*100:.0f}% GPU memory[/dim]"
+                tr(
+                    "proxy_wizard.profile_memory_use",
+                    "[dim]Profile '{profile}' uses {percent}% GPU memory[/dim]",
+                    profile=shortcut_profile,
+                    percent=f"{required_utilization * 100:.0f}",
+                )
             )
 
     # Show warning if using shortcut with parallel settings
     if is_shortcut:
         console.print(
-            "[yellow]⚠ Warning:[/yellow] GPU selection may override profile settings"
+            tr(
+                "proxy_wizard.gpu_override_warning",
+                "[yellow]⚠ Warning:[/yellow] GPU selection may override profile settings",
+            )
         )
         console.print(
-            f"[dim]Profile '{shortcut_profile}' may have tensor_parallel_size or pipeline_parallel_size[/dim]"
+            tr(
+                "proxy_wizard.profile_parallel_possible",
+                "[dim]Profile '{profile}' may have tensor_parallel_size or pipeline_parallel_size[/dim]",
+                profile=shortcut_profile,
+            )
         )
         console.print(
-            "[dim]Your GPU selection will determine the actual parallelism used[/dim]\n"
+            tr(
+                "proxy_wizard.gpu_determines_parallelism",
+                "[dim]Your GPU selection will determine the actual parallelism used[/dim]\n",
+            )
         )
 
     gpu_str = select_gpus(
@@ -370,13 +562,23 @@ def configure_model_for_proxy(
             gpu_ids = [int(g.strip()) for g in gpu_str.split(",")]
         except ValueError:
             console.print(
-                "[yellow]Invalid GPU IDs, using automatic assignment[/yellow]"
+                tr(
+                    "proxy_wizard.invalid_gpu_ids",
+                    "[yellow]Invalid GPU IDs, using automatic assignment[/yellow]",
+                )
             )
     else:
-        console.print("[dim]No GPUs selected, will use automatic assignment[/dim]")
+        console.print(
+            tr(
+                "proxy_wizard.no_gpus_selected",
+                "[dim]No GPUs selected, will use automatic assignment[/dim]",
+            )
+        )
 
     # Port selection with conflict checking
-    console.print("\n[bold]Port Selection[/bold]")
+    console.print(
+        tr("proxy_wizard.port_selection_header", "\n[bold]Port Selection[/bold]")
+    )
 
     # Build port usage map from existing models with running status if proxy is running
     used_ports = {}
@@ -384,15 +586,35 @@ def configure_model_for_proxy(
         used_ports[model.port] = {"name": model.name, "model": model}
 
     if used_ports:
-        console.print("\n[dim]Currently configured ports:[/dim]")
+        console.print(
+            "\n"
+            + tr(
+                "proxy_wizard.configured_ports_label",
+                "[dim]Currently configured ports:[/dim]",
+            )
+        )
         for port, info in sorted(used_ports.items()):
             # For running proxy, check if model is actually running
             if is_running_proxy:
                 # For running proxy, just show the port is in use
                 # The actual running status will be checked by the caller
-                console.print(f"  Port {port}: {info['name']}")
+                console.print(
+                    tr(
+                        "proxy_wizard.port_used_line",
+                        "  Port {port}: {name}",
+                        port=port,
+                        name=info["name"],
+                    )
+                )
             else:
-                console.print(f"  Port {port}: {info['name']}")
+                console.print(
+                    tr(
+                        "proxy_wizard.port_used_line",
+                        "  Port {port}: {name}",
+                        port=port,
+                        name=info["name"],
+                    )
+                )
 
     # Suggest next available port
     default_port = 8001 + index
@@ -400,7 +622,17 @@ def configure_model_for_proxy(
     while default_port in used_ports:
         default_port += 1
 
-    port_str = input(f"Port (default: {default_port}): ").strip() or str(default_port)
+    port_str = (
+        input(
+            tr(
+                "proxy_wizard.port_prompt",
+                "Port (default: {port}): ",
+                port=default_port,
+            )
+        )
+        .strip()
+        or str(default_port)
+    )
     try:
         port = int(port_str)
         # Check for port conflicts
@@ -408,20 +640,44 @@ def configure_model_for_proxy(
             if is_running_proxy:
                 # For running proxy, the caller will handle port reuse for stopped models
                 console.print(
-                    f"[yellow]Port {port} is configured for '{used_ports[port]['name']}'[/yellow]"
+                    tr(
+                        "proxy_wizard.port_configured_for",
+                        "[yellow]Port {port} is configured for '{name}'[/yellow]",
+                        port=port,
+                        name=used_ports[port]["name"],
+                    )
                 )
                 console.print(
-                    "[dim]Note: If this model is stopped, it will be replaced.[/dim]"
+                    tr(
+                        "proxy_wizard.port_replacement_note",
+                        "[dim]Note: If this model is stopped, it will be replaced.[/dim]",
+                    )
                 )
             else:
                 # For initial config, don't allow duplicate ports
                 console.print(
-                    f"[red]Port {port} is already in use by '{used_ports[port]['name']}'[/red]"
+                    tr(
+                        "proxy_wizard.port_in_use",
+                        "[red]Port {port} is already in use by '{name}'[/red]",
+                        port=port,
+                        name=used_ports[port]["name"],
+                    )
                 )
-                console.print("[yellow]Please choose a different port[/yellow]")
+                console.print(
+                    tr(
+                        "proxy_wizard.choose_other_port",
+                        "[yellow]Please choose a different port[/yellow]",
+                    )
+                )
                 return None
     except ValueError:
-        console.print(f"[yellow]Invalid port, using default: {default_port}[/yellow]")
+        console.print(
+            tr(
+                "proxy_wizard.invalid_port_default",
+                "[yellow]Invalid port, using default: {port}[/yellow]",
+                port=default_port,
+            )
+        )
         port = default_port
 
     # Profile selection
@@ -429,7 +685,13 @@ def configure_model_for_proxy(
     if is_shortcut:
         # Use the profile from the shortcut
         profile = shortcut_profile
-        console.print(f"\n[dim]Using profile from shortcut: {profile}[/dim]")
+        console.print(
+            tr(
+                "proxy_wizard.using_profile_from_shortcut",
+                "\n[dim]Using profile from shortcut: {profile}[/dim]",
+                profile=profile,
+            )
+        )
     else:
         # Normal profile selection for non-shortcut models
         from ...config import ConfigManager
@@ -438,14 +700,21 @@ def configure_model_for_proxy(
         all_profiles = config_manager.get_all_profiles()
 
         if all_profiles:
-            profile_names = list(all_profiles.keys())
-            profile_names.append("No profile")
-
-            selected_profile = unified_prompt(
-                "profile_selection", "Select profile", profile_names, allow_back=False
+            profile_choices: list = [
+                (name, name) for name in all_profiles.keys()
+            ]
+            profile_choices.append(
+                ("none", tr("proxy_wizard.no_profile", "No profile"))
             )
 
-            profile = None if selected_profile == "No profile" else selected_profile
+            selected_profile = prompt_choice(
+                "profile_selection",
+                tr("proxy_wizard.select_profile", "Select profile"),
+                profile_choices,
+                allow_back=False,
+            )
+
+            profile = None if selected_profile == "none" else selected_profile
 
             # If profile selected and no GPUs selected yet, update required_utilization
             if profile and not gpu_ids:
@@ -455,10 +724,17 @@ def configure_model_for_proxy(
                         "gpu_memory_utilization", 0.9
                     )
                     console.print(
-                        f"\n[yellow]Note: Selected profile uses {profile_util*100:.0f}% GPU memory[/yellow]"
+                        tr(
+                            "proxy_wizard.selected_profile_memory",
+                            "\n[yellow]Note: Selected profile uses {percent}% GPU memory[/yellow]",
+                            percent=f"{profile_util * 100:.0f}",
+                        )
                     )
                     console.print(
-                        "[dim]You may want to reconsider GPU selection based on this requirement[/dim]"
+                        tr(
+                            "proxy_wizard.reconsider_gpu_note",
+                            "[dim]You may want to reconsider GPU selection based on this requirement[/dim]",
+                        )
                     )
         else:
             profile = None
@@ -474,34 +750,66 @@ def configure_model_for_proxy(
     loading_priority = None
     if len(existing_models) > 0 or not is_running_proxy:
         # Only ask about loading priority when configuring multiple models
-        console.print("\n[bold]Loading Priority (Optional)[/bold]")
         console.print(
-            "[dim]Set loading order for sequential startup. "
-            "Lower numbers load first (e.g., 1, 2, 3).[/dim]"
+            tr(
+                "proxy_wizard.loading_priority_header",
+                "\n[bold]Loading Priority (Optional)[/bold]",
+            )
         )
         console.print(
-            "[dim]Useful when models share GPUs to control KV cache allocation.[/dim]"
+            tr(
+                "proxy_wizard.loading_priority_order",
+                "[dim]Set loading order for sequential startup. "
+                "Lower numbers load first (e.g., 1, 2, 3).[/dim]",
+            )
         )
         console.print(
-            "[dim]Leave empty for parallel loading or if this is the only model.[/dim]"
+            tr(
+                "proxy_wizard.loading_priority_kv_note",
+                "[dim]Useful when models share GPUs to control KV cache allocation.[/dim]",
+            )
+        )
+        console.print(
+            tr(
+                "proxy_wizard.loading_priority_parallel_note",
+                "[dim]Leave empty for parallel loading or if this is the only model.[/dim]",
+            )
         )
 
-        priority_input = input("Loading priority (press Enter to skip): ").strip()
+        priority_input = (
+            input(
+                tr(
+                    "proxy_wizard.loading_priority_prompt",
+                    "Loading priority (press Enter to skip): ",
+                )
+            )
+            .strip()
+        )
         if priority_input:
             try:
                 loading_priority = int(priority_input)
                 if loading_priority < 1:
                     console.print(
-                        "[yellow]Priority must be >= 1, using default (no priority)[/yellow]"
+                        tr(
+                            "proxy_wizard.priority_must_be_one",
+                            "[yellow]Priority must be >= 1, using default (no priority)[/yellow]",
+                        )
                     )
                     loading_priority = None
                 else:
                     console.print(
-                        f"[green]✓ Loading priority set to {loading_priority}[/green]"
+                        tr(
+                            "proxy_wizard.priority_set",
+                            "[green]✓ Loading priority set to {priority}[/green]",
+                            priority=loading_priority,
+                        )
                     )
             except ValueError:
                 console.print(
-                    "[yellow]Invalid priority number, using default (no priority)[/yellow]"
+                    tr(
+                        "proxy_wizard.invalid_priority",
+                        "[yellow]Invalid priority number, using default (no priority)[/yellow]",
+                    )
                 )
                 loading_priority = None
 
@@ -573,7 +881,12 @@ def edit_proxy_config_interactive(current_config: ProxyConfig) -> Optional[Proxy
     """
     # Note: ProxyConfigManager used for validation if needed
 
-    console.print("\n[bold cyan]Edit Proxy Configuration[/bold cyan]")
+    console.print(
+        tr(
+            "proxy_wizard.edit_proxy_config_title",
+            "\n[bold cyan]Edit Proxy Configuration[/bold cyan]",
+        )
+    )
 
     while True:
         # Show current configuration
@@ -581,25 +894,37 @@ def edit_proxy_config_interactive(current_config: ProxyConfig) -> Optional[Proxy
 
         # Menu options
         options = [
-            "Edit proxy settings",
-            "Add model",
-            "Remove model",
-            "Enable/disable model",
-            "Save and exit",
-            "Exit without saving",
+            (
+                "edit_settings",
+                tr("proxy_wizard.action_edit_settings", "Edit proxy settings"),
+            ),
+            ("add_model", tr("proxy_wizard.action_add_model_menu", "Add model")),
+            ("remove_model", tr("proxy_wizard.action_remove_model", "Remove model")),
+            (
+                "toggle_model",
+                tr("proxy_wizard.action_toggle_model", "Enable/disable model"),
+            ),
+            ("save_exit", tr("proxy_wizard.action_save_exit", "Save and exit")),
+            (
+                "exit_no_save",
+                tr("proxy_wizard.action_exit_no_save", "Exit without saving"),
+            ),
         ]
 
-        action = unified_prompt(
-            "edit_action", "Select action", options, allow_back=False
+        action = prompt_choice(
+            "edit_action",
+            tr("proxy_wizard.select_action", "Select action"),
+            options,
+            allow_back=False,
         )
 
-        if action == "Save and exit":
+        if action == "save_exit":
             return current_config
-        elif action == "Exit without saving":
+        elif action == "exit_no_save":
             return None
-        elif action == "Edit proxy settings":
+        elif action == "edit_settings":
             edit_proxy_settings(current_config)
-        elif action == "Add model":
+        elif action == "add_model":
             model = configure_model_for_proxy(
                 len(current_config.models),
                 existing_models=current_config.models,
@@ -607,13 +932,22 @@ def edit_proxy_config_interactive(current_config: ProxyConfig) -> Optional[Proxy
             )
             if model:
                 current_config.models.append(model)
-                console.print(f"[green]✓ Added model: {model.name}[/green]")
-        elif action == "Remove model":
+                console.print(
+                    tr(
+                        "proxy_wizard.model_added",
+                        "[green]✓ Added model: {name}[/green]",
+                        name=model.name,
+                    )
+                )
+        elif action == "remove_model":
             if current_config.models:
                 model_names = [m.name for m in current_config.models]
                 selected = unified_prompt(
                     "remove_model",
-                    "Select model to remove",
+                    tr(
+                        "proxy_wizard.select_model_to_remove",
+                        "Select model to remove",
+                    ),
                     model_names,
                     allow_back=True,
                 )
@@ -621,28 +955,48 @@ def edit_proxy_config_interactive(current_config: ProxyConfig) -> Optional[Proxy
                     current_config.models = [
                         m for m in current_config.models if m.name != selected
                     ]
-                    console.print(f"[green]✓ Removed model: {selected}[/green]")
-        elif action == "Enable/disable model":
+                    console.print(
+                        tr(
+                            "proxy_wizard.model_removed",
+                            "[green]✓ Removed model: {name}[/green]",
+                            name=selected,
+                        )
+                    )
+        elif action == "toggle_model":
             if current_config.models:
-                model_names = [
-                    f"{m.name} ({'enabled' if m.enabled else 'disabled'})"
-                    for m in current_config.models
-                ]
-                selected = unified_prompt(
+                toggle_choices = []
+                for m in current_config.models:
+                    status_label = _status_label_lowercase(m.enabled)
+                    toggle_choices.append((m.name, f"{m.name} ({status_label})"))
+                selected = prompt_choice(
                     "toggle_model",
-                    "Select model to toggle",
-                    model_names,
+                    tr(
+                        "proxy_wizard.select_model_to_toggle", "Select model to toggle"
+                    ),
+                    toggle_choices,
                     allow_back=True,
                 )
-                if selected != "BACK":
-                    model_name = selected.split(" (")[0]
+                if selected != "BACK" and selected:
+                    model_name = selected
                     for model in current_config.models:
                         if model.name == model_name:
                             model.enabled = not model.enabled
-                            status = "enabled" if model.enabled else "disabled"
-                            console.print(
-                                f"[green]✓ Model {model_name} {status}[/green]"
-                            )
+                            if model.enabled:
+                                console.print(
+                                    tr(
+                                        "proxy_wizard.model_enabled",
+                                        "[green]✓ Model {name} enabled[/green]",
+                                        name=model_name,
+                                    )
+                                )
+                            else:
+                                console.print(
+                                    tr(
+                                        "proxy_wizard.model_disabled",
+                                        "[green]✓ Model {name} disabled[/green]",
+                                        name=model_name,
+                                    )
+                                )
                             break
 
     return None  # If we exit the loop without saving
@@ -650,64 +1004,135 @@ def edit_proxy_config_interactive(current_config: ProxyConfig) -> Optional[Proxy
 
 def edit_proxy_settings(config: ProxyConfig):
     """Edit proxy server settings."""
-    console.print("\n[bold]Edit Proxy Settings[/bold]")
-    console.print(f"Current host: {config.host}")
-    console.print(f"Current port: {config.port}")
+    console.print(
+        tr(
+            "proxy_wizard.edit_proxy_settings_header",
+            "\n[bold]Edit Proxy Settings[/bold]",
+        )
+    )
+    console.print(
+        tr("proxy_wizard.current_host", "Current host: {host}", host=config.host)
+    )
+    console.print(
+        tr("proxy_wizard.current_port", "Current port: {port}", port=config.port)
+    )
 
-    new_host = input("New host (press Enter to keep current): ").strip()
+    new_host = (
+        input(
+            tr(
+                "proxy_wizard.new_host_prompt",
+                "New host (press Enter to keep current): ",
+            )
+        )
+        .strip()
+    )
     if new_host:
         config.host = new_host
 
-    new_port = input("New port (press Enter to keep current): ").strip()
+    new_port = (
+        input(
+            tr(
+                "proxy_wizard.new_port_prompt",
+                "New port (press Enter to keep current): ",
+            )
+        )
+        .strip()
+    )
     if new_port:
         try:
             config.port = int(new_port)
         except ValueError:
-            console.print("[red]Invalid port number[/red]")
+            console.print(
+                tr(
+                    "proxy_wizard.invalid_port_number",
+                    "[red]Invalid port number[/red]",
+                )
+            )
 
     # Toggle settings
-    cors_choice = unified_prompt(
+    cors_choice = prompt_choice(
         "cors_setting",
-        f"CORS (currently {'enabled' if config.enable_cors else 'disabled'})",
-        ["Enable", "Disable", "Keep current"],
+        tr(
+            "proxy_wizard.cors_current",
+            "CORS (currently {status})",
+            status=_status_label_lowercase(config.enable_cors),
+        ),
+        [
+            ("enable", tr("proxy_wizard.action_enable", "Enable")),
+            ("disable", tr("proxy_wizard.action_disable", "Disable")),
+            ("keep", tr("proxy_wizard.action_keep_current", "Keep current")),
+        ],
         allow_back=False,
     )
-    if cors_choice == "Enable":
+    if cors_choice == "enable":
         config.enable_cors = True
-    elif cors_choice == "Disable":
+    elif cors_choice == "disable":
         config.enable_cors = False
     # "Keep current" - no change needed
 
-    console.print("[green]✓ Settings updated[/green]")
+    console.print(
+        tr("proxy_wizard.settings_updated", "[green]✓ Settings updated[/green]")
+    )
 
 
 def display_proxy_config(config: ProxyConfig):
     """Display proxy configuration."""
-    console.print("\n[bold]Current Configuration[/bold]")
-    console.print(f"Host: {config.host}")
-    console.print(f"Port: {config.port}")
-    console.print(f"CORS: {'Enabled' if config.enable_cors else 'Disabled'}")
-    console.print(f"Metrics: {'Enabled' if config.enable_metrics else 'Disabled'}")
     console.print(
-        f"Request Logging: {'Enabled' if config.log_requests else 'Disabled'}"
+        tr(
+            "proxy_wizard.current_configuration_header",
+            "\n[bold]Current Configuration[/bold]",
+        )
+    )
+    console.print(tr("proxy_wizard.host_label", "Host: {host}", host=config.host))
+    console.print(tr("proxy_wizard.port_label", "Port: {port}", port=config.port))
+    console.print(
+        tr(
+            "proxy_wizard.cors_label",
+            "CORS: {status}",
+            status=_status_label(config.enable_cors),
+        )
+    )
+    console.print(
+        tr(
+            "proxy_wizard.metrics_label",
+            "Metrics: {status}",
+            status=_status_label(config.enable_metrics),
+        )
+    )
+    console.print(
+        tr(
+            "proxy_wizard.request_logging_label",
+            "Request Logging: {status}",
+            status=_status_label(config.log_requests),
+        )
     )
 
     if config.models:
-        console.print(f"\nModels ({len(config.models)}):")
+        console.print(
+            tr(
+                "proxy_wizard.models_count_header",
+                "\nModels ({count}):",
+                count=len(config.models),
+            )
+        )
         table = Table()
-        table.add_column("Name", style="cyan")
-        table.add_column("Model Path", style="green")
-        table.add_column("GPUs", style="magenta")
-        table.add_column("Port", style="yellow")
-        table.add_column("Profile", style="blue")
-        table.add_column("Priority", style="green", width=8)
-        table.add_column("Status", style="dim")
+        table.add_column(tr("proxy_wizard.col_name", "Name"), style="cyan")
+        table.add_column(tr("proxy_wizard.col_model_path", "Model Path"), style="green")
+        table.add_column(tr("proxy_wizard.col_gpus_list", "GPUs"), style="magenta")
+        table.add_column(tr("proxy_wizard.col_port", "Port"), style="yellow")
+        table.add_column(tr("proxy_wizard.col_profile", "Profile"), style="blue")
+        table.add_column(
+            tr("proxy_wizard.col_priority", "Priority"), style="green", width=8
+        )
+        table.add_column(tr("proxy_wizard.col_status", "Status"), style="dim")
 
         for model in config.models:
             gpu_str = (
-                ",".join(str(g) for g in model.gpu_ids) if model.gpu_ids else "Auto"
+                ",".join(str(g) for g in model.gpu_ids)
+                if model.gpu_ids
+                else tr("proxy_wizard.auto", "Auto")
             )
-            status = "Enabled" if model.enabled else "Disabled"
+            status = _status_label(model.enabled)
             priority_str = (
                 str(model.loading_priority) if model.loading_priority else "-"
             )
@@ -720,11 +1145,16 @@ def display_proxy_config(config: ProxyConfig):
                 ),
                 gpu_str,
                 str(model.port),
-                model.profile or "None",
+                model.profile or tr("proxy_wizard.none", "None"),
                 priority_str,
                 status,
             )
 
         console.print(table)
     else:
-        console.print("\n[yellow]No models configured[/yellow]")
+        console.print(
+            tr(
+                "proxy_wizard.no_models_configured",
+                "\n[yellow]No models configured[/yellow]",
+            )
+        )

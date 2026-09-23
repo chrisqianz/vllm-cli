@@ -11,6 +11,43 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+# Process-wide current manager, set automatically on construction so that
+# module-level helpers (tr) work without threading the manager through
+# every call site.
+_current_manager: Optional["I18nManager"] = None
+
+
+def set_current_manager(manager: Optional["I18nManager"]) -> None:
+    """Register the I18nManager used by the module-level tr() helper."""
+    global _current_manager
+    _current_manager = manager
+
+
+def get_current_manager() -> Optional["I18nManager"]:
+    """Return the I18nManager registered for tr(), if any."""
+    return _current_manager
+
+
+def tr(key: str, default: Optional[str] = None, **kwargs) -> str:
+    """Translate using the process-wide I18nManager.
+
+    Falls back to ``default`` (then to ``key``) when no manager is active or
+    the key has no translation, so untranslated call sites degrade to English
+    instead of showing raw keys.
+    """
+    manager = _current_manager
+    if manager is not None:
+        result = manager.t(key, **kwargs)
+        if result != key:
+            return result
+    text = default if default is not None else key
+    if kwargs:
+        try:
+            return text.format(**kwargs)
+        except (KeyError, IndexError, ValueError):
+            return text
+    return text
+
 
 class I18nManager:
     """
@@ -43,6 +80,9 @@ class I18nManager:
         
         # Load initial language
         self._load_initial_language()
+
+        # Register as the active manager for tr()
+        set_current_manager(self)
     
     def _load_initial_language(self) -> None:
         """Load the initial language from config or default to English."""

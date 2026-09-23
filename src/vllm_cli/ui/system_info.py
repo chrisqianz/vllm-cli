@@ -12,6 +12,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from ..i18n import tr
 from ..system import (
     format_size,
     get_dependency_info,
@@ -75,23 +76,32 @@ def show_system_info(i18n_manager=None) -> str:
         _show_performance_recommendations(recommendations)
 
     # Ask if user wants to see detailed vLLM native information
-    from .navigation import unified_prompt
+    from .navigation import prompt_choice
 
     additional_options = [
-        "View detailed vLLM native information",
-        "Continue without viewing",
+        (
+            "view",
+            tr(
+                "sysinfo_ui.view_native_info",
+                "View detailed vLLM native information",
+            ),
+        ),
+        (
+            "skip",
+            tr("sysinfo_ui.continue_without_viewing", "Continue without viewing"),
+        ),
     ]
 
-    choice = unified_prompt(
+    choice = prompt_choice(
         "vllm_native_info",
-        "Additional Information Available",
+        tr("sysinfo_ui.additional_information", "Additional Information Available"),
         additional_options,
         allow_back=False,
     )
 
-    if choice == "View detailed vLLM native information":
+    if choice == "view":
         show_vllm_native_info()
-        input("\nPress Enter to continue...")
+        input("\n" + tr("common.press_enter", "Press Enter to continue..."))
 
     return "continue"
 
@@ -102,16 +112,29 @@ def _show_gpu_information(gpu_caps):
 
     if gpu_info and gpu_caps:
         gpu_table = Table(
-            title="[bold green]GPU Information[/bold green]",
+            title=tr(
+                "sysinfo_ui.gpu_information_title",
+                "[bold green]GPU Information[/bold green]",
+            ),
             show_header=True,
             header_style="bold blue",
         )
         gpu_table.add_column("GPU", style="cyan")
-        gpu_table.add_column("Name", style="magenta", width=45)
-        gpu_table.add_column("Memory", style="yellow")
-        gpu_table.add_column("Compute Cap", style="green")
-        gpu_table.add_column("Architecture", style="blue")
-        gpu_table.add_column("Features", style="white")
+        gpu_table.add_column(
+            tr("sysinfo_ui.col_name", "Name"), style="magenta", width=45
+        )
+        gpu_table.add_column(
+            tr("sysinfo_ui.col_memory", "Memory"), style="yellow"
+        )
+        gpu_table.add_column(
+            tr("sysinfo_ui.col_compute_cap", "Compute Cap"), style="green"
+        )
+        gpu_table.add_column(
+            tr("sysinfo_ui.col_architecture", "Architecture"), style="blue"
+        )
+        gpu_table.add_column(
+            tr("sysinfo_ui.col_features", "Features"), style="white"
+        )
 
         for i, (gpu, caps) in enumerate(zip(gpu_info, gpu_caps)):
             # Build features string
@@ -122,7 +145,11 @@ def _show_gpu_information(gpu_caps):
                 features.append("Tensor")
             if caps.get("bf16_support", False):
                 features.append("BF16")
-            feature_str = " ".join(features) if features else "Basic"
+            feature_str = (
+                " ".join(features)
+                if features
+                else tr("sysinfo_ui.feature_basic", "Basic")
+            )
 
             gpu_table.add_row(
                 str(i),
@@ -135,25 +162,33 @@ def _show_gpu_information(gpu_caps):
 
         console.print(gpu_table)
     else:
-        console.print("[yellow]No NVIDIA GPUs detected[/yellow]")
+        console.print(
+            tr(
+                "sysinfo_ui.no_nvidia_gpus",
+                "[yellow]No NVIDIA GPUs detected[/yellow]",
+            )
+        )
 
 
 def _show_memory_information():
     """Display memory information."""
     memory_info = get_memory_info()
     mem_table = Table(
-        title="[bold green]Memory Information[/bold green]",
+        title=tr(
+            "sysinfo_ui.memory_information_title",
+            "[bold green]Memory Information[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    mem_table.add_column("Type", style="cyan")
-    mem_table.add_column("Total", style="magenta")
-    mem_table.add_column("Used", style="yellow")
-    mem_table.add_column("Available", style="green")
-    mem_table.add_column("Usage", style="red")
+    mem_table.add_column(tr("sysinfo_ui.col_type", "Type"), style="cyan")
+    mem_table.add_column(tr("sysinfo_ui.col_total", "Total"), style="magenta")
+    mem_table.add_column(tr("sysinfo_ui.col_used", "Used"), style="yellow")
+    mem_table.add_column(tr("sysinfo_ui.col_available", "Available"), style="green")
+    mem_table.add_column(tr("sysinfo_ui.col_usage", "Usage"), style="red")
 
     mem_table.add_row(
-        "System RAM",
+        tr("sysinfo_ui.system_ram", "System RAM"),
         format_size(memory_info["total"]),
         format_size(memory_info["used"]),
         format_size(memory_info["available"]),
@@ -166,14 +201,25 @@ def _show_memory_information():
 def _show_attention_backends(attention_info):
     """Display attention backend information."""
     attn_table = Table(
-        title="[bold green]Attention Backends[/bold green]",
+        title=tr(
+            "sysinfo_ui.attention_backends_title",
+            "[bold green]Attention Backends[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    attn_table.add_column("Backend", style="cyan", min_width=28)
-    attn_table.add_column("Status", style="magenta", min_width=18)
-    attn_table.add_column("Version", style="yellow", min_width=14)
-    attn_table.add_column("Notes", style="white", overflow="fold")
+    attn_table.add_column(
+        tr("sysinfo_ui.col_backend", "Backend"), style="cyan", min_width=28
+    )
+    attn_table.add_column(
+        tr("sysinfo_ui.col_status", "Status"), style="magenta", min_width=18
+    )
+    attn_table.add_column(
+        tr("sysinfo_ui.col_version", "Version"), style="yellow", min_width=14
+    )
+    attn_table.add_column(
+        tr("sysinfo_ui.col_notes", "Notes"), style="white", overflow="fold"
+    )
 
     # Current/effective backend
     current_backend = attention_info.get("current_backend", "auto")
@@ -181,17 +227,20 @@ def _show_attention_backends(attention_info):
 
     if current_backend != "auto":
         attn_table.add_row(
-            "Current Setting",
+            tr("sysinfo_ui.current_setting", "Current Setting"),
             f"[green]✓[/green] {current_backend.upper()}",
             "",
-            "Explicitly set via VLLM_ATTENTION_BACKEND",
+            tr(
+                "sysinfo_ui.explicitly_set_via_env",
+                "Explicitly set via VLLM_ATTENTION_BACKEND",
+            ),
         )
     else:
         attn_table.add_row(
-            "Effective Backend",
+            tr("sysinfo_ui.effective_backend", "Effective Backend"),
             f"[blue]→[/blue] {effective_backend}",
             "",
-            "Auto-detected backend",
+            tr("sysinfo_ui.auto_detected_backend", "Auto-detected backend"),
         )
 
     # Add separator
@@ -202,27 +251,36 @@ def _show_attention_backends(attention_info):
     if vllm_fa and vllm_fa.get("available"):
         # Main vLLM Flash Attention row
         attn_table.add_row(
-            "vLLM Flash Attention (Native)",
-            "[green]✓ Built-in[/green]",
+            tr("sysinfo_ui.vllm_fa_native", "vLLM Flash Attention (Native)"),
+            tr("sysinfo_ui.status_builtin", "[green]✓ Built-in[/green]"),
             vllm_fa.get("version", "unknown"),
-            f"Compute Cap: {vllm_fa.get('compute_capability', 'N/A')}",
+            tr(
+                "sysinfo_ui.compute_cap_label",
+                "Compute Cap: {cap}",
+                cap=vllm_fa.get("compute_capability", "N/A"),
+            ),
         )
 
         # FA2 status
         fa2_status = (
-            "[green]✓ Available[/green]"
+            tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
             if vllm_fa.get("fa2_available")
-            else "[red]✗ Not compiled[/red]"
+            else tr("sysinfo_ui.status_not_compiled", "[red]✗ Not compiled[/red]")
         )
         fa2_gpu = (
-            "[green]✓ Supported[/green]"
+            tr("sysinfo_ui.status_supported", "[green]✓ Supported[/green]")
             if vllm_fa.get("fa2_gpu_supported")
-            else "[yellow]✗ Not supported[/yellow]"
+            else tr(
+                "sysinfo_ui.status_not_supported", "[yellow]✗ Not supported[/yellow]"
+            )
         )
         fa2_notes = (
-            "Recommended"
+            tr("sysinfo_ui.recommended", "Recommended")
             if vllm_fa.get("fa2_gpu_supported")
-            else vllm_fa.get("fa2_unsupported_reason", "GPU incompatible")
+            else vllm_fa.get(
+                "fa2_unsupported_reason",
+                tr("sysinfo_ui.gpu_incompatible", "GPU incompatible"),
+            )
         )
 
         attn_table.add_row(
@@ -234,23 +292,33 @@ def _show_attention_backends(attention_info):
 
         # FA3 status
         fa3_status = (
-            "[green]✓ Available[/green]"
+            tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
             if vllm_fa.get("fa3_available")
-            else "[red]✗ Not compiled[/red]"
+            else tr("sysinfo_ui.status_not_compiled", "[red]✗ Not compiled[/red]")
         )
         fa3_gpu = (
-            "[green]✓ Supported[/green]"
+            tr("sysinfo_ui.status_supported", "[green]✓ Supported[/green]")
             if vllm_fa.get("fa3_gpu_supported")
-            else "[yellow]✗ Not supported[/yellow]"
+            else tr(
+                "sysinfo_ui.status_not_supported", "[yellow]✗ Not supported[/yellow]"
+            )
         )
         # Shorten the FA3 unsupported reason for Blackwell
         if not vllm_fa.get("fa3_gpu_supported"):
             if "Blackwell" in vllm_fa.get("fa3_unsupported_reason", ""):
-                fa3_notes = "Not for Blackwell GPUs (SM 12.0)"
+                fa3_notes = tr(
+                    "sysinfo_ui.fa3_not_for_blackwell",
+                    "Not for Blackwell GPUs (SM 12.0)",
+                )
             else:
-                fa3_notes = "Not supported on this GPU"
+                fa3_notes = tr(
+                    "sysinfo_ui.fa3_not_supported_gpu",
+                    "Not supported on this GPU",
+                )
         else:
-            fa3_notes = "Best for Hopper (SM 9.0)"
+            fa3_notes = tr(
+                "sysinfo_ui.fa3_best_hopper", "Best for Hopper (SM 9.0)"
+            )
 
         attn_table.add_row(
             "  └─ Flash Attention 3",
@@ -268,18 +336,30 @@ def _show_attention_backends(attention_info):
         info = attention_info.get(backend, {})
         name = info.get("name", backend)
         available = info.get("available", False)
-        version = info.get("version") or "Not installed"
+        version = info.get("version") or tr(
+            "sysinfo_ui.not_installed", "Not installed"
+        )
 
         if available:
-            status = "[green]✓ Available[/green]"
+            status = tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
             if backend == "flash_attn":
-                notes = "External Flash Attention package"
+                notes = tr(
+                    "sysinfo_ui.ext_fa_package_note",
+                    "External Flash Attention package",
+                )
             elif backend == "flashinfer":
-                notes = "Optimized for Blackwell/long context"
+                notes = tr(
+                    "sysinfo_ui.ext_flashinfer_note",
+                    "Optimized for Blackwell/long context",
+                )
             else:
-                notes = "Memory efficient alternative"
+                notes = tr(
+                    "sysinfo_ui.ext_xformers_note", "Memory efficient alternative"
+                )
         else:
-            status = "[red]✗ Not installed[/red]"
+            status = tr(
+                "sysinfo_ui.status_not_installed", "[red]✗ Not installed[/red]"
+            )
             if backend == "flash_attn":
                 notes = "pip install flash-attn"
             elif backend == "flashinfer":
@@ -295,14 +375,17 @@ def _show_attention_backends(attention_info):
 def _show_quantization_support(quant_info):
     """Display quantization support information."""
     quant_table = Table(
-        title="[bold green]Quantization Support[/bold green]",
+        title=tr(
+            "sysinfo_ui.quantization_title",
+            "[bold green]Quantization Support[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    quant_table.add_column("Method", style="cyan")
-    quant_table.add_column("Status", style="magenta")
-    quant_table.add_column("Version", style="yellow")
-    quant_table.add_column("Use Case", style="white")
+    quant_table.add_column(tr("sysinfo_ui.col_method", "Method"), style="cyan")
+    quant_table.add_column(tr("sysinfo_ui.col_status", "Status"), style="magenta")
+    quant_table.add_column(tr("sysinfo_ui.col_version", "Version"), style="yellow")
+    quant_table.add_column(tr("sysinfo_ui.col_use_case", "Use Case"), style="white")
 
     # Built-in vLLM support
     builtin = quant_info.get("builtin_support", [])
@@ -310,8 +393,8 @@ def _show_quantization_support(quant_info):
         if method in builtin:
             quant_table.add_row(
                 method.upper(),
-                "[green]✓ Built-in[/green]",
-                "vLLM native",
+                tr("sysinfo_ui.status_builtin", "[green]✓ Built-in[/green]"),
+                tr("sysinfo_ui.vllm_native", "vLLM native"),
                 _get_quantization_use_case(method),
             )
 
@@ -321,14 +404,21 @@ def _show_quantization_support(quant_info):
         info = quant_info.get(lib, {})
         name = info.get("name", lib)
         available = info.get("available", False)
-        version = info.get("version") or "Not installed"
+        version = info.get("version") or tr(
+            "sysinfo_ui.not_installed", "Not installed"
+        )
 
         if available:
-            status = "[green]✓ Available[/green]"
+            status = tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
             use_case = _get_quantization_use_case(lib)
         else:
-            status = "[red]✗ Not installed[/red]"
-            use_case = "Install for quantization support"
+            status = tr(
+                "sysinfo_ui.status_not_installed", "[red]✗ Not installed[/red]"
+            )
+            use_case = tr(
+                "sysinfo_ui.install_for_quantization",
+                "Install for quantization support",
+            )
 
         quant_table.add_row(name, status, version, use_case)
 
@@ -338,13 +428,20 @@ def _show_quantization_support(quant_info):
 def _show_core_dependencies(core_info):
     """Display core dependencies information."""
     deps_table = Table(
-        title="[bold green]Core Dependencies[/bold green]",
+        title=tr(
+            "sysinfo_ui.core_dependencies_title",
+            "[bold green]Core Dependencies[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    deps_table.add_column("Component", style="cyan", width=24)
-    deps_table.add_column("Version", style="magenta", width=20)
-    deps_table.add_column("Status", style="yellow")
+    deps_table.add_column(
+        tr("sysinfo_ui.col_component", "Component"), style="cyan", width=24
+    )
+    deps_table.add_column(
+        tr("sysinfo_ui.col_version", "Version"), style="magenta", width=20
+    )
+    deps_table.add_column(tr("sysinfo_ui.col_status", "Status"), style="yellow")
 
     # Critical dependencies
     critical_deps = ["vllm", "torch", "transformers", "triton"]
@@ -352,12 +449,14 @@ def _show_core_dependencies(core_info):
         info = core_info.get(dep, {})
         name = info.get("name", dep)
         available = info.get("available", False)
-        version = info.get("version") or "Not installed"
+        version = info.get("version") or tr(
+            "sysinfo_ui.not_installed", "Not installed"
+        )
 
         if available:
-            status = "[green]✓ OK[/green]"
+            status = tr("sysinfo_ui.status_ok", "[green]✓ OK[/green]")
         else:
-            status = "[red]✗ Missing[/red]"
+            status = tr("sysinfo_ui.status_missing", "[red]✗ Missing[/red]")
 
         deps_table.add_row(name, version, status)
 
@@ -369,22 +468,28 @@ def _show_core_dependencies(core_info):
             name = info.get("name", dep)
             version = info.get("version", "unknown")
             deps_table.add_row(
-                f"{name} (optional)", version, "[blue]✓ Available[/blue]"
+                tr(
+                    "sysinfo_ui.optional_suffix",
+                    "{name} (optional)",
+                    name=name,
+                ),
+                version,
+                tr("sysinfo_ui.status_available_blue", "[blue]✓ Available[/blue]"),
             )
 
     # CUDA information if available
     cuda_info = core_info.get("cuda_info", {})
     if cuda_info.get("available", False):
         deps_table.add_row(
-            "CUDA Runtime",
+            tr("sysinfo_ui.cuda_runtime", "CUDA Runtime"),
             cuda_info.get("version", "unknown"),
-            "[green]✓ Available[/green]",
+            tr("sysinfo_ui.status_available", "[green]✓ Available[/green]"),
         )
         if cuda_info.get("cudnn_available", False):
             deps_table.add_row(
                 "cuDNN",
                 str(cuda_info.get("cudnn_version", "unknown")),
-                "[green]✓ Available[/green]",
+                tr("sysinfo_ui.status_available", "[green]✓ Available[/green]"),
             )
 
     console.print(deps_table)
@@ -392,7 +497,9 @@ def _show_core_dependencies(core_info):
 
 def _show_performance_recommendations(recommendations):
     """Display performance optimization recommendations."""
-    console.print("\n[bold yellow]Performance Recommendations[/bold yellow]")
+    console.print(
+        f"\n[bold yellow]{tr('sysinfo_ui.performance_recommendations', 'Performance Recommendations')}[/bold yellow]"
+    )
 
     high_priority = [r for r in recommendations if r["priority"] == "high"]
     medium_priority = [r for r in recommendations if r["priority"] == "medium"]
@@ -400,7 +507,9 @@ def _show_performance_recommendations(recommendations):
     if high_priority:
         high_panel = Panel(
             _format_recommendations(high_priority),
-            title="[bold red]High Priority[/bold red]",
+            title=tr(
+                "sysinfo_ui.high_priority", "[bold red]High Priority[/bold red]"
+            ),
             border_style="red",
         )
         console.print(high_panel)
@@ -408,7 +517,10 @@ def _show_performance_recommendations(recommendations):
     if medium_priority:
         medium_panel = Panel(
             _format_recommendations(medium_priority),
-            title="[bold yellow]Medium Priority[/bold yellow]",
+            title=tr(
+                "sysinfo_ui.medium_priority",
+                "[bold yellow]Medium Priority[/bold yellow]",
+            ),
             border_style="yellow",
         )
         console.print(medium_panel)
@@ -432,7 +544,7 @@ def _format_recommendations(recommendations):
         text.append("\n  ")
 
         # Add action
-        text.append("Action: ", style="cyan")
+        text.append(tr("sysinfo_ui.action_label", "Action: "), style="cyan")
         text.append(rec["action"])
 
     return text
@@ -441,23 +553,37 @@ def _format_recommendations(recommendations):
 def _get_quantization_use_case(method):
     """Get use case description for quantization method."""
     use_cases = {
-        "fp8": "GPU accelerated, 2x speedup",
-        "awq": "Fast inference, good quality",
-        "gptq": "Memory efficient, slower",
-        "auto_gptq": "GPTQ implementation",
-        "bitsandbytes": "Easy 8-bit/4-bit quantization",
-        "llmcompressor": "Advanced compression",
-        "modelopt_fp4": "NVIDIA ModelOpt NVFP4 quantization",
-        "modelopt_mxfp8": "NVIDIA ModelOpt MXFP8 mixed precision",
+        "fp8": tr("sysinfo_ui.use_case_fp8", "GPU accelerated, 2x speedup"),
+        "awq": tr("sysinfo_ui.use_case_awq", "Fast inference, good quality"),
+        "gptq": tr("sysinfo_ui.use_case_gptq", "Memory efficient, slower"),
+        "auto_gptq": tr("sysinfo_ui.use_case_auto_gptq", "GPTQ implementation"),
+        "bitsandbytes": tr(
+            "sysinfo_ui.use_case_bitsandbytes", "Easy 8-bit/4-bit quantization"
+        ),
+        "llmcompressor": tr(
+            "sysinfo_ui.use_case_llmcompressor", "Advanced compression"
+        ),
+        "modelopt_fp4": tr(
+            "sysinfo_ui.use_case_modelopt_fp4",
+            "NVIDIA ModelOpt NVFP4 quantization",
+        ),
+        "modelopt_mxfp8": tr(
+            "sysinfo_ui.use_case_modelopt_mxfp8",
+            "NVIDIA ModelOpt MXFP8 mixed precision",
+        ),
     }
-    return use_cases.get(method, "General quantization")
+    return use_cases.get(
+        method, tr("sysinfo_ui.use_case_general", "General quantization")
+    )
 
 
 def show_vllm_native_info():
     """
     Display detailed vLLM native information.
     """
-    console.print("\n[bold cyan]vLLM Native Information[/bold cyan]\n")
+    console.print(
+        f"\n[bold cyan]{tr('sysinfo_ui.vllm_native_title', 'vLLM Native Information')}[/bold cyan]\n"
+    )
 
     # Get all vLLM information
     platform_info = get_vllm_platform_info()
@@ -505,19 +631,30 @@ def show_vllm_native_info():
 def _show_vllm_flash_attention_status(flash_attn_info):
     """Display vLLM Flash Attention status."""
     fa_table = Table(
-        title="[bold green]vLLM Flash Attention Status[/bold green]",
+        title=tr(
+            "sysinfo_ui.fa_status_title",
+            "[bold green]vLLM Flash Attention Status[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    fa_table.add_column("Component", style="cyan", min_width=30)
-    fa_table.add_column("Status", style="magenta", min_width=20)
-    fa_table.add_column("Details", style="yellow")
+    fa_table.add_column(
+        tr("sysinfo_ui.col_component", "Component"), style="cyan", min_width=30
+    )
+    fa_table.add_column(
+        tr("sysinfo_ui.col_status", "Status"), style="magenta", min_width=20
+    )
+    fa_table.add_column(tr("sysinfo_ui.col_details", "Details"), style="yellow")
 
     # Version info
     fa_table.add_row(
         "vLLM Flash Attention",
         f"v{flash_attn_info.get('version', 'Unknown')}",
-        f"Compute Cap: {flash_attn_info.get('compute_capability', 'N/A')}",
+        tr(
+            "sysinfo_ui.compute_cap_label",
+            "Compute Cap: {cap}",
+            cap=flash_attn_info.get("compute_capability", "N/A"),
+        ),
     )
 
     # FA2 Status
@@ -526,16 +663,27 @@ def _show_vllm_flash_attention_status(flash_attn_info):
 
     if fa2_available:
         if fa2_gpu_supported:
-            fa2_status = "[green]✓ Available & Supported[/green]"
-            fa2_details = "Recommended for this GPU"
+            fa2_status = tr(
+                "sysinfo_ui.status_available_supported",
+                "[green]✓ Available & Supported[/green]",
+            )
+            fa2_details = tr(
+                "sysinfo_ui.recommended_for_gpu", "Recommended for this GPU"
+            )
         else:
-            fa2_status = "[yellow]✓ Available, ✗ Not GPU supported[/yellow]"
+            fa2_status = tr(
+                "sysinfo_ui.status_available_not_gpu",
+                "[yellow]✓ Available, ✗ Not GPU supported[/yellow]",
+            )
             fa2_details = flash_attn_info.get(
-                "fa2_unsupported_reason", "GPU incompatible"
+                "fa2_unsupported_reason",
+                tr("sysinfo_ui.gpu_incompatible", "GPU incompatible"),
             )
     else:
-        fa2_status = "[red]✗ Not compiled[/red]"
-        fa2_details = "FA2 module not available"
+        fa2_status = tr("sysinfo_ui.status_not_compiled", "[red]✗ Not compiled[/red]")
+        fa2_details = tr(
+            "sysinfo_ui.fa2_module_unavailable", "FA2 module not available"
+        )
 
     fa_table.add_row("Flash Attention 2", fa2_status, fa2_details)
 
@@ -545,18 +693,33 @@ def _show_vllm_flash_attention_status(flash_attn_info):
 
     if fa3_available:
         if fa3_gpu_supported:
-            fa3_status = "[green]✓ Available & Supported[/green]"
-            fa3_details = "Best for Hopper GPUs"
+            fa3_status = tr(
+                "sysinfo_ui.status_available_supported",
+                "[green]✓ Available & Supported[/green]",
+            )
+            fa3_details = tr(
+                "sysinfo_ui.fa3_best_hopper_gpus", "Best for Hopper GPUs"
+            )
         else:
-            fa3_status = "[yellow]✓ Available, ✗ Not GPU supported[/yellow]"
+            fa3_status = tr(
+                "sysinfo_ui.status_available_not_gpu",
+                "[yellow]✓ Available, ✗ Not GPU supported[/yellow]",
+            )
             fa3_reason = flash_attn_info.get("fa3_unsupported_reason", "")
             if "Blackwell" in fa3_reason:
-                fa3_details = "Not for Blackwell GPUs (SM 12.0)"
+                fa3_details = tr(
+                    "sysinfo_ui.fa3_not_for_blackwell",
+                    "Not for Blackwell GPUs (SM 12.0)",
+                )
             else:
-                fa3_details = fa3_reason or "GPU incompatible"
+                fa3_details = fa3_reason or tr(
+                    "sysinfo_ui.gpu_incompatible", "GPU incompatible"
+                )
     else:
-        fa3_status = "[red]✗ Not compiled[/red]"
-        fa3_details = "FA3 module not available"
+        fa3_status = tr("sysinfo_ui.status_not_compiled", "[red]✗ Not compiled[/red]")
+        fa3_details = tr(
+            "sysinfo_ui.fa3_module_unavailable", "FA3 module not available"
+        )
 
     fa_table.add_row("Flash Attention 3", fa3_status, fa3_details)
 
@@ -564,15 +727,24 @@ def _show_vllm_flash_attention_status(flash_attn_info):
     recommended = flash_attn_info.get("recommended_version", "Unknown")
     if recommended != "None (use alternative backend)":
         fa_table.add_row(
-            "Recommended Version",
+            tr("sysinfo_ui.recommended_version", "Recommended Version"),
             f"[blue]→ {recommended}[/blue]",
-            "Auto-selected for best performance",
+            tr(
+                "sysinfo_ui.auto_selected_best_performance",
+                "Auto-selected for best performance",
+            ),
         )
     else:
         fa_table.add_row(
-            "Recommended Version",
-            "[yellow]⚠ Use alternative[/yellow]",
-            "Consider FlashInfer or xFormers",
+            tr("sysinfo_ui.recommended_version", "Recommended Version"),
+            tr(
+                "sysinfo_ui.status_use_alternative",
+                "[yellow]⚠ Use alternative[/yellow]",
+            ),
+            tr(
+                "sysinfo_ui.consider_alternative_backends",
+                "Consider FlashInfer or xFormers",
+            ),
         )
 
     console.print(fa_table)
@@ -581,31 +753,44 @@ def _show_vllm_flash_attention_status(flash_attn_info):
 def _show_attention_backends_usability(backend_info):
     """Display all attention backends with actual usability status."""
     backend_table = Table(
-        title="[bold green]Attention Backends Usability[/bold green]",
+        title=tr(
+            "sysinfo_ui.backends_usability_title",
+            "[bold green]Attention Backends Usability[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    backend_table.add_column("Backend", style="cyan", min_width=30)
-    backend_table.add_column("Status", style="magenta", min_width=25)
-    backend_table.add_column("Version", style="yellow", min_width=15)
-    backend_table.add_column("Notes", style="white")
+    backend_table.add_column(
+        tr("sysinfo_ui.col_backend", "Backend"), style="cyan", min_width=30
+    )
+    backend_table.add_column(
+        tr("sysinfo_ui.col_status", "Status"), style="magenta", min_width=25
+    )
+    backend_table.add_column(
+        tr("sysinfo_ui.col_version", "Version"), style="yellow", min_width=15
+    )
+    backend_table.add_column(tr("sysinfo_ui.col_notes", "Notes"), style="white")
 
     # Show current settings first
     env_backend = backend_info.get("env_backend", "auto")
     auto_selected = backend_info.get("auto_selected", "Unknown")
 
     backend_table.add_row(
-        "Environment Setting",
+        tr("sysinfo_ui.environment_setting", "Environment Setting"),
         f"[blue]{env_backend}[/blue]",
         "",
         "VLLM_ATTENTION_BACKEND",
     )
 
     backend_table.add_row(
-        "Auto-Selected Backend",
+        tr("sysinfo_ui.auto_selected_backend", "Auto-Selected Backend"),
         f"[green]→ {auto_selected}[/green]",
         "",
-        f"For compute cap {backend_info.get('compute_capability', 'unknown')}",
+        tr(
+            "sysinfo_ui.for_compute_cap",
+            "For compute cap {cap}",
+            cap=backend_info.get("compute_capability", "unknown"),
+        ),
     )
 
     backend_table.add_row("", "", "", "")  # Separator
@@ -626,23 +811,39 @@ def _show_attention_backends_usability(backend_info):
             fa2_usable = backend_data.get("fa2_usable", False)
             fa3_usable = backend_data.get("fa3_usable", False)
             if fa2_usable and fa3_usable:
-                status = "[green]✓ FA2+FA3 Usable[/green]"
+                status = tr(
+                    "sysinfo_ui.status_fa2_fa3_usable", "[green]✓ FA2+FA3 Usable[/green]"
+                )
             elif fa2_usable:
-                status = "[green]✓ FA2 Usable[/green]"
+                status = tr(
+                    "sysinfo_ui.status_fa2_usable", "[green]✓ FA2 Usable[/green]"
+                )
             elif fa3_usable:
-                status = "[green]✓ FA3 Usable[/green]"
+                status = tr(
+                    "sysinfo_ui.status_fa3_usable", "[green]✓ FA3 Usable[/green]"
+                )
             elif available:
-                status = "[yellow]⚠ Available, not usable[/yellow]"
+                status = tr(
+                    "sysinfo_ui.status_available_not_usable",
+                    "[yellow]⚠ Available, not usable[/yellow]",
+                )
             else:
-                status = "[red]✗ Not available[/red]"
+                status = tr(
+                    "sysinfo_ui.status_not_available", "[red]✗ Not available[/red]"
+                )
         else:
             # Regular backends
             if usable:
-                status = "[green]✓ Usable[/green]"
+                status = tr("sysinfo_ui.status_usable", "[green]✓ Usable[/green]")
             elif available:
-                status = "[yellow]⚠ Available, not usable[/yellow]"
+                status = tr(
+                    "sysinfo_ui.status_available_not_usable",
+                    "[yellow]⚠ Available, not usable[/yellow]",
+                )
             else:
-                status = "[red]✗ Not available[/red]"
+                status = tr(
+                    "sysinfo_ui.status_not_available", "[red]✗ Not available[/red]"
+                )
 
         # Format version
         if version and version != "error":
@@ -671,110 +872,141 @@ def _show_gpu_recommendations(platform_info, backend_info):
     gpu_name = device.get("name", "Unknown")
 
     rec_table = Table(
-        title="[bold green]GPU-Specific Recommendations[/bold green]",
+        title=tr(
+            "sysinfo_ui.gpu_recommendations_title",
+            "[bold green]GPU-Specific Recommendations[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    rec_table.add_column("Setting", style="cyan", min_width=40)
-    rec_table.add_column("Recommended Value", style="magenta", min_width=30)
-    rec_table.add_column("Purpose", style="yellow")
+    rec_table.add_column(
+        tr("sysinfo_ui.col_setting", "Setting"), style="cyan", min_width=40
+    )
+    rec_table.add_column(
+        tr("sysinfo_ui.col_recommended_value", "Recommended Value"),
+        style="magenta",
+        min_width=30,
+    )
+    rec_table.add_column(tr("sysinfo_ui.col_purpose", "Purpose"), style="yellow")
 
     # Determine GPU architecture and give recommendations
     if cap_major == 12:  # Blackwell
         rec_table.add_row(
-            "GPU Architecture",
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
             f"[bold]Blackwell (SM {compute_cap})[/bold]",
-            "Latest generation GPU",
+            tr("sysinfo_ui.rec_latest_gen", "Latest generation GPU"),
         )
         rec_table.add_row("", "", "")  # Separator
         rec_table.add_row(
             "VLLM_USE_TRTLLM_ATTENTION",
             "[green]1[/green]",
-            "Enable TensorRT-LLM for best performance",
+            tr(
+                "sysinfo_ui.rec_enable_tensorrt",
+                "Enable TensorRT-LLM for best performance",
+            ),
         )
         rec_table.add_row(
             "VLLM_USE_FLASHINFER_MOE_MXFP4_BF16",
             "[green]1[/green]",
-            "BF16 activation for MoE (reference precision)",
+            tr(
+                "sysinfo_ui.rec_bf16_moe",
+                "BF16 activation for MoE (reference precision)",
+            ),
         )
         rec_table.add_row(
             "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8",
-            "[yellow]1 (optional)[/yellow]",
-            "MXFP8 activation (faster, accuracy trade-off)",
+            tr("sysinfo_ui.rec_one_optional", "[yellow]1 (optional)[/yellow]"),
+            tr(
+                "sysinfo_ui.rec_mxfp8_moe",
+                "MXFP8 activation (faster, accuracy trade-off)",
+            ),
         )
         rec_table.add_row(
             "VLLM_ATTENTION_BACKEND",
-            "[blue]FLASHINFER or auto[/blue]",
-            "FlashInfer optimized for Blackwell",
+            tr("sysinfo_ui.rec_flashinfer_or_auto", "[blue]FLASHINFER or auto[/blue]"),
+            tr(
+                "sysinfo_ui.rec_flashinfer_blackwell",
+                "FlashInfer optimized for Blackwell",
+            ),
         )
     elif cap_major == 9:  # Hopper
         rec_table.add_row(
-            "GPU Architecture",
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
             f"[bold]Hopper (SM {compute_cap})[/bold]",
-            "H100 series GPU",
+            tr("sysinfo_ui.rec_h100", "H100 series GPU"),
         )
         rec_table.add_row("", "", "")  # Separator
         rec_table.add_row(
             "VLLM_ATTENTION_BACKEND",
             "[green]auto[/green]",
-            "Will use Flash Attention 3",
+            tr("sysinfo_ui.rec_uses_fa3", "Will use Flash Attention 3"),
         )
         rec_table.add_row(
             "VLLM_USE_FLASHINFER_MOE_FP8",
             "[green]1[/green]",
-            "FP8 support for MoE models",
+            tr("sysinfo_ui.rec_fp8_moe", "FP8 support for MoE models"),
         )
     elif cap_major == 8 and cap_minor in [0, 6]:  # Ampere
         rec_table.add_row(
-            "GPU Architecture",
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
             f"[bold]Ampere (SM {compute_cap})[/bold]",
-            "A100/A40 series GPU",
+            tr("sysinfo_ui.rec_a100", "A100/A40 series GPU"),
         )
         rec_table.add_row("", "", "")  # Separator
         rec_table.add_row(
             "VLLM_ATTENTION_BACKEND",
             "[green]TRITON_ATTN_VLLM_V1[/green]",
-            "Optimized for Ampere architecture",
+            tr("sysinfo_ui.rec_ampere", "Optimized for Ampere architecture"),
         )
         rec_table.add_row(
             "VLLM_USE_TRITON_FLASH_ATTN",
             "[green]1[/green]",
-            "Enable Triton flash attention",
+            tr("sysinfo_ui.rec_triton_fa", "Enable Triton flash attention"),
         )
     elif cap_major == 8 and cap_minor == 9:  # Ada Lovelace
         rec_table.add_row(
-            "GPU Architecture",
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
             f"[bold]Ada Lovelace (SM {compute_cap})[/bold]",
-            "RTX 4090/L40 series GPU",
+            tr("sysinfo_ui.rec_4090_l40", "RTX 4090/L40 series GPU"),
         )
         rec_table.add_row("", "", "")  # Separator
         rec_table.add_row(
             "VLLM_ATTENTION_BACKEND",
             "[green]auto[/green]",
-            "Will use Flash Attention 2",
+            tr("sysinfo_ui.rec_uses_fa2", "Will use Flash Attention 2"),
         )
         rec_table.add_row(
             "VLLM_USE_CUDNN_PREFILL",
-            "[yellow]1 (optional)[/yellow]",
-            "Can improve prefill performance",
+            tr("sysinfo_ui.rec_one_optional", "[yellow]1 (optional)[/yellow]"),
+            tr("sysinfo_ui.rec_prefill", "Can improve prefill performance"),
         )
     else:
-        rec_table.add_row("GPU Architecture", f"SM {compute_cap}", gpu_name)
+        rec_table.add_row(
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
+            f"SM {compute_cap}",
+            gpu_name,
+        )
         rec_table.add_row("", "", "")  # Separator
         rec_table.add_row(
             "VLLM_ATTENTION_BACKEND",
             "[blue]auto[/blue]",
-            "Let vLLM choose best backend",
+            tr("sysinfo_ui.rec_auto_backend", "Let vLLM choose best backend"),
         )
 
     # Common recommendations for all GPUs
     rec_table.add_row("", "", "")  # Separator
-    rec_table.add_row("[bold]Common Settings[/bold]", "", "")
-    rec_table.add_row("VLLM_USE_V1", "[green]1[/green]", "Use V1 engine (recommended)")
+    rec_table.add_row(
+        tr("sysinfo_ui.rec_common_settings", "[bold]Common Settings[/bold]"), "", ""
+    )
+    rec_table.add_row(
+        "VLLM_USE_V1",
+        "[green]1[/green]",
+        tr("sysinfo_ui.rec_v1_engine", "Use V1 engine (recommended)"),
+    )
     rec_table.add_row(
         "VLLM_ALLOW_LONG_MAX_MODEL_LEN",
-        "[yellow]1 (if needed)[/yellow]",
-        "For very long context models",
+        tr("sysinfo_ui.rec_one_if_needed", "[yellow]1 (if needed)[/yellow]"),
+        tr("sysinfo_ui.rec_long_context", "For very long context models"),
     )
 
     console.print(rec_table)
@@ -783,23 +1015,38 @@ def _show_gpu_recommendations(platform_info, backend_info):
 def _show_vllm_platform(platform_info):
     """Display vLLM platform information."""
     platform_table = Table(
-        title="[bold green]vLLM Platform & Architecture[/bold green]",
+        title=tr(
+            "sysinfo_ui.platform_title",
+            "[bold green]vLLM Platform & Architecture[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    platform_table.add_column("Property", style="cyan", min_width=25)
-    platform_table.add_column("Value", style="magenta")
+    platform_table.add_column(
+        tr("sysinfo_ui.col_property", "Property"), style="cyan", min_width=25
+    )
+    platform_table.add_column(tr("sysinfo_ui.col_value", "Value"), style="magenta")
 
     # Platform basics
     platform_table.add_row(
-        "Platform Type", platform_info.get("platform_type", "Unknown")
+        tr("sysinfo_ui.platform_type", "Platform Type"),
+        platform_info.get("platform_type", "Unknown"),
     )
-    platform_table.add_row("Device Type", platform_info.get("device_type", "Unknown"))
-    platform_table.add_row("Ray Device Key", platform_info.get("ray_device_key", "N/A"))
+    platform_table.add_row(
+        tr("sysinfo_ui.device_type", "Device Type"),
+        platform_info.get("device_type", "Unknown"),
+    )
+    platform_table.add_row(
+        tr("sysinfo_ui.ray_device_key", "Ray Device Key"),
+        platform_info.get("ray_device_key", "N/A"),
+    )
 
     # Architecture
     if "architecture" in platform_info:
-        platform_table.add_row("GPU Architecture", platform_info["architecture"])
+        platform_table.add_row(
+            tr("sysinfo_ui.row_gpu_architecture", "GPU Architecture"),
+            platform_info["architecture"],
+        )
 
     # Device details
     devices = platform_info.get("devices", [])
@@ -807,11 +1054,27 @@ def _show_vllm_platform(platform_info):
         for i, device in enumerate(devices):
             if i > 0:
                 platform_table.add_row("", "")  # Separator
-            platform_table.add_row(f"GPU {i} Name", device["name"])
-            platform_table.add_row(f"GPU {i} Compute Capability", device["capability"])
-            platform_table.add_row(f"GPU {i} Memory", f"{device['memory_gb']:.1f} GB")
+            platform_table.add_row(
+                tr("sysinfo_ui.row_gpu_name", "GPU {index} Name", index=i),
+                device["name"],
+            )
+            platform_table.add_row(
+                tr(
+                    "sysinfo_ui.row_gpu_compute_cap",
+                    "GPU {index} Compute Capability",
+                    index=i,
+                ),
+                device["capability"],
+            )
+            platform_table.add_row(
+                tr("sysinfo_ui.row_gpu_memory", "GPU {index} Memory", index=i),
+                f"{device['memory_gb']:.1f} GB",
+            )
             if device.get("uuid"):
-                platform_table.add_row(f"GPU {i} UUID", device["uuid"])
+                platform_table.add_row(
+                    tr("sysinfo_ui.row_gpu_uuid", "GPU {index} UUID", index=i),
+                    device["uuid"],
+                )
 
     console.print(platform_table)
 
@@ -819,77 +1082,112 @@ def _show_vllm_platform(platform_info):
 def _show_vllm_capabilities(capabilities):
     """Display vLLM capabilities."""
     cap_table = Table(
-        title="[bold green]vLLM Capabilities & Features[/bold green]",
+        title=tr(
+            "sysinfo_ui.capabilities_title",
+            "[bold green]vLLM Capabilities & Features[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    cap_table.add_column("Capability", style="cyan", min_width=30)
-    cap_table.add_column("Status", style="magenta", min_width=20)
-    cap_table.add_column("Details", style="yellow")
+    cap_table.add_column(
+        tr("sysinfo_ui.col_capability", "Capability"),
+        style="cyan",
+        min_width=30,
+    )
+    cap_table.add_column(
+        tr("sysinfo_ui.col_status", "Status"), style="magenta", min_width=20
+    )
+    cap_table.add_column(tr("sysinfo_ui.col_details", "Details"), style="yellow")
 
     # FP8 Support
     fp8_support = capabilities.get("supports_fp8", False)
     cap_table.add_row(
-        "FP8 Support",
-        "[green]✓ Supported[/green]" if fp8_support else "[red]✗ Not supported[/red]",
-        capabilities.get("fp8_dtype", "N/A") if fp8_support else "Requires SM 8.9+",
+        tr("sysinfo_ui.cap_fp8_support", "FP8 Support"),
+        tr("sysinfo_ui.status_supported", "[green]✓ Supported[/green]")
+        if fp8_support
+        else tr("sysinfo_ui.status_not_supported_red", "[red]✗ Not supported[/red]"),
+        capabilities.get("fp8_dtype", "N/A")
+        if fp8_support
+        else tr("sysinfo_ui.cap_fp8_requires", "Requires SM 8.9+"),
     )
 
     # Data types
     dtypes = capabilities.get("supported_dtypes", [])
     cap_table.add_row(
-        "Supported Data Types",
-        "[green]✓ Available[/green]" if dtypes else "[red]✗ Unknown[/red]",
+        tr("sysinfo_ui.cap_supported_dtypes", "Supported Data Types"),
+        tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
+        if dtypes
+        else tr("sysinfo_ui.status_unknown", "[red]✗ Unknown[/red]"),
         ", ".join(dtypes) if dtypes else "N/A",
     )
 
     # V1 Engine
     v1_support = capabilities.get("supports_v1_engine", False)
     cap_table.add_row(
-        "V1 Engine Support",
-        "[green]✓ Supported[/green]" if v1_support else "[yellow]⚠ Legacy[/yellow]",
-        "Optimized engine for latest vLLM" if v1_support else "Using V0 engine",
+        tr("sysinfo_ui.cap_v1_engine", "V1 Engine Support"),
+        tr("sysinfo_ui.status_supported", "[green]✓ Supported[/green]")
+        if v1_support
+        else tr("sysinfo_ui.status_legacy", "[yellow]⚠ Legacy[/yellow]"),
+        tr("sysinfo_ui.cap_v1_optimized_engine", "Optimized engine for latest vLLM")
+        if v1_support
+        else tr("sysinfo_ui.cap_using_v0", "Using V0 engine"),
     )
 
     # Custom AllReduce
     allreduce = capabilities.get("supports_custom_allreduce", False)
     cap_table.add_row(
-        "Custom AllReduce",
-        "[green]✓ Enabled[/green]" if allreduce else "[yellow]○ Disabled[/yellow]",
-        "Optimized multi-GPU communication" if allreduce else "Standard NCCL",
+        tr("sysinfo_ui.cap_custom_allreduce", "Custom AllReduce"),
+        tr("sysinfo_ui.status_enabled", "[green]✓ Enabled[/green]")
+        if allreduce
+        else tr("sysinfo_ui.status_disabled", "[yellow]○ Disabled[/yellow]"),
+        tr("sysinfo_ui.cap_multi_gpu_comm", "Optimized multi-GPU communication")
+        if allreduce
+        else tr("sysinfo_ui.cap_standard_nccl", "Standard NCCL"),
     )
 
     # Pin Memory
     pin_memory = capabilities.get("supports_pin_memory", False)
     cap_table.add_row(
-        "Pin Memory",
-        (
-            "[green]✓ Available[/green]"
-            if pin_memory
-            else "[yellow]○ Not available[/yellow]"
+        tr("sysinfo_ui.cap_pin_memory", "Pin Memory"),
+        tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
+        if pin_memory
+        else tr(
+            "sysinfo_ui.status_not_available_dim", "[yellow]○ Not available[/yellow]"
         ),
-        "Faster CPU-GPU transfer" if pin_memory else "WSL/Container detected",
+        tr("sysinfo_ui.cap_faster_transfer", "Faster CPU-GPU transfer")
+        if pin_memory
+        else tr("sysinfo_ui.cap_wsl_container", "WSL/Container detected"),
     )
 
     # Sleep Mode
     sleep_mode = capabilities.get("supports_sleep_mode", False)
     cap_table.add_row(
-        "Sleep Mode",
-        (
-            "[green]✓ Available[/green]"
-            if sleep_mode
-            else "[yellow]○ Not available[/yellow]"
+        tr("sysinfo_ui.cap_sleep_mode", "Sleep Mode"),
+        tr("sysinfo_ui.status_available", "[green]✓ Available[/green]")
+        if sleep_mode
+        else tr(
+            "sysinfo_ui.status_not_available_dim", "[yellow]○ Not available[/yellow]"
         ),
-        "GPU power saving when idle" if sleep_mode else "Always active",
+        tr("sysinfo_ui.cap_power_saving", "GPU power saving when idle")
+        if sleep_mode
+        else tr("sysinfo_ui.cap_always_active", "Always active"),
     )
 
     # Recommended backend
     backend = capabilities.get("recommended_attention_backend", "Unknown")
-    cap_table.add_row("Recommended Attention", "[blue]→ Auto-selected[/blue]", backend)
+    cap_table.add_row(
+        tr("sysinfo_ui.cap_recommended_attention", "Recommended Attention"),
+        tr("sysinfo_ui.status_arrow_auto", "[blue]→ Auto-selected[/blue]"),
+        backend,
+    )
 
     # CPU Architecture
     cpu_arch = capabilities.get("cpu_architecture", "Unknown")
-    cap_table.add_row("CPU Architecture", "[green]✓ Detected[/green]", cpu_arch)
+    cap_table.add_row(
+        tr("sysinfo_ui.cap_cpu_arch", "CPU Architecture"),
+        tr("sysinfo_ui.status_detected", "[green]✓ Detected[/green]"),
+        cpu_arch,
+    )
 
     console.print(cap_table)
 
@@ -897,17 +1195,34 @@ def _show_vllm_capabilities(capabilities):
 def _show_vllm_kernels(kernel_status):
     """Display vLLM kernel availability."""
     kernel_table = Table(
-        title="[bold green]vLLM Custom CUDA Kernels[/bold green]",
+        title=tr(
+            "sysinfo_ui.kernels_title",
+            "[bold green]vLLM Custom CUDA Kernels[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    kernel_table.add_column("Kernel Category", style="cyan", min_width=20)
-    kernel_table.add_column("Kernel Name", style="magenta", min_width=25)
-    kernel_table.add_column("Status", style="yellow", min_width=15)
+    kernel_table.add_column(
+        tr("sysinfo_ui.col_kernel_category", "Kernel Category"),
+        style="cyan",
+        min_width=20,
+    )
+    kernel_table.add_column(
+        tr("sysinfo_ui.col_kernel_name", "Kernel Name"),
+        style="magenta",
+        min_width=25,
+    )
+    kernel_table.add_column(
+        tr("sysinfo_ui.col_status", "Status"), style="yellow", min_width=15
+    )
 
     # Check if custom ops loaded
     if not kernel_status.get("custom_ops_loaded", False):
-        kernel_table.add_row("Error", "Custom ops not loaded", "[red]✗ Failed[/red]")
+        kernel_table.add_row(
+            tr("sysinfo_ui.status_error", "Error"),
+            tr("sysinfo_ui.custom_ops_not_loaded", "Custom ops not loaded"),
+            tr("sysinfo_ui.status_failed", "[red]✗ Failed[/red]"),
+        )
         if "error" in kernel_status:
             kernel_table.add_row("", kernel_status["error"], "")
     else:
@@ -957,14 +1272,25 @@ def _show_vllm_kernels(kernel_status):
 def _show_vllm_environment(env_status):
     """Display vLLM environment variables."""
     env_table = Table(
-        title="[bold green]vLLM Environment Variables[/bold green]",
+        title=tr(
+            "sysinfo_ui.environment_title",
+            "[bold green]vLLM Environment Variables[/bold green]",
+        ),
         show_header=True,
         header_style="bold blue",
     )
-    env_table.add_column("Category", style="cyan", min_width=15)
-    env_table.add_column("Variable", style="magenta", min_width=35)
-    env_table.add_column("Current", style="yellow", min_width=15)
-    env_table.add_column("Default", style="white", min_width=15)
+    env_table.add_column(
+        tr("sysinfo_ui.col_category", "Category"), style="cyan", min_width=15
+    )
+    env_table.add_column(
+        tr("sysinfo_ui.col_variable", "Variable"), style="magenta", min_width=35
+    )
+    env_table.add_column(
+        tr("sysinfo_ui.col_current", "Current"), style="yellow", min_width=15
+    )
+    env_table.add_column(
+        tr("sysinfo_ui.col_default", "Default"), style="white", min_width=15
+    )
 
     categories = env_status.get("categories", {})
 
@@ -987,11 +1313,15 @@ def _show_vllm_environment(env_status):
                 has_content = True
 
                 # Format values
-                current = env_value if env_value is not None else "[dim]not set[/dim]"
+                current = (
+                    env_value
+                    if env_value is not None
+                    else tr("sysinfo_ui.env_not_set", "[dim]not set[/dim]")
+                )
                 default = (
                     str(default_value)
                     if default_value is not None
-                    else "[dim]none[/dim]"
+                    else tr("sysinfo_ui.env_none", "[dim]none[/dim]")
                 )
 
                 # Highlight modified values
@@ -1012,5 +1342,10 @@ def _show_vllm_environment(env_status):
 
     # Show a legend
     console.print(
-        "\n[dim]Legend: [bold green]Green[/bold green] = Modified from default | [dim]dim[/dim] = Not set[/dim]"
+        "\n"
+        + tr(
+            "sysinfo_ui.env_legend",
+            "[dim]Legend: [bold green]Green[/bold green] = Modified from default "
+            "| [dim]dim[/dim] = Not set[/dim]",
+        )
     )

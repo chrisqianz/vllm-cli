@@ -28,6 +28,14 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.7.0.0
+
+### 🀄 Full Chinese Localization (i18n everywhere)
+
+- **Every interactive screen now follows your language setting** — model manager, profiles, custom configurations, model directories, shortcuts, server monitor, log viewer, proxy wizard/monitor, recipes sync, system info, and all CLI messages. Previously only ~12% of UI strings were translated; the whole app is now localized (1,453 new keys, zh/en in lockstep).
+- **Unbreakable menus**: option prompts switched to a label→stable-key design (`prompt_choice`), eliminating the class of bugs where a translated label silently kills a menu option (the v0.6.0.1 proxy failure mode).
+- **Zero-risk for English users**: `tr()` falls back to the original English text whenever a translation is unavailable; CLI/headless paths are unchanged.
+
 ## What's New in v0.6.0.1
 
 ### 🐛 Multi-Model Proxy Fixed (no longer experimental)

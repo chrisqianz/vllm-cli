@@ -64,3 +64,29 @@ def unified_prompt(
     except Exception as e:
         logger.error(f"Error in unified prompt: {e}")
         return None
+
+
+def prompt_choice(key, message, choices, allow_back=True):
+    """Prompt with translated labels while returning a stable action key.
+
+    Args:
+        key: Unique key for this prompt
+        message: Prompt message (already translated by caller, e.g. via tr)
+        choices: List of ``(value, label)`` tuples; ``label`` is displayed,
+            ``value`` is returned. Values must be stable ASCII identifiers.
+        allow_back: Whether to include a Back option (returns "BACK")
+
+    Returns:
+        The selected ``value``, "BACK", or None if cancelled/interrupted.
+    """
+    labels = [label for _value, label in choices]
+    selected = unified_prompt(key, message, labels, allow_back=allow_back)
+    if selected is None or selected == "BACK":
+        return selected
+    for value, label in choices:
+        if label == selected:
+            return value
+    # Displayed text did not match any label (should not happen): treat as
+    # cancel rather than silently selecting the wrong action.
+    logger.warning(f"prompt_choice[{key}]: unmatched selection {selected!r}")
+    return None

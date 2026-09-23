@@ -12,6 +12,8 @@ import subprocess
 from rich.console import Console
 from rich.panel import Panel
 
+from ..i18n import tr
+
 logger = logging.getLogger(__name__)
 console = Console()
 
@@ -30,12 +32,28 @@ def launch_hf_model_tool(args: list = None) -> None:
     try:
         result = subprocess.run(cmd, env=os.environ.copy())
         if result.returncode != 0:
-            console.print("[yellow]hf-model-tool exited with an error.[/yellow]")
+            console.print(
+                tr(
+                    "hf_ui.tool_exited_error",
+                    "[yellow]hf-model-tool exited with an error.[/yellow]",
+                )
+            )
     except FileNotFoundError:
-        console.print("[red]hf-model-tool not found. Please install it:[/red]")
+        console.print(
+            tr(
+                "hf_ui.tool_not_found",
+                "[red]hf-model-tool not found. Please install it:[/red]",
+            )
+        )
         console.print("  pip install hf-model-tool")
     except Exception as e:
-        console.print(f"[red]Error launching hf-model-tool: {e}[/red]")
+        console.print(
+            tr(
+                "hf_ui.launch_error",
+                "[red]Error launching hf-model-tool: {error}[/red]",
+                error=e,
+            )
+        )
 
 
 def check_hf_model_tool_installed() -> bool:
@@ -65,13 +83,13 @@ def launch_hf_model_tool_interactive() -> str:
     console.clear()
     console.print(
         Panel(
-            "[bold cyan]Launching HF-Model-Tool[/bold cyan]\n"
-            "[dim]Full model management interface[/dim]",
+            f"[bold cyan]{tr('hf_ui.launching_title', 'Launching HF-Model-Tool')}[/bold cyan]\n"
+            f"[dim]{tr('hf_ui.launching_subtitle', 'Full model management interface')}[/dim]",
             border_style="blue",
         )
     )
     launch_hf_model_tool()
-    input("\nPress Enter to continue...")
+    input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "continue"
 
 
@@ -80,11 +98,11 @@ def launch_hf_model_tool_manage() -> str:
     console.clear()
     console.print(
         Panel(
-            "[bold cyan]Asset Management[/bold cyan]\n"
-            "[dim]Delete, deduplicate, and organize models[/dim]",
+            f"[bold cyan]{tr('hf_ui.asset_management_title', 'Asset Management')}[/bold cyan]\n"
+            f"[dim]{tr('hf_ui.asset_management_subtitle', 'Delete, deduplicate, and organize models')}[/dim]",
             border_style="blue",
         )
     )
     launch_hf_model_tool(["--manage"])
-    input("\nPress Enter to continue...")
+    input("\n" + tr("common.press_enter", "Press Enter to continue..."))
     return "continue"

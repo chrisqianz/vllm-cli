@@ -11,10 +11,11 @@ from typing import Any, Dict, Optional
 import inquirer
 from rich.panel import Panel
 
+from ..i18n import tr
 from ..models import list_available_models
 from ..system import format_size
 from .common import console
-from .navigation import unified_prompt
+from .navigation import prompt_choice, unified_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,9 @@ def select_shortcut_for_serving() -> Optional[Dict[str, Any]]:
     shortcuts = config_manager.list_shortcuts()
 
     if not shortcuts:
-        console.print("[yellow]No shortcuts available.[/yellow]")
+        console.print(
+            tr("model_mgr.no_shortcuts", "[yellow]No shortcuts available.[/yellow]")
+        )
         return None
 
     # Build shortcut choices with details
@@ -49,10 +52,12 @@ def select_shortcut_for_serving() -> Optional[Dict[str, Any]]:
         shortcut_choices.append(f"{name}: {model_display} [{profile}]")
 
     # Show shortcut selection
-    console.print("\n[bold cyan]Select Shortcut[/bold cyan]")
+    console.print(
+        tr("model_mgr.select_shortcut", "\n[bold cyan]Select Shortcut[/bold cyan]")
+    )
     selected = unified_prompt(
         "shortcut_select",
-        "Choose a shortcut to use",
+        tr("model_mgr.choose_shortcut", "Choose a shortcut to use"),
         shortcut_choices,
         allow_back=True,
     )
@@ -66,7 +71,13 @@ def select_shortcut_for_serving() -> Optional[Dict[str, Any]]:
     # Get full shortcut data
     shortcut_data = config_manager.get_shortcut(shortcut_name)
     if not shortcut_data:
-        console.print(f"[red]Shortcut '{shortcut_name}' not found.[/red]")
+        console.print(
+            tr(
+                "model_mgr.shortcut_not_found",
+                "[red]Shortcut '{name}' not found.[/red]",
+                name=shortcut_name,
+            )
+        )
         return None
 
     # Update last used timestamp
@@ -93,19 +104,41 @@ def enter_remote_model() -> Optional[str]:
 
     from ..config import ConfigManager
 
-    console.print("\n[bold cyan]Remote Model Selection[/bold cyan]")
-    console.print("\nEnter a HuggingFace model ID to serve directly from the Hub.")
-    console.print("The model will be automatically downloaded on first use.\n")
+    console.print(
+        tr("model_mgr.remote_title", "\n[bold cyan]Remote Model Selection[/bold cyan]")
+    )
+    console.print(
+        tr(
+            "model_mgr.remote_intro",
+            "\nEnter a HuggingFace model ID to serve directly from the Hub.",
+        )
+    )
+    console.print(
+        tr(
+            "model_mgr.remote_auto_download",
+            "The model will be automatically downloaded on first use.\n",
+        )
+    )
 
-    console.print("[dim]Examples:[/dim]")
+    console.print(tr("model_mgr.examples_label", "[dim]Examples:[/dim]"))
     console.print("  • openai/gpt-oss-120b\n")
 
     console.print(
-        "[yellow]Note:[/yellow] First-time download may take 10-30 minutes depending on model size.\n"
+        tr(
+            "model_mgr.first_download_note",
+            "[yellow]Note:[/yellow] First-time download may take 10-30 minutes "
+            "depending on model size.\n",
+        )
     )
 
     while True:
-        console.print("[cyan]Model ID (or 'back' to cancel):[/cyan] ", end="")
+        console.print(
+            tr(
+                "model_mgr.model_id_prompt",
+                "[cyan]Model ID (or 'back' to cancel):[/cyan] ",
+            ),
+            end="",
+        )
         model_id = input().strip()
 
         if model_id.lower() in ["back", "cancel", ""]:
@@ -114,59 +147,115 @@ def enter_remote_model() -> Optional[str]:
         # Validate model ID format
         if "/" not in model_id:
             console.print(
-                "[red]Invalid format. Model ID should be 'organization/model-name'[/red]"
+                tr(
+                    "model_mgr.invalid_model_id_format",
+                    "[red]Invalid format. Model ID should be "
+                    "'organization/model-name'[/red]",
+                )
             )
             continue
 
         parts = model_id.split("/")
         if len(parts) != 2:
             console.print(
-                "[red]Invalid format. Model ID should be 'organization/model-name'[/red]"
+                tr(
+                    "model_mgr.invalid_model_id_format",
+                    "[red]Invalid format. Model ID should be "
+                    "'organization/model-name'[/red]",
+                )
             )
             continue
 
         org, model_name = parts
         if not org or not model_name:
             console.print(
-                "[red]Invalid model ID. Both organization and model name are required.[/red]"
+                tr(
+                    "model_mgr.invalid_model_id_parts",
+                    "[red]Invalid model ID. Both organization and model name are "
+                    "required.[/red]",
+                )
             )
             continue
 
         # Confirm the selection
-        console.print(f"\n[bold]Selected model:[/bold] {model_id}")
+        console.print(
+            tr(
+                "model_mgr.selected_model",
+                "\n[bold]Selected model:[/bold] {model}",
+                model=model_id,
+            )
+        )
 
         # Check for HF token and offer to configure if needed
         config_manager = ConfigManager()
         has_token = bool(config_manager.config.get("hf_token"))
 
         if has_token:
-            console.print("[green]✓ HuggingFace token is configured[/green]")
+            console.print(
+                tr(
+                    "model_mgr.token_configured",
+                    "[green]✓ HuggingFace token is configured[/green]",
+                )
+            )
         else:
             console.print(
-                "\n[dim]Note: Some models require a HuggingFace token for access.[/dim]"
+                tr(
+                    "model_mgr.token_needed_note",
+                    "\n[dim]Note: Some models require a HuggingFace token for "
+                    "access.[/dim]",
+                )
             )
             console.print(
-                "[dim]If this model is gated, you'll need to provide a token.[/dim]\n"
-            )
-
-            token_options = ["Configure HF token now", "Continue without token"]
-
-            token_action = unified_prompt(
-                "token_action",
-                "Would you like to configure a HuggingFace token?",
-                token_options,
-            )
-
-            if token_action == "Configure HF token now":
-                console.print("\n[cyan]Enter your HuggingFace token:[/cyan]")
-                console.print(
-                    "[dim]Get your token from: https://huggingface.co/settings/tokens[/dim]"
+                tr(
+                    "model_mgr.token_gated_note",
+                    "[dim]If this model is gated, you'll need to provide a "
+                    "token.[/dim]\n",
                 )
-                console.print("[dim]The token will be hidden as you type.[/dim]\n")
+            )
 
-                token = getpass.getpass("Token: ").strip()
+            token_action = prompt_choice(
+                "token_action",
+                tr(
+                    "model_mgr.configure_token_title",
+                    "Would you like to configure a HuggingFace token?",
+                ),
+                [
+                    (
+                        "configure",
+                        tr("model_mgr.configure_token", "Configure HF token now"),
+                    ),
+                    ("skip", tr("model_mgr.skip_token", "Continue without token")),
+                ],
+            )
+
+            if token_action == "configure":
+                console.print(
+                    tr(
+                        "model_mgr.enter_token_prompt",
+                        "\n[cyan]Enter your HuggingFace token:[/cyan]",
+                    )
+                )
+                console.print(
+                    tr("model_mgr.token_link_label", "[dim]Get your token from:[/dim]")
+                    + " [dim]https://huggingface.co/settings/tokens[/dim]"
+                )
+                console.print(
+                    tr(
+                        "model_mgr.token_hidden_note",
+                        "[dim]The token will be hidden as you type.[/dim]\n",
+                    )
+                )
+
+                token = getpass.getpass(
+                    tr("model_mgr.token_input_prompt", "Token: ")
+                ).strip()
                 if token:
-                    console.print("\n[cyan]Validating token...[/cyan]")
+                    console.print(
+                        tr(
+                            "model_mgr.validating_token",
+                            "\n[cyan]Validating token...[/cyan]",
+                        )
+                    )
 
                     from ..validation.token import validate_hf_token
 
@@ -176,19 +265,41 @@ def enter_remote_model() -> Optional[str]:
                         config_manager.config["hf_token"] = token
                         config_manager._save_config()
                         console.print(
-                            "[green]✓ Token validated and saved successfully[/green]"
+                            tr(
+                                "model_mgr.token_saved",
+                                "[green]✓ Token validated and saved successfully[/green]",
+                            )
                         )
                         if user_info:
                             console.print(
-                                f"[dim]Authenticated as: {user_info.get('name', 'Unknown')}[/dim]\n"
+                                tr(
+                                    "model_mgr.authenticated_as",
+                                    "[dim]Authenticated as: {name}[/dim]\n",
+                                    name=user_info.get("name", "Unknown"),
+                                )
                             )
                     else:
-                        console.print("[red]✗ Token validation failed[/red]")
-                        console.print("[dim]The token may be invalid or expired.[/dim]")
+                        console.print(
+                            tr(
+                                "model_mgr.token_validation_failed",
+                                "[red]✗ Token validation failed[/red]",
+                            )
+                        )
+                        console.print(
+                            tr(
+                                "model_mgr.token_invalid_note",
+                                "[dim]The token may be invalid or expired.[/dim]",
+                            )
+                        )
 
                         # Ask if they want to continue anyway
                         confirm = (
-                            input("\nContinue with this token anyway? (y/N): ")
+                            input(
+                                tr(
+                                    "model_mgr.save_token_anyway_prompt",
+                                    "\nContinue with this token anyway? (y/N): ",
+                                )
+                            )
                             .strip()
                             .lower()
                         )
@@ -196,33 +307,69 @@ def enter_remote_model() -> Optional[str]:
                             config_manager.config["hf_token"] = token
                             config_manager._save_config()
                             console.print(
-                                "[yellow]Token saved (but may not work)[/yellow]\n"
+                                tr(
+                                    "model_mgr.token_saved_unverified",
+                                    "[yellow]Token saved (but may not work)[/yellow]\n",
+                                )
                             )
                         else:
-                            console.print("[yellow]Continuing without token[/yellow]\n")
+                            console.print(
+                                tr(
+                                    "model_mgr.continuing_without_token",
+                                    "[yellow]Continuing without token[/yellow]\n",
+                                )
+                            )
                 else:
                     console.print(
-                        "[yellow]No token provided, continuing without token[/yellow]\n"
+                        tr(
+                            "model_mgr.no_token_provided",
+                            "[yellow]No token provided, continuing without "
+                            "token[/yellow]\n",
+                        )
                     )
 
         console.print(
-            "\n[yellow]Warning:[/yellow] This model will be downloaded from HuggingFace Hub."
+            tr(
+                "model_mgr.download_warning",
+                "\n[yellow]Warning:[/yellow] This model will be downloaded from "
+                "HuggingFace Hub.",
+            )
         )
         console.print(
-            "Download size can range from a few GB to 100+ GB depending on the model.\n"
+            tr(
+                "model_mgr.download_size_note",
+                "Download size can range from a few GB to 100+ GB depending on the "
+                "model.\n",
+            )
         )
 
-        console.print("[cyan]Proceed with this model? (Y/n):[/cyan] ", end="")
+        console.print(
+            tr(
+                "model_mgr.proceed_confirm",
+                "[cyan]Proceed with this model? (Y/n):[/cyan] ",
+            ),
+            end="",
+        )
         confirm = input().strip().lower()
 
         if confirm in ["", "y", "yes"]:
             logger.info(f"User selected remote model: {model_id}")
             return model_id
         elif confirm in ["n", "no"]:
-            console.print("[yellow]Model selection cancelled.[/yellow]")
+            console.print(
+                tr(
+                    "model_mgr.model_selection_cancelled",
+                    "[yellow]Model selection cancelled.[/yellow]",
+                )
+            )
             continue
         else:
-            console.print("[red]Invalid response. Please enter 'y' or 'n'.[/red]")
+            console.print(
+                tr(
+                    "model_mgr.invalid_yn_response",
+                    "[red]Invalid response. Please enter 'y' or 'n'.[/red]",
+                )
+            )
             continue
 
 
@@ -231,42 +378,77 @@ def select_model() -> Optional[Any]:
     Select a model from available models with provider categorization.
     Can return either a string (model name) or a dict (model with LoRA config).
     """
-    console.print("\n[bold cyan]Model Selection[/bold cyan]")
+    console.print(
+        tr(
+            "model_mgr.model_selection_title",
+            "\n[bold cyan]Model Selection[/bold cyan]",
+        )
+    )
 
     try:
         # First, ask if user wants to use local or remote model
-        model_source_choices = [
-            "Select from local models",
-            "Serve model with LoRA adapters",
-            "Use a model from HuggingFace Hub (auto-download)",
-        ]
-
-        source_choice = unified_prompt(
+        source_choice = prompt_choice(
             "model_source",
-            "How would you like to select a model?",
-            model_source_choices,
+            tr(
+                "model_mgr.how_select_model",
+                "How would you like to select a model?",
+            ),
+            [
+                ("local", tr("model_mgr.source_local", "Select from local models")),
+                (
+                    "lora",
+                    tr("model_mgr.source_lora", "Serve model with LoRA adapters"),
+                ),
+                (
+                    "remote",
+                    tr(
+                        "model_mgr.source_remote",
+                        "Use a model from HuggingFace Hub (auto-download)",
+                    ),
+                ),
+            ],
             allow_back=True,
         )
 
         if not source_choice or source_choice == "BACK":
             return None
 
-        if source_choice == "Use a model from HuggingFace Hub (auto-download)":
+        if source_choice == "remote":
             return enter_remote_model()
 
-        if source_choice == "Serve model with LoRA adapters":
+        if source_choice == "lora":
             return select_model_with_lora()
 
         # Continue with local model selection
-        console.print("\n[bold cyan]Fetching available models...[/bold cyan]")
+        console.print(
+            tr(
+                "model_mgr.fetching_models",
+                "\n[bold cyan]Fetching available models...[/bold cyan]",
+            )
+        )
         models = list_available_models()
 
         if not models:
-            console.print("[yellow]No local models found.[/yellow]")
-            console.print("\nYou can either:")
-            console.print("  1. Download models using HuggingFace tools")
-            console.print("  2. Go back and select 'Use a model from HuggingFace Hub'")
-            input("\nPress Enter to continue...")
+            console.print(
+                tr(
+                    "model_mgr.no_local_models",
+                    "[yellow]No local models found.[/yellow]",
+                )
+            )
+            console.print(tr("model_mgr.no_models_options", "\nYou can either:"))
+            console.print(
+                tr(
+                    "model_mgr.no_models_hint_download",
+                    "  1. Download models using HuggingFace tools",
+                )
+            )
+            console.print(
+                tr(
+                    "model_mgr.no_models_hint_remote",
+                    "  2. Go back and select 'Use a model from HuggingFace Hub'",
+                )
+            )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             return None
 
         # Group models by provider
@@ -326,7 +508,11 @@ def select_model() -> Optional[Any]:
 
         selected_provider = unified_prompt(
             "provider",
-            f"Select Provider ({total_providers} available)",
+            tr(
+                "model_mgr.select_provider",
+                "Select Provider ({count} available)",
+                count=total_providers,
+            ),
             provider_choices,
             allow_back=True,
         )
@@ -358,7 +544,12 @@ def select_model() -> Optional[Any]:
         # Show model selection for the provider
         selected = unified_prompt(
             "model",
-            f"Select {provider_name} Model ({len(provider_models)} available)",
+            tr(
+                "model_mgr.select_provider_model",
+                "Select {provider} Model ({count} available)",
+                provider=provider_name,
+                count=len(provider_models),
+            ),
             model_choices,
             allow_back=True,
         )
@@ -378,23 +569,46 @@ def select_model() -> Optional[Any]:
             if check_name == model_display_name or model["name"] == model_display_name:
                 # Special handling for Ollama models
                 if model.get("type") == "ollama_model":
-                    console.print("\n[yellow]⚠ Warning: Ollama GGUF Model[/yellow]")
                     console.print(
-                        "GGUF support in vLLM is experimental and varies by model architecture."
+                        tr(
+                            "model_mgr.gguf_warning",
+                            "\n[yellow]⚠ Warning: Ollama GGUF Model[/yellow]",
+                        )
                     )
                     console.print(
-                        "\n[cyan]Important:[/cyan] Not all GGUF models are supported."
+                        tr(
+                            "model_mgr.gguf_experimental",
+                            "GGUF support in vLLM is experimental and varies by model "
+                            "architecture.",
+                        )
                     )
-                    console.print("\nFor compatibility information, see:")
                     console.print(
-                        "  • vLLM-CLI Guide: [cyan]https://github.com/Chen-zexi/vllm-cli/blob/main/docs/ollama-integration.md[/cyan]"
+                        tr(
+                            "model_mgr.gguf_important",
+                            "\n[cyan]Important:[/cyan] Not all GGUF models are supported.",
+                        )
                     )
                     console.print(
-                        "  • vLLM Docs: [cyan]https://docs.vllm.ai/en/latest/models/supported_models.html[/cyan]"
+                        tr(
+                            "model_mgr.gguf_compat_info",
+                            "\nFor compatibility information, see:",
+                        )
+                    )
+                    console.print(
+                        f"{tr('model_mgr.guide_link_label', '  • vLLM-CLI Guide:')} "
+                        "[cyan]https://github.com/Chen-zexi/vllm-cli/blob/main/docs/ollama-integration.md[/cyan]"
+                    )
+                    console.print(
+                        f"{tr('model_mgr.vllm_docs_link_label', '  • vLLM Docs:')} "
+                        "[cyan]https://docs.vllm.ai/en/latest/models/supported_models.html[/cyan]"
                     )
 
                     console.print(
-                        "\n[cyan]Continue with this model? (Y/n):[/cyan] ", end=""
+                        tr(
+                            "model_mgr.continue_model_confirm",
+                            "\n[cyan]Continue with this model? (Y/n):[/cyan] ",
+                        ),
+                        end="",
                     )
                     confirm = input().strip().lower()
                     if confirm not in ["", "y", "yes"]:
@@ -433,7 +647,13 @@ def select_model() -> Optional[Any]:
 
     except Exception as e:
         logger.error(f"Error selecting model: {e}")
-        console.print(f"[red]Error selecting model: {e}[/red]")
+        console.print(
+            tr(
+                "model_mgr.error_selecting_model",
+                "[red]Error selecting model: {error}[/red]",
+                error=e,
+            )
+        )
         return None
 
 
@@ -466,98 +686,167 @@ def handle_model_management(i18n_manager=None) -> str:
             t("menu.model_management.refresh_cache", "Refresh Model Cache"),
         ]
 
-        action = unified_prompt(
+        # Stable action keys keep the comparison language-independent while the
+        # labels below are what the user actually sees.
+        management_actions = [
+            "open_tool",
+            "list_models",
+            "manage_assets",
+            "view_details",
+            "refresh_cache",
+        ]
+
+        action = prompt_choice(
             "model_management",
             t("menu.model_management.title", "Model Management"),
-            management_options,
+            list(zip(management_actions, management_options)),
             allow_back=True,
         )
 
         if not action or action == "BACK":
             return "continue"  # Return to main menu
 
-        if action == "Open Model Management Tool":
+        if action == "open_tool":
             # Launch full hf-model-tool interface
             console.print(
                 Panel(
-                    "[bold cyan]Launching HF-Model-Tool[/bold cyan]\n"
-                    "[dim]Full model management interface[/dim]",
+                    tr(
+                        "model_mgr.panel_launch_tool",
+                        "[bold cyan]Launching HF-Model-Tool[/bold cyan]\n"
+                        "[dim]Full model management interface[/dim]",
+                    ),
                     border_style="blue",
                 )
             )
             try:
                 subprocess.run(["hf-model-tool"], env=os.environ.copy())
             except FileNotFoundError:
-                console.print("[red]hf-model-tool not found. Please install it:[/red]")
+                console.print(
+                    tr(
+                        "model_mgr.tool_not_found",
+                        "[red]hf-model-tool not found. Please install it:[/red]",
+                    )
+                )
                 console.print("  pip install hf-model-tool")
             except Exception as e:
-                console.print(f"[red]Error launching hf-model-tool: {e}[/red]")
-            input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "model_mgr.error_launching_tool",
+                        "[red]Error launching hf-model-tool: {error}[/red]",
+                        error=e,
+                    )
+                )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             # Continue loop - stay in model management menu
 
-        elif action == "List All Models":
+        elif action == "list_models":
             # Launch hf-model-tool in list mode
             console.print(
                 Panel(
-                    "[bold cyan]Model List[/bold cyan]\n"
-                    "[dim]Displaying all discovered models[/dim]",
+                    tr(
+                        "model_mgr.panel_model_list",
+                        "[bold cyan]Model List[/bold cyan]\n"
+                        "[dim]Displaying all discovered models[/dim]",
+                    ),
                     border_style="blue",
                 )
             )
             try:
                 subprocess.run(["hf-model-tool", "--list"], env=os.environ.copy())
             except FileNotFoundError:
-                console.print("[red]hf-model-tool not found. Please install it:[/red]")
+                console.print(
+                    tr(
+                        "model_mgr.tool_not_found",
+                        "[red]hf-model-tool not found. Please install it:[/red]",
+                    )
+                )
                 console.print("  pip install hf-model-tool")
             except Exception as e:
-                console.print(f"[red]Error: {e}[/red]")
-            input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "model_mgr.error_generic",
+                        "[red]Error: {error}[/red]",
+                        error=e,
+                    )
+                )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             # Continue loop - stay in model management menu
 
-        elif action == "Manage Assets":
+        elif action == "manage_assets":
             # Launch hf-model-tool in manage mode
             console.print(
                 Panel(
-                    "[bold cyan]Asset Management[/bold cyan]\n"
-                    "[dim]Delete, deduplicate, and organize models[/dim]",
+                    tr(
+                        "model_mgr.panel_asset_management",
+                        "[bold cyan]Asset Management[/bold cyan]\n"
+                        "[dim]Delete, deduplicate, and organize models[/dim]",
+                    ),
                     border_style="blue",
                 )
             )
             try:
                 subprocess.run(["hf-model-tool", "--manage"], env=os.environ.copy())
             except FileNotFoundError:
-                console.print("[red]hf-model-tool not found. Please install it:[/red]")
+                console.print(
+                    tr(
+                        "model_mgr.tool_not_found",
+                        "[red]hf-model-tool not found. Please install it:[/red]",
+                    )
+                )
                 console.print("  pip install hf-model-tool")
             except Exception as e:
-                console.print(f"[red]Error: {e}[/red]")
-            input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "model_mgr.error_generic",
+                        "[red]Error: {error}[/red]",
+                        error=e,
+                    )
+                )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             # Continue loop - stay in model management menu
 
-        elif action == "View Model Details":
+        elif action == "view_details":
             # Launch hf-model-tool in details mode
             console.print(
                 Panel(
-                    "[bold cyan]Model Details[/bold cyan]\n"
-                    "[dim]View detailed information about models[/dim]",
+                    tr(
+                        "model_mgr.panel_model_details",
+                        "[bold cyan]Model Details[/bold cyan]\n"
+                        "[dim]View detailed information about models[/dim]",
+                    ),
                     border_style="blue",
                 )
             )
             try:
                 subprocess.run(["hf-model-tool", "--details"], env=os.environ.copy())
             except FileNotFoundError:
-                console.print("[red]hf-model-tool not found. Please install it:[/red]")
+                console.print(
+                    tr(
+                        "model_mgr.tool_not_found",
+                        "[red]hf-model-tool not found. Please install it:[/red]",
+                    )
+                )
                 console.print("  pip install hf-model-tool")
             except Exception as e:
-                console.print(f"[red]Error: {e}[/red]")
-            input("\nPress Enter to continue...")
+                console.print(
+                    tr(
+                        "model_mgr.error_generic",
+                        "[red]Error: {error}[/red]",
+                        error=e,
+                    )
+                )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             # Continue loop - stay in model management menu
 
-        elif action == "Refresh Model Cache":
+        elif action == "refresh_cache":
             # Refresh the model cache used by serving menu
             console.print(
                 Panel(
-                    "[bold cyan]Refreshing Model Cache[/bold cyan]\n"
-                    "[dim]Scanning all model directories for updates...[/dim]",
+                    tr(
+                        "model_mgr.panel_refresh_cache",
+                        "[bold cyan]Refreshing Model Cache[/bold cyan]\n"
+                        "[dim]Scanning all model directories for updates...[/dim]",
+                    ),
                     border_style="blue",
                 )
             )
@@ -575,15 +864,30 @@ def handle_model_management(i18n_manager=None) -> str:
                 old_count = old_stats.get("cached_models_count", 0)
 
                 # Show scanning progress
-                console.print("\n[cyan]Step 1/3:[/cyan] Refreshing model registry...")
+                console.print(
+                    tr(
+                        "model_mgr.refresh_step_registry",
+                        "\n[cyan]Step 1/3:[/cyan] Refreshing model registry...",
+                    )
+                )
 
                 # Refresh the cache
                 model_manager.refresh_cache()
 
-                console.print("[cyan]Step 2/3:[/cyan] Clearing old cache...")
+                console.print(
+                    tr(
+                        "model_mgr.refresh_step_clear",
+                        "[cyan]Step 2/3:[/cyan] Clearing old cache...",
+                    )
+                )
                 time.sleep(0.1)  # Brief pause for visual feedback
 
-                console.print("[cyan]Step 3/3:[/cyan] Loading fresh model data...")
+                console.print(
+                    tr(
+                        "model_mgr.refresh_step_load",
+                        "[cyan]Step 3/3:[/cyan] Loading fresh model data...",
+                    )
+                )
                 time.sleep(0.1)  # Brief pause for visual feedback
 
                 # Get new cache stats to show user
@@ -591,9 +895,17 @@ def handle_model_management(i18n_manager=None) -> str:
                 new_count = new_stats.get("cached_models_count", 0)
 
                 # Show success message with details
-                console.print("\n[green]✓ Model cache refreshed successfully![/green]")
                 console.print(
-                    "[dim]The serving menu will now show all current models.[/dim]"
+                    tr(
+                        "model_mgr.cache_refreshed",
+                        "\n[green]✓ Model cache refreshed successfully![/green]",
+                    )
+                )
+                console.print(
+                    tr(
+                        "model_mgr.cache_refreshed_note",
+                        "[dim]The serving menu will now show all current models.[/dim]",
+                    )
                 )
 
                 # Show model count changes
@@ -601,27 +913,51 @@ def handle_model_management(i18n_manager=None) -> str:
                     diff = new_count - old_count
                     if diff > 0:
                         console.print(
-                            f"\n[cyan]Models in cache: {new_count} (+{diff} new)[/cyan]"
+                            tr(
+                                "model_mgr.cache_count_added",
+                                "\n[cyan]Models in cache: {count} (+{added} new)[/cyan]",
+                                count=new_count,
+                                added=diff,
+                            )
                         )
                     else:
                         console.print(
-                            f"\n[cyan]Models in cache: {new_count} ({diff} removed)[/cyan]"
+                            tr(
+                                "model_mgr.cache_count_removed",
+                                "\n[cyan]Models in cache: {count} ({removed} removed)[/cyan]",
+                                count=new_count,
+                                removed=diff,
+                            )
                         )
                 else:
                     console.print(
-                        f"\n[cyan]Models in cache: {new_count} (no changes)[/cyan]"
+                        tr(
+                            "model_mgr.cache_count_unchanged",
+                            "\n[cyan]Models in cache: {count} (no changes)[/cyan]",
+                            count=new_count,
+                        )
                     )
 
                 # Show cache freshness
                 console.print(
-                    f"[dim]Cache TTL: {new_stats.get('ttl_seconds', 30)} seconds[/dim]"
+                    tr(
+                        "model_mgr.cache_ttl",
+                        "[dim]Cache TTL: {seconds} seconds[/dim]",
+                        seconds=new_stats.get("ttl_seconds", 30),
+                    )
                 )
 
             except Exception as e:
-                console.print(f"[red]Error refreshing cache: {e}[/red]")
+                console.print(
+                    tr(
+                        "model_mgr.error_refreshing_cache",
+                        "[red]Error refreshing cache: {error}[/red]",
+                        error=e,
+                    )
+                )
                 logger.error(f"Cache refresh error: {e}")
 
-            input("\nPress Enter to continue...")
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             # Continue loop - stay in model management menu
 
 
@@ -632,28 +968,56 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
     Returns:
         Dictionary with model and LoRA configuration for serving
     """
-    console.print("\n[bold cyan]Model + LoRA Selection[/bold cyan]")
     console.print(
-        "[dim]Select a base model and LoRA adapters to serve together[/dim]\n"
+        tr("model_mgr.lora_title", "\n[bold cyan]Model + LoRA Selection[/bold cyan]")
+    )
+    console.print(
+        tr(
+            "model_mgr.lora_intro",
+            "[dim]Select a base model and LoRA adapters to serve together[/dim]\n",
+        )
     )
 
     # First scan for LoRA adapters to determine which models have adapters
-    console.print("[cyan]Scanning for LoRA adapters...[/cyan]")
+    console.print(
+        tr("model_mgr.scanning_lora", "[cyan]Scanning for LoRA adapters...[/cyan]")
+    )
     try:
         from ..models.discovery import scan_for_lora_adapters
 
         lora_adapters = scan_for_lora_adapters()
 
         if not lora_adapters:
-            console.print("[yellow]No LoRA adapters found.[/yellow]")
-            console.print("\nLoRA adapters should be placed in directories with:")
+            console.print(
+                tr(
+                    "model_mgr.no_lora_found",
+                    "[yellow]No LoRA adapters found.[/yellow]",
+                )
+            )
+            console.print(
+                tr(
+                    "model_mgr.lora_dir_hint",
+                    "\nLoRA adapters should be placed in directories with:",
+                )
+            )
             console.print("  • adapter_config.json")
             console.print("  • adapter_model.safetensors or adapter_model.bin")
-            console.print("\nYou can manage LoRA adapters using hf-model-tool")
-            input("\nPress Enter to continue...")
+            console.print(
+                tr(
+                    "model_mgr.lora_manage_hint",
+                    "\nYou can manage LoRA adapters using hf-model-tool",
+                )
+            )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             return None
 
-        console.print(f"[green]Found {len(lora_adapters)} LoRA adapter(s)[/green]\n")
+        console.print(
+            tr(
+                "model_mgr.lora_found",
+                "[green]Found {count} LoRA adapter(s)[/green]\n",
+                count=len(lora_adapters),
+            )
+        )
 
         # Extract base models from LoRA metadata
         base_models_with_lora = set()
@@ -685,9 +1049,19 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
         models = list_available_models()
 
         if not models:
-            console.print("[yellow]No local models found.[/yellow]")
-            console.print("Please download models first using hf-model-tool")
-            input("\nPress Enter to continue...")
+            console.print(
+                tr(
+                    "model_mgr.no_local_models",
+                    "[yellow]No local models found.[/yellow]",
+                )
+            )
+            console.print(
+                tr(
+                    "model_mgr.download_models_hint",
+                    "Please download models first using hf-model-tool",
+                )
+            )
+            input(f"\n{tr('common.press_enter', 'Press Enter to continue...')}")
             return None
 
         # Filter models to only show those with LoRA adapters
@@ -710,17 +1084,30 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
         # If no models with LoRA found, show all and let user know
         if not models_with_lora:
             console.print(
-                "[yellow]No models found with matching LoRA adapters.[/yellow]"
+                tr(
+                    "model_mgr.no_matching_lora_models",
+                    "[yellow]No models found with matching LoRA adapters.[/yellow]",
+                )
             )
             console.print(
-                "Showing all models. LoRA compatibility will be checked after selection.\n"
+                tr(
+                    "model_mgr.showing_all_models_note",
+                    "Showing all models. LoRA compatibility will be checked after "
+                    "selection.\n",
+                )
             )
             models_with_lora = models
 
         # Select the base model
-        console.print("[cyan]Step 1: Select Base Model[/cyan]")
         console.print(
-            f"[dim]Showing {len(models_with_lora)} model(s) with LoRA adapters[/dim]\n"
+            tr("model_mgr.step1_base_model", "[cyan]Step 1: Select Base Model[/cyan]")
+        )
+        console.print(
+            tr(
+                "model_mgr.showing_lora_models",
+                "[dim]Showing {count} model(s) with LoRA adapters[/dim]\n",
+                count=len(models_with_lora),
+            )
         )
 
         model_choices = []
@@ -742,7 +1129,10 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
                 model_choices.append(f"{model_name} ({size_str})")
 
         selected_model = unified_prompt(
-            "base_model", "Select Base Model", model_choices, allow_back=True
+            "base_model",
+            tr("model_mgr.select_base_model", "Select Base Model"),
+            model_choices,
+            allow_back=True,
         )
 
         if not selected_model or selected_model == "BACK":
@@ -769,8 +1159,16 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
                 break
 
         # Now select LoRA adapters for this model
-        console.print("\n[cyan]Step 2: Select LoRA Adapters[/cyan]")
-        console.print(f"[dim]Base model: {base_model_name}[/dim]\n")
+        console.print(
+            tr("model_mgr.step2_lora", "\n[cyan]Step 2: Select LoRA Adapters[/cyan]")
+        )
+        console.print(
+            tr(
+                "model_mgr.base_model_line",
+                "[dim]Base model: {model}[/dim]\n",
+                model=base_model_name,
+            )
+        )
 
         # Filter compatible LoRAs for the selected model
         compatible_loras = []
@@ -792,9 +1190,19 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
 
         if not compatible_loras and incompatible_loras:
             console.print(
-                "[yellow]No clearly compatible LoRA adapters found for this model.[/yellow]"
+                tr(
+                    "model_mgr.no_compatible_lora",
+                    "[yellow]No clearly compatible LoRA adapters found for this "
+                    "model.[/yellow]",
+                )
             )
-            if inquirer.confirm("Show all LoRA adapters anyway?", default=True):
+            if inquirer.confirm(
+                tr(
+                    "model_mgr.show_all_lora_confirm",
+                    "Show all LoRA adapters anyway?",
+                ),
+                default=True,
+            ):
                 compatible_loras = incompatible_loras
             else:
                 return base_model_name
@@ -810,18 +1218,30 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
 
         # Allow multiple LoRA selection
         console.print(
-            "[dim]You can select multiple LoRA adapters (space to select, enter to confirm)[/dim]"
+            tr(
+                "model_mgr.multiple_lora_hint",
+                "[dim]You can select multiple LoRA adapters (space to select, enter "
+                "to confirm)[/dim]",
+            )
         )
 
         questions = [
             inquirer.Checkbox(
-                "loras", message="Select LoRA adapters", choices=lora_choices
+                "loras",
+                message=tr("model_mgr.select_lora_adapters", "Select LoRA adapters"),
+                choices=lora_choices,
             )
         ]
 
         answers = inquirer.prompt(questions)
         if not answers or not answers["loras"]:
-            if inquirer.confirm("Continue without LoRA adapters?", default=False):
+            if inquirer.confirm(
+                tr(
+                    "model_mgr.continue_without_lora_confirm",
+                    "Continue without LoRA adapters?",
+                ),
+                default=False,
+            ):
                 return base_model_name
             return None
 
@@ -845,10 +1265,19 @@ def select_model_with_lora() -> Optional[Dict[str, Any]]:
         return {"model": base_model_path_or_name, "lora_modules": selected_lora_configs}
 
     except Exception as e:
-        console.print(f"[red]Error selecting LoRA adapters: {e}[/red]")
+        console.print(
+            tr(
+                "model_mgr.error_selecting_lora",
+                "[red]Error selecting LoRA adapters: {error}[/red]",
+                error=e,
+            )
+        )
         logger.error(f"LoRA selection error: {e}")
 
-        if inquirer.confirm("Continue with base model only?", default=True):
+        if inquirer.confirm(
+            tr("model_mgr.continue_base_only", "Continue with base model only?"),
+            default=True,
+        ):
             return base_model_path_or_name
         return None
 
