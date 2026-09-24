@@ -20,3 +20,7 @@ build/
 
 # vLLM source check dirs (temp analysis)
 .v0*-check/
+
+# Local release tooling (audit script, package builder) — kept on disk, never in git
+# (also excluded from release zips by dev/package.sh)
+dev/
