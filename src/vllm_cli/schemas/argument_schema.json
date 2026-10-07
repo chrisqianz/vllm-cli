@@ -2427,7 +2427,8 @@
         "tensorizer",
         "gguf",
         "bitsandbytes",
-        "modelscope"
+        "modelscope",
+        "ipc_cache"
       ],
       "importance": "medium",
       "added_in": "v0.22.0"

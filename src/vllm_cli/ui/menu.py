@@ -50,6 +50,7 @@ def show_main_menu(i18n_manager=None) -> str:
             "menu.main.serve_with_profile": "Serve with Profile",
             "menu.main.serve_custom": "Serve with Custom Config",
             "menu.main.multi_model_proxy": "Multi-Model Proxy",
+            "menu.main.weight_cache": "Weight Cache Preload",
             "menu.main.model_management": "Model Management",
             "menu.main.system_info": "System Information",
             "menu.main.settings": "Settings",
@@ -90,6 +91,7 @@ def show_main_menu(i18n_manager=None) -> str:
         ("menu.main.serve_with_profile", "serve_with_profile"),
         ("menu.main.serve_custom", "serve_custom"),
         ("menu.main.multi_model_proxy", "multi_model_proxy"),
+        ("menu.main.weight_cache", "weight_cache"),
         ("menu.main.model_management", "model_management"),
         ("menu.main.system_info", "system_info"),
         ("menu.main.settings", "settings"),
@@ -128,6 +130,9 @@ def show_main_menu(i18n_manager=None) -> str:
         return handle_custom_config(i18n_manager)
     elif action_key == "multi_model_proxy":
         return handle_multi_model_proxy(i18n_manager)
+    elif action_key == "weight_cache":
+        from .preload import handle_weight_cache_menu
+        return handle_weight_cache_menu(i18n_manager)
     elif action_key == "model_management":
         return handle_model_management(i18n_manager)
     elif action_key == "system_info":
