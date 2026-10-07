@@ -28,6 +28,26 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.8.0.0
+
+### 🚀 vLLM 0.31.0 Full Support
+
+**Major version bump** from vLLM 0.30.0 support to vLLM 0.31.0 (717 commits from 307 contributors).
+
+**vLLM 0.31 Highlights:**
+- **DeepSeek-V4.1-Flash performance** — FlashMLA mega attention with NVFP4 compressed KV (SM100 default), Mega-Gate kernels, fused TP all-reduce + MoE finalize
+- **Fast restarts** — `vllm preload` weight-cache daemon keeps post-quantized weights GPU-resident; experimental CRIU engine snapshots via `vllm snapshot`
+- **Speculative decoding on Model Runner V2** — draft models, custom logits processors, LiLiCorr drafter, DSpark adaptive verification
+- **Large-scale serving** — MoonEP all2all (`--all2all-backend moonep`), PCP+DP, sharding-aware NCCL weight transfer for RL rollouts
+- **Scheduling controls** — `--max-num-active-seqs` admission cap, adaptive long-prefill threshold
+- **Granite 4.2 thinking parser** (`granite_thinking_parser`) and per-request `release_kv_cache_memory()` API
+
+**New args**: `--max-num-active-seqs`, `--long-prefill-token-threshold-adaptive`, `--swa-bounded-replay`, `--enable-mamba-shared-prefix-checkpoint`, `--sleep-preserve-parameter-names`, `--aux-output-config`, `--max-lora-cls-labels`, `--logging-config`, `--log-level`
+
+**Breaking**: `--enable-mamba-fine-grained-prefix-cache` renamed to `--enable-mamba-shared-prefix-checkpoint`; per-request multimodal kwargs now gated behind `--trust-request-mm-kwargs`; `tokenizer_mode="slow"` removed.
+
+**Schema v2.8.0:** 338 arguments (9 new), 51 tool parsers (+deepseek_v41, k2_horizon), 35 reasoning parsers (+deepseek_v41, k2_horizon, granite_thinking_parser)
+
 ## What's New in v0.7.0.1
 
 ### 🩹 Two localization gaps from field testing

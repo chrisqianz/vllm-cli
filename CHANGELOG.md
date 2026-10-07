@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.8.0.0] - 2026-10-07
+
+### Added
+- **vLLM 0.31.0 Full Support**: Updated to support vLLM v0.31.0 (717 commits from 307 contributors) — DeepSeek-V4.1-Flash FlashMLA mega-attention path, `vllm preload` weight-cache fast restarts, speculative decoding on Model Runner V2, MoonEP all2all backend, Granite 4.2 thinking parser
+- **New CLI Arguments (9)**:
+  - `--max-num-active-seqs` — cap on requests the scheduler admits into RUNNING (#56758)
+  - `--long-prefill-token-threshold-adaptive` — floor the long-prefill threshold at a fair share of the token budget (#57951, #58459)
+  - `--swa-bounded-replay` — keep sliding-window KV out of prefix caching, replay on hit (default on for supporting models, #56227)
+  - `--enable-mamba-shared-prefix-checkpoint` — Mamba align checkpoint at the shared-prefix junction (#57382)
+  - `--sleep-preserve-parameter-names` — parameter-name globs preserved across level-2 sleep (#57891)
+  - `--aux-output-config` — auxiliary-output JSON config (routed-experts return, LRU byte cap)
+  - `--max-lora-cls-labels` — output size for LoRA classification heads
+  - `--logging-config` / `--log-level` — structured logging flags (#57205)
+- `granite_thinking_parser` added to `--reasoning-parser` choices (Granite 4.2, #55957); `deepseek_v41` and `k2_horizon` backfilled into the schema's tool/reasoning parser choice lists (0.30-cycle backlog)
+
+### Changed
+- Argument schema v2.8.0: 338 arguments (9 new, 2 deprecated), last synced against vLLM v0.31.0
+- `vllm` dependency upper bound raised: `vllm>=0.20.0,<0.32.0`
+
+### Fixed
+- One-click command import no longer swallows the token following the new 0.31 boolean flags (`--swa-bounded-replay`, `--enable-mamba-shared-prefix-checkpoint`, `--long-prefill-token-threshold-adaptive`)
+
+### Deprecated
+- `--enable-mamba-fine-grained-prefix-cache` — removed upstream in vLLM 0.31.0, renamed to `--enable-mamba-shared-prefix-checkpoint` (#57382)
+- `--log-config-file` — deprecated upstream (warning since 0.31.0, removal in vLLM v0.33.0); use `--logging-config` with `pylogging_config_file`
+
 ## [v0.7.0.1] - 2026-09-23
 
 ### Fixed

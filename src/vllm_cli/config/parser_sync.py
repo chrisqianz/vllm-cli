@@ -109,6 +109,8 @@ REASONING_PARSER_NAME_MAP = {
     # v0.30.0 additions
     "deepseek_v41": "deepseek_v41",
     "k2_horizon": "k2_horizon",
+    # v0.31.0 additions
+    "granite_thinking_parser": "granite_thinking_parser",
 }
 
 

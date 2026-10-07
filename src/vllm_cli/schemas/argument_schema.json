@@ -1,6 +1,6 @@
 {
-  "version": "2.7.0",
-  "description": "vLLM server argument definitions and metadata (supports v0.20.0 - v0.30.0)",
+  "version": "2.8.0",
+  "description": "Machine-readable vLLM argument definitions (supports v0.20.0 - v0.31.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -796,16 +796,19 @@
         "deepseek_r1",
         "deepseek_v3",
         "deepseek_v4",
+        "deepseek_v41",
         "ernie45",
         "gemma4",
         "glm45",
         "glm47",
         "granite",
+        "granite_thinking_parser",
         "holo2",
         "hunyuan_a13b",
         "hy_v3",
         "hy_v4",
         "inkling",
+        "k2_horizon",
         "kimi_k2",
         "kimi_k3",
         "ling3",
@@ -826,7 +829,7 @@
         null
       ],
       "importance": "high",
-      "hint": "v0.29.0: 32 parsers. New: hy_v4",
+      "hint": "v0.31.0: 35 parsers. New: deepseek_v41, k2_horizon (0.30 backlog), granite_thinking_parser",
       "deprecated": false,
       "deprecation_note": null,
       "removed_from_cli_in": null
@@ -1043,6 +1046,7 @@
         "deepseek_v31",
         "deepseek_v32",
         "deepseek_v4",
+        "deepseek_v41",
         "dots",
         "ernie45",
         "functiongemma",
@@ -1060,6 +1064,7 @@
         "inkling",
         "internlm",
         "jamba",
+        "k2_horizon",
         "kimi_k2",
         "kimi_k3",
         "lfm2",
@@ -1088,7 +1093,7 @@
         null
       ],
       "importance": "high",
-      "hint": "v0.29.0: 49 parsers. New: granite-20b-fc, hy_v4"
+      "hint": "v0.31.0: 51 parsers. New: deepseek_v41, k2_horizon (0.30 backlog)"
     },
     "tool_parser_plugin": {
       "type": "string",
@@ -1113,10 +1118,13 @@
     "log_config_file": {
       "type": "string",
       "category": "monitoring",
-      "description": "Path to logging config JSON file",
+      "description": "Path to pylogging config JSON file (deprecated since vLLM 0.31.0)",
       "default": null,
       "cli_flag": "--log-config-file",
-      "importance": "medium"
+      "importance": "medium",
+      "deprecated": true,
+      "deprecation_note": "Deprecated in vLLM 0.31.0 (prints a warning); will be removed in vLLM v0.33.0. Use --logging-config with pylogging_config_file instead.",
+      "removed_from_cli_in": "v0.33.0"
     },
     "async_scheduling": {
       "type": "boolean",
@@ -3788,7 +3796,10 @@
       "cli_flag": "--enable-mamba-fine-grained-prefix-cache",
       "importance": "low",
       "hint": "Fine-grained prefix cache for hybrid SSM models (vLLM 0.30.0+)",
-      "new_in": "v0.30.0"
+      "new_in": "v0.30.0",
+      "deprecated": true,
+      "deprecation_note": "Renamed in vLLM 0.31.0 (#57382). Use --enable-mamba-shared-prefix-checkpoint instead.",
+      "removed_from_cli_in": "v0.31.0"
     },
     "enable_nccl_comm_suspend": {
       "type": "boolean",
@@ -3846,6 +3857,109 @@
       "importance": "low",
       "hint": "DSA/NSA indexer top-k kernel backend (vLLM 0.30.0+)",
       "new_in": "v0.30.0"
+    },
+    "aux_output_config": {
+      "type": "string",
+      "category": "advanced",
+      "description": "Auxiliary-output delivery configuration (JSON, vLLM 0.31.0+)",
+      "default": null,
+      "cli_flag": "--aux-output-config",
+      "importance": "low",
+      "hint": "JSON config: enable_return_routed_experts, max_bytes (LRU capacity; null derives from KV cache capacity)",
+      "new_in": "v0.31.0"
+    },
+    "enable_mamba_shared_prefix_checkpoint": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Register a Mamba align checkpoint at the shared-prefix junction (vLLM 0.31.0+)",
+      "default": false,
+      "cli_flag": "--enable-mamba-shared-prefix-checkpoint",
+      "importance": "low",
+      "hint": "Only takes effect with mamba_cache_mode 'align', EAGLE on the Mamba group, and a prefix match unit smaller than the Mamba block size",
+      "new_in": "v0.31.0"
+    },
+    "log_level": {
+      "type": "choice",
+      "category": "monitoring",
+      "description": "Shortcut for --logging-config.log_level (vLLM 0.31.0+)",
+      "default": null,
+      "cli_flag": "--log-level",
+      "choices": [
+        "CRITICAL",
+        "ERROR",
+        "WARNING",
+        "INFO",
+        "DEBUG",
+        "NOTSET"
+      ],
+      "importance": "low",
+      "hint": "Overrides the log_level field inside --logging-config if both are specified",
+      "new_in": "v0.31.0"
+    },
+    "logging_config": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Logging configuration (JSON, vLLM 0.31.0+)",
+      "default": null,
+      "cli_flag": "--logging-config",
+      "importance": "low",
+      "hint": "JSON LoggingConfig (log_format, log_level, pylogging_config_file, ...); replaces deprecated --log-config-file",
+      "new_in": "v0.31.0"
+    },
+    "long_prefill_token_threshold_adaptive": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Floor long prefill token threshold at a fair share of the token budget (vLLM 0.31.0+)",
+      "default": false,
+      "cli_flag": "--long-prefill-token-threshold-adaptive",
+      "importance": "low",
+      "hint": "Floors threshold at max_num_batched_tokens / (queued + running requests); only applies when long_prefill_token_threshold is nonzero",
+      "new_in": "v0.31.0"
+    },
+    "max_lora_cls_labels": {
+      "type": "integer",
+      "category": "lora",
+      "description": "Maximum output size for LoRA classification heads (vLLM 0.31.0+)",
+      "default": null,
+      "cli_flag": "--max-lora-cls-labels",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low",
+      "hint": "Defaults to the base model classification head size",
+      "new_in": "v0.31.0"
+    },
+    "max_num_active_seqs": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Maximum number of requests the scheduler admits into RUNNING (vLLM 0.31.0+)",
+      "default": null,
+      "cli_flag": "--max-num-active-seqs",
+      "validation": {
+        "min": 1
+      },
+      "importance": "medium",
+      "hint": "Lowers only the RUNNING admission limit; must be <= max_num_seqs (which sizes the model runner buffers / CUDA graph capture)",
+      "new_in": "v0.31.0"
+    },
+    "sleep_preserve_parameter_names": {
+      "type": "list",
+      "category": "optimization",
+      "description": "Parameter-name globs to preserve across level-2 sleep (vLLM 0.31.0+)",
+      "cli_flag": "--sleep-preserve-parameter-names",
+      "importance": "low",
+      "hint": "Space-separated globs (nargs='+'); senders must omit these parameters, loaders must preserve their storage. Requires --enable-sleep-mode",
+      "new_in": "v0.31.0"
+    },
+    "swa_bounded_replay": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Keep sliding-window KV out of prefix caching and rebuild it after a prefix hit (vLLM 0.31.0+)",
+      "default": true,
+      "cli_flag": "--swa-bounded-replay",
+      "importance": "low",
+      "hint": "On by default for models that support it (e.g. DeepSeek-V4.1, except ROCm); requires model runner V2",
+      "new_in": "v0.31.0"
     }
   },
   "vllm_versions_supported": [
@@ -3863,14 +3977,16 @@
     "0.27.1",
     "0.28.0",
     "0.29.0",
-    "0.30.0"
+    "0.30.0",
+    "0.31.0"
   ],
-  "last_synced_version": "v0.30.0",
-  "deprecated_count": 119,
+  "last_synced_version": "v0.31.0",
+  "deprecated_count": 121,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
   "new_in_v028_count": 20,
   "new_in_v029_count": 8,
-  "new_in_v030_count": 9
+  "new_in_v030_count": 9,
+  "new_in_v031_count": 9
 }

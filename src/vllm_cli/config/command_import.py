@@ -59,6 +59,9 @@ class CommandImporter:
         "--numa-bind",
         "--calculate-kv-scales",
         "--enable-mamba-cache-stochastic-rounding",
+        "--swa-bounded-replay",
+        "--enable-mamba-shared-prefix-checkpoint",
+        "--long-prefill-token-threshold-adaptive",
     }
 
     # CLI flag to config key mapping (partial; full mapping from schema)
