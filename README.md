@@ -28,6 +28,26 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.9.0.0
+
+### 🚀 vLLM 0.32.0 Full Support
+
+**Major version bump** from vLLM 0.31.0 support to vLLM 0.32.0 (814 commits from 363 contributors, 121 new).
+
+**vLLM 0.32 Highlights:**
+- **Generic `hf` parsers** — `--tool-call-parser hf` / `--reasoning-parser hf` read the checkpoint's `response_template`, so conforming checkpoints need no model-specific parser; works in both the Python and Rust frontends
+- **Structured decisions** — new `POST /v1/systemone` endpoint answers `choice` / `noul` / `score` questions over a structured state, served by default
+- **Low-precision KV everywhere** — NVFP4 KV now runs on SM8x, SM90 and SM12x; GLM-5.x defaults to FP8 KV on SM100; ROCm gains 4-bit `ultraquant_4bit` (~2× FP8 density)
+- **Sleep mode gets deeper** — releases workspace scratch (up to 4.5 GiB) and KV-init state (~4.6 GiB) per GPU; new `--sleep-mode-offload-cudagraph` pages CUDA graphs out to CPU
+- **Faster startup** — `vllm download-kernels`, `vllm preload --preload-autotune`, and a shared-memory tensor arena for large multimodal tensors
+- **Security hardening** — CORS no longer defaults to `*` (set `--allowed-origins`), three GHSA fixes, raster-only untrusted image formats, HMAC-signed shared-memory handles
+
+**New args**: `--custom-histogram-buckets`, `--enable-hc-sp`, `--enable-shm-tensor-arena`, `--sleep-mode-offload-cudagraph`
+
+**Breaking**: Python 3.10 dropped upstream (vLLM now needs 3.11–3.14); `--mamba-cache-mode all` now fails validation; cascade attention removed (`--disable-cascade-attn` only warns); default CORS origins restricted; `transformers>=5.16.1,<5.20.0` and `tokenizers>=0.23.2` required.
+
+**Schema v2.9.0:** 342 arguments (4 new), 54 tool parsers (+hf, plamo3, qwen3_json), 38 reasoning parsers (+hf, minicpmv, plamo3)
+
 ## What's New in v0.8.0.0
 
 ### 🚀 vLLM 0.31.0 Full Support

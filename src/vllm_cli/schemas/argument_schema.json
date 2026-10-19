@@ -1,6 +1,6 @@
 {
-  "version": "2.8.0",
-  "description": "Machine-readable vLLM argument definitions (supports v0.20.0 - v0.31.0)",
+  "version": "2.9.0",
+  "description": "Machine-readable vLLM argument definitions (supports v0.20.0 - v0.32.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -406,18 +406,24 @@
       "cli_flag": "--kv-cache-dtype",
       "choices": [
         "auto",
+        "float16",
+        "bfloat16",
         "fp8",
         "fp8_e4m3",
         "fp8_e5m2",
         "fp8_inc",
         "fp8_ds_mla",
+        "nvfp4_ds_mla",
         "turboquant_k8v4",
         "turboquant_4bit_nc",
         "turboquant_k3v4_nc",
         "turboquant_3bit_nc",
+        "ultraquant_4bit",
+        "int4_per_token_head",
         "int8_per_token_head",
         "fp8_per_token_head",
-        "nvfp4"
+        "nvfp4",
+        "nvfp4_4over6"
       ],
       "importance": "medium",
       "hint": "FP8 reduces memory with minimal quality impact. TurboQuant options (turboquant_*) enable 2-bit KV cache compression with 4x capacity (vLLM 0.20+)"
@@ -803,6 +809,7 @@
         "glm47",
         "granite",
         "granite_thinking_parser",
+        "hf",
         "holo2",
         "hunyuan_a13b",
         "hy_v3",
@@ -813,6 +820,7 @@
         "kimi_k3",
         "ling3",
         "mimo",
+        "minicpmv",
         "minimax_m2",
         "minimax_m2_append_think",
         "minimax_m3",
@@ -821,6 +829,7 @@
         "nemotron_v3",
         "olmo3",
         "openai_gptoss",
+        "plamo3",
         "poolside_v1",
         "qwen3",
         "seed_oss",
@@ -1058,6 +1067,7 @@
         "granite-20b-fc",
         "granite4",
         "hermes",
+        "hf",
         "hunyuan_a13b",
         "hy_v3",
         "hy_v4",
@@ -1082,9 +1092,11 @@
         "olmo3",
         "openai",
         "phi4_mini_json",
+        "plamo3",
         "poolside_v1",
         "pythonic",
         "qwen3_coder",
+        "qwen3_json",
         "qwen3_xml",
         "seed_oss",
         "step3",
@@ -1293,16 +1305,22 @@
       "default": null,
       "cli_flag": "--all2all-backend",
       "choices": [
-        "auto",
-        "deepep_low_latency",
+        "naive",
+        "pplx",
         "deepep_high_throughput",
-        "naive"
+        "deepep_low_latency",
+        "deepep_v2",
+        "mori_high_throughput",
+        "mori_low_latency",
+        "moonep",
+        "nixl_ep",
+        "allgather_reducescatter",
+        "flashinfer_all2allv",
+        "flashinfer_nvlink_two_sided",
+        "flashinfer_nvlink_one_sided"
       ],
       "importance": "low",
-      "hint": "DeepEP backends require the DeepEP package installed",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "hint": "passthrough is not CLI-selectable (bound from --moe-backend)"
     },
     "enable_dbo": {
       "type": "boolean",
@@ -1496,8 +1514,8 @@
       "cli_flag": "--disable-cascade-attn",
       "importance": "low",
       "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "deprecation_note": "Cascade attention removed in vLLM v0.32.0 (#61126); flag still parses but only warns",
+      "removed_from_cli_in": "v0.33.0"
     },
     "skip_tokenizer_init": {
       "type": "boolean",
@@ -1569,6 +1587,7 @@
       "cli_flag": "--moe-backend",
       "choices": [
         "aiter",
+        "aiter_mega_moe",
         "aiter_triton_mxfp4_bf16",
         "auto",
         "b12x",
@@ -1580,7 +1599,7 @@
         "flashinfer_b12x",
         "flashinfer_cutedsl",
         "flashinfer_cutlass",
-        "flashinfer_moe_ep_mega_cutedsl",
+        "flashinfer_moe_ep_cutedsl",
         "flashinfer_moe_ep_mega_deep_gemm",
         "flashinfer_trtllm",
         "flydsl",
@@ -1763,11 +1782,10 @@
       "cli_flag": "--mamba-cache-mode",
       "choices": [
         "none",
-        "all",
         "align"
       ],
       "importance": "low",
-      "hint": "'align' recommended for speculative decoding with Mamba models"
+      "hint": "'align' recommended for speculative decoding with Mamba models | 'all' removed in vLLM v0.32.0 (#58997): --mamba-cache-mode all now fails validation"
     },
     "mamba_cache_dtype": {
       "type": "choice",
@@ -1879,18 +1897,17 @@
     "gdn_prefill_backend": {
       "type": "choice",
       "category": "advanced",
-      "description": "GDN prefill backend (vLLM 0.20+)",
+      "description": "GDN (Gated DeltaNet) prefill backend (vLLM 0.20+)",
       "default": null,
       "cli_flag": "--gdn-prefill-backend",
       "choices": [
         "flashinfer",
-        "triton"
+        "triton",
+        "cutedsl",
+        "aiter_flydsl"
       ],
       "importance": "low",
-      "hint": "Backend for GDN (Grouped Dense Network) prefill",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "hint": "Backend for GDN (Gated DeltaNet) prefill; cutedsl CUDA, aiter_flydsl ROCm"
     },
     "kv_cache_metrics": {
       "type": "boolean",
@@ -3853,6 +3870,7 @@
         "per_row",
         "flashinfer",
         "torch",
+        "aiter",
         null
       ],
       "importance": "low",
@@ -3961,6 +3979,46 @@
       "importance": "low",
       "hint": "On by default for models that support it (e.g. DeepSeek-V4.1, except ROCm); requires model runner V2",
       "new_in": "v0.31.0"
+    },
+    "custom_histogram_buckets": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Custom Prometheus histogram bucket boundaries (JSON, vLLM 0.32.0+)",
+      "default": null,
+      "cli_flag": "--custom-histogram-buckets",
+      "importance": "low",
+      "hint": "JSON mapping family key -> strictly increasing positive bounds; families: request_latency, time_to_first_token, inter_token_latency, iteration_tokens, request_params_n, request_num_preemptions, request_tokens, kv_cache_residency; e.g. '{\"request_latency\": [0.01, 0.05, 0.1, 0.5]}'; each extra bucket adds a time series per label set",
+      "new_in": "v0.32.0"
+    },
+    "enable_hc_sp": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Enable sequence parallelism for HyperConnection (HC) computation (vLLM 0.32.0+)",
+      "default": false,
+      "cli_flag": "--enable-hc-sp",
+      "importance": "low",
+      "hint": "Currently Qwen4Exp on CUDA with TP>1 and PP=1 (ignored when TP=1); does not change MoE parallelism; MoE SP may enable HC SP independently",
+      "new_in": "v0.32.0"
+    },
+    "enable_shm_tensor_arena": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Route large CPU tensors through a zero-copy shared-memory arena (vLLM 0.32.0+)",
+      "default": false,
+      "cli_flag": "--enable-shm-tensor-arena",
+      "importance": "low",
+      "hint": "Experimental; engine->worker broadcast for large CPU tensors (e.g. multimodal pixel_values); most beneficial for multimodal serving with large images + TP; active only when all queue readers are node-local; reserves slots in /dev/shm",
+      "new_in": "v0.32.0"
+    },
+    "sleep_mode_offload_cudagraph": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Back up CUDA graph memory to CPU during sleep, restored in place on wake (vLLM 0.32.0+)",
+      "default": false,
+      "cli_flag": "--sleep-mode-offload-cudagraph",
+      "importance": "low",
+      "hint": "Takes effect together with --enable-sleep-mode, the cumem sleep backend and CUDA graphs",
+      "new_in": "v0.32.0"
     }
   },
   "vllm_versions_supported": [
@@ -3979,15 +4037,17 @@
     "0.28.0",
     "0.29.0",
     "0.30.0",
-    "0.31.0"
+    "0.31.0",
+    "0.32.0"
   ],
-  "last_synced_version": "v0.31.0",
-  "deprecated_count": 121,
+  "last_synced_version": "v0.32.0",
+  "deprecated_count": 119,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
   "new_in_v028_count": 20,
   "new_in_v029_count": 8,
   "new_in_v030_count": 9,
-  "new_in_v031_count": 9
+  "new_in_v031_count": 9,
+  "new_in_v032_count": 4
 }

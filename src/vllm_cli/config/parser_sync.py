@@ -32,7 +32,6 @@ TOOL_PARSER_NAME_MAP = {
     "glm47_moe": "glm47",
     "glm47_engine": "glm47",
     "gemma4_engine": "gemma4",
-    "llama4_pythonic": "llama3_json",
     "minimax": "minimax_m2",
     "minimax_m2": "minimax_m2",
     "minimax_m3": "minimax_m3",
@@ -74,6 +73,10 @@ TOOL_PARSER_NAME_MAP = {
     "llama4_pythonic": "llama4_pythonic",
     "cohere_command3": "cohere_command3",
     "cohere_command4": "cohere_command4",
+    # v0.32.0 additions
+    "hf": "hf",
+    "plamo3": "plamo3",
+    "qwen3_json": "qwen3_json",
 }
 
 REASONING_PARSER_NAME_MAP = {
@@ -111,6 +114,10 @@ REASONING_PARSER_NAME_MAP = {
     "k2_horizon": "k2_horizon",
     # v0.31.0 additions
     "granite_thinking_parser": "granite_thinking_parser",
+    # v0.32.0 additions
+    "hf": "hf",
+    "minicpmv": "minicpmv",
+    "plamo3": "plamo3",
 }
 
 

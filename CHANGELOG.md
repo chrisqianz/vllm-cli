@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.9.0.0] - 2026-10-19
+
+### Added
+- **vLLM 0.32.0 Full Support**: Updated to support vLLM v0.32.0 (814 commits from 363 contributors, 121 new) — `POST /v1/systemone` structured-decisions endpoint, generic `hf` tool/reasoning parsers, NVFP4/FP8 KV cache across SM8x–SM12x, deeper sleep-mode memory release, `vllm preload --preload-autotune`
+- **New CLI Arguments (4)**:
+  - `--custom-histogram-buckets` — custom Prometheus histogram bucket boundaries per metric family (#48867)
+  - `--enable-hc-sp` — HyperConnection sequence parallelism (Qwen4Exp on CUDA, TP>1, PP=1) (#56322)
+  - `--enable-shm-tensor-arena` — zero-copy shared-memory arena for large CPU→worker tensors (#51207)
+  - `--sleep-mode-offload-cudagraph` — back up CUDA graph memory to CPU during sleep (#59160, #59523)
+- `hf`, `plamo3`, `qwen3_json` added to `--tool-call-parser` choices; `hf`, `minicpmv`, `plamo3` added to `--reasoning-parser` choices
+- `--kv-cache-dtype`: `ultraquant_4bit` (ROCm 4-bit KV, #57057) plus 5 backfilled source values (`float16`, `bfloat16`, `nvfp4_ds_mla`, `int4_per_token_head`, `nvfp4_4over6`)
+- `--moe-backend`: `flashinfer_moe_ep_cutedsl` (#54049), `aiter_mega_moe` (#59685); `--sparse-indexer-topk-backend`: `aiter`; `--gdn-prefill-backend`: `cutedsl`, `aiter_flydsl` (#57560)
+
+### Changed
+- Argument schema v2.9.0: 342 arguments (4 new, 1 deprecated), last synced against vLLM v0.32.0
+- `--mamba-cache-mode` no longer offers `all` — removed upstream in vLLM 0.32.0 (#58997)
+- `vllm` dependency upper bound raised: `vllm>=0.20.0,<0.33.0`
+
+### Fixed
+- One-click command import no longer swallows the token following the new 0.32 boolean flags (`--enable-hc-sp`, `--enable-shm-tensor-arena`, `--sleep-mode-offload-cudagraph`)
+- Stale "removed upstream" deprecation markers cleared from `--all2all-backend` and `--gdn-prefill-backend` (both live in current vLLM; choices refreshed)
+- Duplicate `llama4_pythonic` entry in the tool-parser sync map that shadowed the correct identity mapping
+
+### Deprecated
+- `--disable-cascade-attn` — cascade attention removed in vLLM 0.32.0 (#61126); the flag still parses but only warns, and disappears from vLLM in v0.33.0
+
 ## [v0.8.0.0] - 2026-10-07
 
 ### Added

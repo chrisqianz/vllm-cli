@@ -62,6 +62,10 @@ class CommandImporter:
         "--swa-bounded-replay",
         "--enable-mamba-shared-prefix-checkpoint",
         "--long-prefill-token-threshold-adaptive",
+        # v0.32.0 additions
+        "--enable-hc-sp",
+        "--enable-shm-tensor-arena",
+        "--sleep-mode-offload-cudagraph",
     }
 
     # CLI flag to config key mapping (partial; full mapping from schema)
