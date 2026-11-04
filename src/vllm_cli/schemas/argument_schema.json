@@ -1,6 +1,6 @@
 {
-  "version": "2.9.0",
-  "description": "Machine-readable vLLM argument definitions (supports v0.20.0 - v0.32.0)",
+  "version": "2.10.0",
+  "description": "vLLM CLI argument schema (supports v0.20.0 - v0.33.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -414,10 +414,9 @@
         "fp8_inc",
         "fp8_ds_mla",
         "nvfp4_ds_mla",
-        "turboquant_k8v4",
-        "turboquant_4bit_nc",
-        "turboquant_k3v4_nc",
-        "turboquant_3bit_nc",
+        "octave_k3v4",
+        "octave_k3v3",
+        "octave_k3v3_compact",
         "ultraquant_4bit",
         "int4_per_token_head",
         "int8_per_token_head",
@@ -426,7 +425,7 @@
         "nvfp4_4over6"
       ],
       "importance": "medium",
-      "hint": "FP8 reduces memory with minimal quality impact. TurboQuant options (turboquant_*) enable 2-bit KV cache compression with 4x capacity (vLLM 0.20+)"
+      "hint": "ROCM_OCTAVE 3-4 bit KV added in vLLM 0.33.0; turboquant_* removed (vLLM #59774)"
     },
     "num_lookahead_slots": {
       "type": "integer",
@@ -612,11 +611,17 @@
       "cli_flag": "--tokenizer-mode",
       "choices": [
         "auto",
-        "custom",
+        "hf",
+        "alpamayo2_super",
         "mistral",
-        "slow"
+        "deepseek_v32",
+        "deepseek_v4",
+        "inkling",
+        "kimi_k3",
+        "cohere"
       ],
-      "importance": "low"
+      "importance": "low",
+      "hint": "Source list synced in v0.33.0 cycle: legacy 'custom'/'slow' removed (vLLM #58545); 'alpamayo2_super' added (vLLM #62957)"
     },
     "trust_remote_code": {
       "type": "boolean",
@@ -835,6 +840,10 @@
         "seed_oss",
         "step3",
         "step3p5",
+        "beam",
+        "muse",
+        "musespark1x",
+        "step5",
         null
       ],
       "importance": "high",
@@ -1102,6 +1111,10 @@
         "step3",
         "step3p5",
         "xlam",
+        "beam",
+        "muse",
+        "musespark1x",
+        "step5",
         null
       ],
       "importance": "high",
@@ -1589,6 +1602,7 @@
         "aiter",
         "aiter_mega_moe",
         "aiter_triton_mxfp4_bf16",
+        "aiter_triton_mxfp4_mxfp4",
         "auto",
         "b12x",
         "batched_triton",
@@ -1621,7 +1635,10 @@
       "default": null,
       "cli_flag": "--ir-op-priority",
       "importance": "low",
-      "hint": "JSON config for vLLM IR operator priorities"
+      "hint": "JSON config for vLLM IR operator priorities",
+      "deprecated": true,
+      "deprecation_note": "Deprecated in vLLM v0.33.0; removal planned in vLLM v0.34.0 (#63371)",
+      "removed_from_cli_in": "v0.34.0"
     },
     "enable_flashinfer_autotune": {
       "type": "boolean",
@@ -1785,7 +1802,9 @@
         "align"
       ],
       "importance": "low",
-      "hint": "'align' recommended for speculative decoding with Mamba models | 'all' removed in vLLM v0.32.0 (#58997): --mamba-cache-mode all now fails validation"
+      "hint": "'align' recommended for speculative decoding with Mamba models | 'all' removed in vLLM v0.32.0 (#58997): --mamba-cache-mode all now fails validation",
+      "deprecated": true,
+      "deprecation_note": "Deprecated in vLLM v0.33.0: no effect (#60043); flag still parses"
     },
     "mamba_cache_dtype": {
       "type": "choice",
@@ -1904,10 +1923,11 @@
         "flashinfer",
         "triton",
         "cutedsl",
-        "aiter_flydsl"
+        "aiter_flydsl",
+        "sycl"
       ],
       "importance": "low",
-      "hint": "Backend for GDN (Gated DeltaNet) prefill; cutedsl CUDA, aiter_flydsl ROCm"
+      "hint": "GDN = Gated DeltaNet; 'sycl' added for XPU in vLLM 0.33.0 (vLLM #56835)"
     },
     "kv_cache_metrics": {
       "type": "boolean",
@@ -4019,6 +4039,46 @@
       "importance": "low",
       "hint": "Takes effect together with --enable-sleep-mode, the cumem sleep backend and CUDA graphs",
       "new_in": "v0.32.0"
+    },
+    "monokernel": {
+      "type": "boolean",
+      "category": "performance",
+      "description": "Run eligible decode layers on the model's MonoKernel persistent kernel (vLLM 0.33.0+)",
+      "default": false,
+      "cli_flag": "--monokernel",
+      "importance": "low",
+      "hint": "One launch per decoder layer; ROCm gains on DeepSeek-V4.1-Flash / MiniMax-M3 (vLLM #60731, #61082)",
+      "new_in": "v0.33.0"
+    },
+    "sleep_mode_backend": {
+      "type": "string",
+      "category": "optimization",
+      "description": "Mechanism used to free and restore GPU state for sleep mode (vLLM 0.33.0+)",
+      "default": "cumem",
+      "cli_flag": "--sleep-mode-backend",
+      "importance": "low",
+      "hint": "'cumem' uses built-in CuMemAllocator; CUDA checkpoint / CRIU / durable snapshot backends may be registered by plugins (vLLM #63138)",
+      "new_in": "v0.33.0"
+    },
+    "watchdog_config": {
+      "type": "string",
+      "category": "monitoring",
+      "description": "Stack-dump watchdog configuration (JSON, vLLM 0.33.0+)",
+      "default": null,
+      "cli_flag": "--watchdog-config",
+      "importance": "low",
+      "hint": "JSON {\"timeout\":300,\"check_interval\":10,\"dump_dir\":\"\"}; dumps stacks of stuck engine/worker threads; empty dump_dir disables (vLLM #55700)",
+      "new_in": "v0.33.0"
+    },
+    "reasoning_effort_map": {
+      "type": "string",
+      "category": "api",
+      "description": "Map reasoning effort levels to model-specific values (JSON, vLLM 0.33.0+)",
+      "default": null,
+      "cli_flag": "--reasoning-effort-map",
+      "importance": "low",
+      "hint": "JSON object, e.g. {\"low\":\"...\",\"medium\":\"...\",\"high\":\"...\"} (vLLM #61094)",
+      "new_in": "v0.33.0"
     }
   },
   "vllm_versions_supported": [
@@ -4038,10 +4098,11 @@
     "0.29.0",
     "0.30.0",
     "0.31.0",
-    "0.32.0"
+    "0.32.0",
+    "0.33.0"
   ],
-  "last_synced_version": "v0.32.0",
-  "deprecated_count": 119,
+  "last_synced_version": "v0.33.0",
+  "deprecated_count": 121,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
@@ -4049,5 +4110,6 @@
   "new_in_v029_count": 8,
   "new_in_v030_count": 9,
   "new_in_v031_count": 9,
-  "new_in_v032_count": 4
+  "new_in_v032_count": 4,
+  "new_in_v033_count": 4
 }

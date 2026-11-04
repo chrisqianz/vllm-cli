@@ -28,6 +28,27 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.10.0.0
+
+### 🚀 vLLM 0.33.0 Full Support
+
+**Major version bump** from vLLM 0.32.0 support to vLLM 0.33.0 (927 commits from 389 contributors, 122 new).
+
+**vLLM 0.33 Highlights:**
+- **Faster speculative decoding** — XPress refiner for DFlash/DSpark block-diffusion drafters; opt-in FLy lossy verification (+1.04–1.31× decode on MI355X/B300); drafts no longer reserve token-budget slots (DeepSeek-V4.1-Flash + DSpark: 1373 → 3390 output tok/s on GB300); quantized draft `lm_head` (+18% decode at concurrency 1)
+- **ROCm MonoKernel decode** — `--monokernel` runs eligible decode layers in one persistent kernel: 2.32× P50 interactivity for DeepSeek-V4.1-Flash on MI300X/MI325X, −16.6% TPOT for MiniMax-M3-MXFP4 on MI355X; ROCm 10.0 is the default image
+- **New parsers** — `beam`, `muse`/`musespark1x`, `step5` for Reflection Beam-1.0, Muse Spark Open and Step-5 Preview, in both tool and reasoning flavors
+- **Operability** — engine/worker watchdog (`--watchdog-config`) dumps stack traces of stuck processes; concurrent worker startup saves ~50 s at TP8; shared Triton JIT pool speeds cold warmup 9–28%
+- **Pluggable sleep mode** — `--sleep-mode-backend` swaps the default `cumem` allocator for plugin-registered CUDA checkpoint / CRIU backends
+- **Reasoning-effort compatibility** — `--reasoning-effort-map` rewrites efforts the chat template doesn't recognize instead of silently falling back
+- **Platform** — PyTorch 2.14.0 + Triton 3.8.0; CUDA 12.9 wheels dropped (CUDA 13.0 only); new AWS EFA image; `vllm/vllm` image alias
+
+**New args**: `--monokernel`, `--sleep-mode-backend`, `--watchdog-config`, `--reasoning-effort-map`
+
+**Breaking**: Medusa and the MLP speculator removed; legacy Ray compiled-graph executor removed; `--mamba-cache-mode` now a no-op; requests during paused generation return HTTP 503; NIXL connector needs NIXL ≥ 1.5; `--ir-op-priority` deprecated.
+
+**Schema v2.10.0:** 346 arguments (4 new), 58 tool parsers (+beam, muse, musespark1x, step5), 42 reasoning parsers (+same); `--kv-cache-dtype` gains 3 `octave_*` (ROCM_OCTAVE) and drops 4 `turboquant_*`
+
 ## What's New in v0.9.0.0
 
 ### 🚀 vLLM 0.32.0 Full Support

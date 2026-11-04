@@ -77,6 +77,11 @@ TOOL_PARSER_NAME_MAP = {
     "hf": "hf",
     "plamo3": "plamo3",
     "qwen3_json": "qwen3_json",
+    # v0.33.0 additions
+    "beam": "beam",
+    "muse": "muse",
+    "musespark1x": "musespark1x",
+    "step5": "step5",
 }
 
 REASONING_PARSER_NAME_MAP = {
@@ -118,6 +123,11 @@ REASONING_PARSER_NAME_MAP = {
     "hf": "hf",
     "minicpmv": "minicpmv",
     "plamo3": "plamo3",
+    # v0.33.0 additions
+    "beam": "beam",
+    "muse": "muse",
+    "musespark1x": "musespark1x",
+    "step5": "step5",
 }
 
 

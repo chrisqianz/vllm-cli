@@ -66,6 +66,8 @@ class CommandImporter:
         "--enable-hc-sp",
         "--enable-shm-tensor-arena",
         "--sleep-mode-offload-cudagraph",
+        # v0.33.0 additions
+        "--monokernel",
     }
 
     # CLI flag to config key mapping (partial; full mapping from schema)

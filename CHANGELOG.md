@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.10.0.0] - 2026-11-04
+
+### Added
+- **vLLM 0.33.0 Full Support**: Updated to support vLLM v0.33.0 (927 commits from 389 contributors, 122 new) — speculative-decoding XPress refiner & FLy lossy verification, ROCm MonoKernel decode, `/v1/decisions` endpoint, engine/worker watchdog, PyTorch 2.14 + CUDA 13-only wheels
+- **New CLI Arguments (4)**:
+  - `--monokernel` — run eligible decode layers on the model's MonoKernel persistent kernel (ROCm: DeepSeek-V4.1-Flash 2.32× P50 interactivity on MI300X/MI325X, MiniMax-M3-MXFP4 −16.6% TPOT; #60731, #61082)
+  - `--sleep-mode-backend` — pluggable sleep mechanism, default `cumem`; CUDA checkpoint / CRIU backends may be registered by plugins (#63138)
+  - `--watchdog-config` — JSON stack-dump watchdog for stuck engine/worker processes (#55700)
+  - `--reasoning-effort-map` — rewrite request reasoning effort to values the chat template recognizes (#61094)
+- `beam`, `muse`, `musespark1x`, `step5` added to `--tool-call-parser` and `--reasoning-parser` choices (Reflection Beam-1.0, Muse Spark Open, Step-5 Preview; #62052, #62207, #61727)
+- `--kv-cache-dtype`: ROCm 3–4 bit `octave_k3v4` / `octave_k3v3` / `octave_k3v3_compact` (`ROCM_OCTAVE`, ~4.6× KV tokens vs fp16; #59774)
+- `--moe-backend`: `aiter_triton_mxfp4_mxfp4` (#62731); `--gdn-prefill-backend`: `sycl` for XPU (#56835); `--tokenizer-mode`: source-synced list incl. `alpamayo2_super` (#62957)
+
+### Changed
+- Argument schema v2.10.0: 346 arguments (4 new, 2 deprecated), last synced against vLLM v0.33.0
+- `--kv-cache-dtype`: `turboquant_*` values removed — replaced upstream by `ROCM_OCTAVE` (#59774)
+- `vllm` dependency upper bound raised: `vllm>=0.20.0,<0.34.0`
+
+### Fixed
+- One-click command import no longer swallows the token following `--monokernel`
+- `--tokenizer-mode` no longer offers `custom`/`slow`, removed upstream in vLLM 0.31 (#58545)
+
+### Deprecated
+- `--mamba-cache-mode` — no effect since vLLM 0.33.0 (#60043); the flag still parses
+- `--ir-op-priority` — deprecated in vLLM 0.33.0, removal planned in vLLM v0.34.0 (#63371)
+
 ## [v0.9.0.0] - 2026-10-19
 
 ### Added
