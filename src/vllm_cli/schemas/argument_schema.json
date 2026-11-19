@@ -1,6 +1,6 @@
 {
-  "version": "2.10.0",
-  "description": "vLLM CLI argument schema (supports v0.20.0 - v0.33.0)",
+  "version": "2.11.0",
+  "description": "vLLM CLI argument schema (supports v0.20.0 - v0.34.0)",
   "arguments": {
     "model": {
       "type": "string",
@@ -612,6 +612,7 @@
       "choices": [
         "auto",
         "hf",
+        "glm5_next",
         "alpamayo2_super",
         "mistral",
         "deepseek_v32",
@@ -842,8 +843,10 @@
         "step3p5",
         "beam",
         "muse",
-        "musespark1x",
         "step5",
+        "ripple",
+        "zaya",
+        "musespark",
         null
       ],
       "importance": "high",
@@ -1113,8 +1116,12 @@
         "xlam",
         "beam",
         "muse",
-        "musespark1x",
         "step5",
+        "granite_toolcall_parser",
+        "musespark",
+        "ripple",
+        "zaya",
+        "zaya_xml",
         null
       ],
       "importance": "high",
@@ -1326,6 +1333,7 @@
         "mori_high_throughput",
         "mori_low_latency",
         "moonep",
+        "mori",
         "nixl_ep",
         "allgather_reducescatter",
         "flashinfer_all2allv",
@@ -1333,7 +1341,7 @@
         "flashinfer_nvlink_one_sided"
       ],
       "importance": "low",
-      "hint": "passthrough is not CLI-selectable (bound from --moe-backend)"
+      "hint": "MoE all2all communication backend; mori = MoRI EPv2 (vLLM 0.34.0+)"
     },
     "enable_dbo": {
       "type": "boolean",
@@ -1924,7 +1932,8 @@
         "triton",
         "cutedsl",
         "aiter_flydsl",
-        "sycl"
+        "sycl",
+        "hip"
       ],
       "importance": "low",
       "hint": "GDN = Gated DeltaNet; 'sycl' added for XPU in vLLM 0.33.0 (vLLM #56835)"
@@ -4079,6 +4088,76 @@
       "importance": "low",
       "hint": "JSON object, e.g. {\"low\":\"...\",\"medium\":\"...\",\"high\":\"...\"} (vLLM #61094)",
       "new_in": "v0.33.0"
+    },
+    "cache_aware_admission_window": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Sliding window (in steps) within which requests are ordered by prefix-cache hit ratio when admitting (vLLM 0.34.0+)",
+      "default": 0,
+      "cli_flag": "--cache-aware-admission-window",
+      "validation": {
+        "min": 0
+      },
+      "importance": "low",
+      "hint": "Opt-in cache-aware admission ordering; 0 disables (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
+    },
+    "cache_aware_admission_threshold": {
+      "type": "float",
+      "category": "performance",
+      "description": "Prefix-cache hit-ratio threshold (0-1) above which a waiting request is admitted earlier inside the cache-aware admission window (vLLM 0.34.0+)",
+      "default": 0.5,
+      "cli_flag": "--cache-aware-admission-threshold",
+      "validation": {
+        "min": 0.0,
+        "max": 1.0
+      },
+      "importance": "low",
+      "hint": "Only takes effect when --cache-aware-admission-window > 0 (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
+    },
+    "max_num_inflight_kv_loads": {
+      "type": "integer",
+      "category": "performance",
+      "description": "Maximum number of async KV-cache loads in flight; loads can start while the batch is full (vLLM 0.34.0+)",
+      "default": null,
+      "cli_flag": "--max-num-inflight-kv-loads",
+      "validation": {
+        "min": 1
+      },
+      "importance": "low",
+      "hint": "KV-connector throughput tuning; None keeps current behavior (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
+    },
+    "checkpoint_prepare_on_startup": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Prepare the checkpoint/restore allocator at startup for CRIU + cuda-checkpoint flows (/checkpoint/prepare endpoints) (vLLM 0.34.0+)",
+      "default": false,
+      "cli_flag": "--checkpoint-prepare-on-startup",
+      "importance": "low",
+      "hint": "Requires --enable-sleep-mode (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
+    },
+    "enable_extensible_kv_cache": {
+      "type": "boolean",
+      "category": "optimization",
+      "description": "Size the KV cache from memory actually free after warmup instead of a fixed gpu_memory_utilization slice (vLLM 0.34.0+)",
+      "default": true,
+      "cli_flag": "--enable-extensible-kv-cache",
+      "importance": "high",
+      "hint": "On by default in vLLM 0.34.0; consider removing gpu_memory_utilization from profiles (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
+    },
+    "shuffle_safetensors_files": {
+      "type": "boolean",
+      "category": "model",
+      "description": "Shuffle safetensors shard read order to spread I/O across ranks during weight loading (vLLM 0.34.0+)",
+      "default": false,
+      "cli_flag": "--shuffle-safetensors-files",
+      "importance": "low",
+      "hint": "Helps large expert-parallel startup on shared storage (vLLM 0.34.0+)",
+      "new_in": "v0.34.0"
     }
   },
   "vllm_versions_supported": [
@@ -4099,9 +4178,10 @@
     "0.30.0",
     "0.31.0",
     "0.32.0",
-    "0.33.0"
+    "0.33.0",
+    "0.34.0"
   ],
-  "last_synced_version": "v0.33.0",
+  "last_synced_version": "v0.34.0",
   "deprecated_count": 121,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
@@ -4111,5 +4191,6 @@
   "new_in_v030_count": 9,
   "new_in_v031_count": 9,
   "new_in_v032_count": 4,
-  "new_in_v033_count": 4
+  "new_in_v033_count": 4,
+  "new_in_v034_count": 6
 }

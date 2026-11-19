@@ -68,6 +68,10 @@ class CommandImporter:
         "--sleep-mode-offload-cudagraph",
         # v0.33.0 additions
         "--monokernel",
+        # v0.34.0 additions
+        "--enable-extensible-kv-cache",
+        "--shuffle-safetensors-files",
+        "--checkpoint-prepare-on-startup",
     }
 
     # CLI flag to config key mapping (partial; full mapping from schema)
@@ -188,8 +192,8 @@ class CommandImporter:
                     if i + 1 < len(tokens):
                         i += 1
                         config_key = self._resolve_flag(token)
-                        value = self._parse_value(tokens[i], config_key)
                         if config_key:
+                            value = self._parse_value(tokens[i], config_key)
                             config[config_key] = value
                     else:
                         logger.warning(f"Missing value for {token}")
@@ -204,7 +208,7 @@ class CommandImporter:
         config = self._convert_config_types(config)
 
         # Build result
-        result = {
+        result: Dict[str, Any] = {
             "model": model or "",
             "config": config,
         }

@@ -80,8 +80,13 @@ TOOL_PARSER_NAME_MAP = {
     # v0.33.0 additions
     "beam": "beam",
     "muse": "muse",
-    "musespark1x": "musespark1x",
     "step5": "step5",
+    # v0.34.0 additions (musespark1x renamed to musespark upstream)
+    "granite_toolcall_parser": "granite_toolcall_parser",
+    "musespark": "musespark",
+    "ripple": "ripple",
+    "zaya": "zaya",
+    "zaya_xml": "zaya_xml",
 }
 
 REASONING_PARSER_NAME_MAP = {
@@ -126,8 +131,11 @@ REASONING_PARSER_NAME_MAP = {
     # v0.33.0 additions
     "beam": "beam",
     "muse": "muse",
-    "musespark1x": "musespark1x",
     "step5": "step5",
+    # v0.34.0 additions (musespark1x renamed to musespark upstream)
+    "musespark": "musespark",
+    "ripple": "ripple",
+    "zaya": "zaya",
 }
 
 
@@ -154,13 +162,15 @@ class ParserSync:
     @property
     def schema(self) -> dict:
         """Load local schema."""
-        if self._schema is None:
+        schema = self._schema
+        if schema is None:
             if self.schema_path.exists():
                 with open(self.schema_path) as f:
-                    self._schema = json.load(f)
+                    schema = json.load(f)
             else:
-                self._schema = {"arguments": {}}
-        return self._schema
+                schema = {"arguments": {}}
+            self._schema = schema
+        return schema
 
     def _fetch_url(self, url: str) -> str:
         """Fetch content from URL."""

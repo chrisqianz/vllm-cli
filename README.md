@@ -28,6 +28,26 @@ A command-line interface tool for serving Large Language Models using vLLM. Prov
 
 **Quick Links:** [📖 Docs](#documentation) | [🚀 Quick Start](#quick-start) | [📸 Screenshots](docs/screenshots.md) | [📘 Usage Guide](docs/usage-guide.md) | [❓ Troubleshooting](docs/troubleshooting.md) | [🗺️ Roadmap](docs/roadmap.md)
 
+## What's New in v0.11.0.0
+
+### 🚀 vLLM 0.34.0 Full Support
+
+**Major version bump** from vLLM 0.33.0 support to vLLM 0.34.0 (1,061 commits from 412 contributors, 120 new).
+
+**vLLM 0.34 Highlights:**
+- **Extensible KV cache, on by default** — the KV cache is sized from memory actually free after warmup, so most models get a bigger cache (MiniMax-M3 on H200: 433k → 672k tokens); in most cases you should now **remove `gpu_memory_utilization`** from your profiles
+- **Model Runner V1 is gone** — MRV2 is the only GPU runner (`VLLM_USE_V2_MODEL_RUNNER=0` now fails at startup); suffix decoding and dual-batch overlap moved onto MRV2
+- **Big speedups on Blackwell and MI355X** — up to 1.95× decode (Step5 on GB200), 1.6× throughput (GLM-5.3-Flash), 1.24–1.40× faster long-prompt TTFT; breakable CUDA graphs cut decode ITL 3–8.8% on Qwen3.5
+- **Checkpoint/restore** — CRIU + `cuda-checkpoint` via `/checkpoint/prepare|status|restore` in both frontends; `--checkpoint-prepare-on-startup` pre-arms the allocator (requires `--enable-sleep-mode`)
+- **ROCm consolidation** — images/wheels are ROCm 10.0 only; MoRI EPv2 via `--all2all-backend mori`; HIP GDN prefill backend for gfx1151; TRITON_ATTN default on RDNA3/4
+- **10 new models** — Mistral Large 4 (1T/52B, FP8+NVFP4), MiniMax-M3.1-Flash, Nemotron-3.5-Transcribe, and more
+
+**New args**: `--cache-aware-admission-window`, `--cache-aware-admission-threshold`, `--max-num-inflight-kv-loads`, `--checkpoint-prepare-on-startup`, `--enable-extensible-kv-cache`, `--shuffle-safetensors-files`
+
+**Breaking**: default `--block-size` is now 64 (pass `--block-size 16` to keep old behavior); Model Runner V1 removed along with the legacy logits-processor API and the `custom_class` speculative method; ROCm 7.2 artifacts dropped; `huggingface_hub >= 2.0.0` required; extensible KV cache can raise TPOT 6–18% on some H200 models at concurrency 128 (opt out with `--no-enable-extensible-kv-cache`).
+
+**Schema v2.11.0:** 352 arguments (6 new), 62 tool parsers (+granite_toolcall_parser, ripple, zaya, zaya_xml; musespark1x → musespark), 44 reasoning parsers (+ripple, zaya); `--all2all-backend` gains `mori`, `--gdn-prefill-backend` gains `hip`, `--tokenizer-mode` gains `glm5_next`
+
 ## What's New in v0.10.0.0
 
 ### 🚀 vLLM 0.33.0 Full Support

@@ -24,6 +24,7 @@ VLLM_DEFAULT_BRANCH = "main"
 
 # Supported vLLM versions for targeted sync
 SUPPORTED_VLLM_VERSIONS = [
+    "v0.34.0",
     "v0.33.0",
     "v0.32.0",
     "v0.31.0",
@@ -85,13 +86,15 @@ class CLIArgsSync:
     @property
     def schema(self) -> dict:
         """Load local schema."""
-        if self._schema is None:
+        schema = self._schema
+        if schema is None:
             if self.schema_path.exists():
                 with open(self.schema_path) as f:
-                    self._schema = json.load(f)
+                    schema = json.load(f)
             else:
-                self._schema = {"arguments": {}}
-        return self._schema
+                schema = {"arguments": {}}
+            self._schema = schema
+        return schema
 
     def _get_source_urls(self) -> tuple[str, str]:
         """Get the source URLs for the current branch/tag."""

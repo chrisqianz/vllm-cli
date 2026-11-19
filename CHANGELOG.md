@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.11.0.0] - 2026-11-19
+
+### Added
+
+- **vLLM 0.34.0 Full Support** — complete CLI argument coverage for vLLM v0.34.0 (1,061 commits from 412 contributors, 120 new)
+- **New CLI Arguments** (6, from `vllm/engine/arg_utils.py` at v0.34.0):
+  - `--cache-aware-admission-window` / `--cache-aware-admission-threshold` — opt-in cache-aware admission ordering (performance)
+  - `--max-num-inflight-kv-loads` — async KV-cache loads in flight while the batch is full (KV-connector tuning)
+  - `--checkpoint-prepare-on-startup` — pre-arm the CRIU + cuda-checkpoint allocator at startup (`/checkpoint/*` endpoints, requires `--enable-sleep-mode`)
+  - `--enable-extensible-kv-cache` — size the KV cache from memory actually free after warmup; **on by default in vLLM 0.34.0**
+  - `--shuffle-safetensors-files` — spread weight-loading I/O across ranks
+- **Parser registry updates** — `tool_call_parser` +`granite_toolcall_parser`, `ripple`, `zaya`, `zaya_xml` (62 choices); `reasoning_parser` +`ripple`, `zaya` (44 choices); `musespark1x` renamed upstream to `musespark`; `tokenizer_mode` +`glm5_next`; `all2all_backend` +`mori` (MoRI EPv2, #61361); `gdn_prefill_backend` +`hip` (gfx1151, #56307)
+
+### Changed
+
+- Schema bumped to **v2.11.0**: 352 arguments, 19 supported vLLM versions (0.20.0 – 0.34.0)
+- `pyproject.toml` now allows `vllm>=0.20.0,<0.35.0`
+
+### Fixed
+
+- Command importer: a flag with a value that resolves to no schema entry no longer calls the value parser with a `None` key (unknown flags are skipped cleanly)
+
 ## [v0.10.0.0] - 2026-11-04
 
 ### Added
