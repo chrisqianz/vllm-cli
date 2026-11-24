@@ -1088,7 +1088,9 @@
     "using_selected_gpus": "[dim]使用已选中的 {gpu_count} 个 GPU：{device_ids}[/dim]",
     "using_vllm_default": "[dim]将使用 vLLM 默认值（未设置）[/dim]",
     "value_above_max": "[yellow]数值不得超过 {max_val}，将使用 {max_val}[/yellow]",
-    "value_below_min": "[yellow]数值不得低于 {min_val}，将使用 {min_val}[/yellow]"
+    "value_below_min": "[yellow]数值不得低于 {min_val}，将使用 {min_val}[/yellow]",
+    "enter_value_keep": "输入值{range}或按回车保留当前值（{value}），输入 '-' 移除该参数： ",
+    "argument_cleared": "[green]已从该配置移除 {name}[/green]"
   },
   "hf_ui": {
     "asset_management_subtitle": "删除、去重并整理模型",

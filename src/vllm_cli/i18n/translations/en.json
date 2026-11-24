@@ -1086,7 +1086,9 @@
     "using_selected_gpus": "[dim]Using {gpu_count} selected GPU(s): {device_ids}[/dim]",
     "using_vllm_default": "[dim]Will use vLLM default (not set)[/dim]",
     "value_above_max": "[yellow]Value must be at most {max_val}, using {max_val}[/yellow]",
-    "value_below_min": "[yellow]Value must be at least {min_val}, using {min_val}[/yellow]"
+    "value_below_min": "[yellow]Value must be at least {min_val}, using {min_val}[/yellow]",
+    "enter_value_keep": "Enter value{range} or press Enter to keep current ({value}), or '-' to remove: ",
+    "argument_cleared": "[green]Removed {name} from this profile[/green]"
   },
   "hf_ui": {
     "asset_management_subtitle": "Delete, deduplicate, and organize models",

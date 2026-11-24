@@ -858,7 +858,14 @@ def configure_argument(
             elif max_val is not None:
                 range_str = tr("custom_cfg.range_max", " (max: {max})", max=max_val)
 
-        if default is not None:
+        if arg_name in config:
+            prompt_text = tr(
+                "custom_cfg.enter_value_keep",
+                "Enter value{range} or press Enter to keep current ({value}), or '-' to remove: ",
+                range=range_str,
+                value=config[arg_name],
+            )
+        elif default is not None:
             prompt_text = tr(
                 "custom_cfg.enter_value_default",
                 "Enter value{range} or press Enter for default ({value}): ",
@@ -873,6 +880,17 @@ def configure_argument(
             )
 
         response = input(prompt_text).strip()
+
+        if response in ("-", "clear"):
+            config.pop(arg_name, None)
+            console.print(
+                tr(
+                    "custom_cfg.argument_cleared",
+                    "[green]Removed {name} from this profile[/green]",
+                    name=arg_name,
+                )
+            )
+            return config
 
         if response:
             try:
@@ -935,7 +953,14 @@ def configure_argument(
                 )
             )
 
-        if default is not None:
+        if arg_name in config:
+            prompt_text = tr(
+                "custom_cfg.enter_value_keep",
+                "Enter value{range} or press Enter to keep current ({value}), or '-' to remove: ",
+                range=range_str,
+                value=config[arg_name],
+            )
+        elif default is not None:
             prompt_text = tr(
                 "custom_cfg.enter_value_default",
                 "Enter value{range} or press Enter for default ({value}): ",
@@ -950,6 +975,17 @@ def configure_argument(
             )
 
         response = input(prompt_text).strip()
+
+        if response in ("-", "clear"):
+            config.pop(arg_name, None)
+            console.print(
+                tr(
+                    "custom_cfg.argument_cleared",
+                    "[green]Removed {name} from this profile[/green]",
+                    name=arg_name,
+                )
+            )
+            return config
 
         if response:
             try:
