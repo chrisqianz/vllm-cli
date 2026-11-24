@@ -861,9 +861,9 @@ def configure_argument(
         if default is not None:
             prompt_text = tr(
                 "custom_cfg.enter_value_default",
-                "Enter value{range} or press Enter for default ({default}): ",
+                "Enter value{range} or press Enter for default ({value}): ",
                 range=range_str,
-                default=default,
+                value=default,
             )
         else:
             prompt_text = tr(
@@ -938,9 +938,9 @@ def configure_argument(
         if default is not None:
             prompt_text = tr(
                 "custom_cfg.enter_value_default",
-                "Enter value{range} or press Enter for default ({default}): ",
+                "Enter value{range} or press Enter for default ({value}): ",
                 range=range_str,
-                default=default,
+                value=default,
             )
         else:
             prompt_text = tr(

@@ -103,18 +103,15 @@
     "gpu_memory_utilization": {
       "type": "float",
       "category": "performance",
-      "description": "Fraction of GPU memory to use",
-      "default": 0.9,
+      "description": "Fraction of GPU memory for the model executor (0-1), per-instance. Leave unset with the extensible KV cache (default on CUDA/ROCm): vLLM auto-resolves 1.0, sized from memory actually free after CUDA graph capture (0.92 fallback without extensible cache). Set a lower value only to reserve room for co-tenant processes, unified memory, weight transfer buffers, or KV connectors with their own device buffers.",
+      "default": null,
       "cli_flag": "--gpu-memory-utilization",
       "validation": {
-        "min": 0.1,
+        "min": 0.01,
         "max": 1.0
       },
       "importance": "high",
-      "hint": "Lower values leave room for other processes",
-      "deprecated": true,
-      "deprecation_note": "Argument no longer in vLLM source",
-      "removed_from_cli_in": "v0.22.0"
+      "hint": "vLLM 0.34 extensible KV cache (default on) sizes from measured memory; unset is recommended. Alias: --device-memory-utilization."
     },
     "max_num_seqs": {
       "type": "integer",
@@ -4182,7 +4179,7 @@
     "0.34.0"
   ],
   "last_synced_version": "v0.34.0",
-  "deprecated_count": 121,
+  "deprecated_count": 120,
   "new_in_v022_count": 52,
   "new_in_v024_count": 60,
   "new_in_v025_count": 14,
